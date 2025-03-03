@@ -23,4 +23,6 @@
 - In **Patient Dashboard**, we'll show different tabs like appointments he have as well as the previous appointments, then the medicines which he was prescibed in the first appointment or his current medication history.
 - In **Doctor Dashboard**, we'll show his day-to-day appointments to attend, his particular patients data.
 - In **Nurse Dashboard**, we'll show the day-to-day appointments they need to attend as well the doctors information as well to consult for any information.
-- If possible, we need a ** Admin Dashboard** as well, to control all these details being controlled around the different pages.
+- If possible, we need a **Admin Dashboard** as well, to control all these details being controlled around the different pages.
+
+
