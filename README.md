@@ -107,3 +107,4 @@ hospital-management-system/
 ├── .gitignore              # Git ignore file
 └── README.md               # Project documentation
 ```
+# Claude AI - [Link](https://claude.ai/share/b3e63877-68ef-4b38-9a05-d40653da5a58)
