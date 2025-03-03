@@ -70,3 +70,40 @@ Your plan for different dashboards and user roles is well thought out. Let's exp
 - System configuration
 - Resource allocation
 
+## Project Structure
+Both the frontend and backend 
+```bash
+hospital-management-system/
+├── backend/                # Python backend
+│   ├── app/                # Application package
+│   │   ├── __init__.py     # Makes app a package
+│   │   ├── models/         # Database models
+│   │   ├── routes/         # API endpoints
+│   │   ├── services/       # Business logic
+│   │   ├── utils/          # Helper functions
+│   │   └── ai/             # AI functionality
+│   ├── config.py           # Configuration settings
+│   ├── requirements.txt    # Python dependencies
+│   └── run.py              # Application entry point
+│
+├── frontend/               # React frontend
+│   ├── public/             # Static files
+│   ├── src/
+│   │   ├── assets/         # Images, icons, etc.
+│   │   ├── components/     # Reusable components
+│   │   ├── pages/          # Page components
+│   │   │   ├── Admin/      # Admin dashboard pages
+│   │   │   ├── Doctor/     # Doctor dashboard pages
+│   │   │   ├── Nurse/      # Nurse dashboard pages
+│   │   │   └── Patient/    # Patient dashboard pages
+│   │   ├── services/       # API integration
+│   │   ├── utils/          # Helper functions
+│   │   ├── context/        # React context
+│   │   ├── App.js          # Main component
+│   │   └── index.js        # Entry point
+│   ├── package.json        # npm dependencies
+│   └── README.md           # Frontend documentation
+│
+├── .gitignore              # Git ignore file
+└── README.md               # Project documentation
+```
