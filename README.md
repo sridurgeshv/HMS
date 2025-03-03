@@ -25,4 +25,48 @@
 - In **Nurse Dashboard**, we'll show the day-to-day appointments they need to attend as well the doctors information as well to consult for any information.
 - If possible, we need a **Admin Dashboard** as well, to control all these details being controlled around the different pages.
 
+## Frontend (React.js)
+Your plan for different dashboards and user roles is well thought out. Let's expand on it:
+
+### 1. Welcome/Landing Page
+
+- Hospital introduction
+- Key features
+- Navigation to login
+
+### 2. Authentication System
+
+- Patient portal login/signup
+- Staff portal with role-based access:
+  - Doctor login
+  - Nurse/attendee login
+  - Admin login
+
+### 3. Patient Dashboard
+- Upcoming appointments
+- Appointment booking interface
+- Medical history
+- Prescription history and current medications
+- Personal profile management
+- Billing information and payment history
+
+### 4. Doctor Dashboard
+- Daily/weekly appointment schedule
+- Patient records access
+- Prescription management
+- Medical notes and history
+- Communication system with patients/nurses
+
+### 5. Nurse Dashboard
+- Daily tasks and appointments
+- Patient care notes
+- Doctor assignment information
+- Medication administration tracking
+
+### 6. Admin Dashboard
+- User management (staff and patients)
+- Department management
+- Analytics and reporting
+- System configuration
+- Resource allocation
 
