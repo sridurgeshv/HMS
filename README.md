@@ -14,7 +14,6 @@
 
 ## Some Extra Data - [Project Feasibility for Hospital Management System](https://monica.im/share/chat?shareId=ZSO50tpgkKpDpffK)
 
-
 # Frontend Plan
 
 - First a welcome page mostly the same design as in the youtube video.
