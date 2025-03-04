@@ -108,7 +108,7 @@ hospital-management-system/
 ```
 # Claude AI - [Link](https://claude.ai/share/b3e63877-68ef-4b38-9a05-d40653da5a58)
 
-## Important Links 
+## Important Links for project
 1. [Customize account management emails and SMS messages](https://support.google.com/firebase/answer/7000714)
 2. [Add users](https://support.google.com/firebase/answer/6400802?hl=en&ref_topic=6386702)
 3. [Add Firebase to your JavaScript project](https://firebase.google.com/docs/web/setup)
