@@ -4,9 +4,10 @@ import './App.css';
 
 // Import pages
 import Welcome from './pages/Welcome';
+import Register from './pages/Register';
+
 /*
 import Login from './pages/Login';
-import Register from './pages/Register';
 
 // Patient pages
 import PatientDashboard from './pages/patient/Dashboard';
@@ -34,9 +35,9 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={<Welcome />} />
+          <Route path="/register" element={<Register />} />
 {/*}
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
           
           {/* Patient routes 
           <Route path="/patient/dashboard" element={<PatientDashboard />} />

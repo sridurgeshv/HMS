@@ -1,0 +1,123 @@
+/* Registration Page Styles */
+.curasphere-register-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+    padding: 2rem;
+}
+
+.curasphere-register-container {
+    width: 100%;
+    max-width: 500px;
+}
+
+.curasphere-register-card {
+    background-color: white;
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+    padding: 2.5rem;
+    text-align: center;
+}
+
+.curasphere-register-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1e3a8a;
+    margin-bottom: 0.5rem;
+}
+
+.curasphere-register-subtitle {
+    color: #4b5563;
+    margin-bottom: 2rem;
+}
+
+.curasphere-register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.curasphere-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.curasphere-input-icon {
+    position: absolute;
+    left: 1rem;
+    color: #9ca3af;
+}
+
+.curasphere-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.curasphere-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.curasphere-password-toggle {
+    position: absolute;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.curasphere-register-button {
+    background-color: #3b82f6;
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 9999px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s;
+    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+}
+
+.curasphere-register-button:hover {
+    background-color: #2563eb;
+}
+
+.curasphere-register-footer {
+    margin-top: 1.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.curasphere-login-link {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.curasphere-login-link:hover {
+    text-decoration: underline;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    .curasphere-register-card {
+        padding: 1.5rem;
+    }
+
+    .curasphere-register-title {
+        font-size: 1.5rem;
+    }
+}

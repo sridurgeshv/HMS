@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { HeartPulse, Clock, Shield, Stethoscope } from 'lucide-react';
 import dc1 from '../assets/dc1.JPG';
@@ -17,13 +18,10 @@ const Welcome = () => {
             <a href="#home" className="curasphere-nav-link">Home</a>
             <a href="#services" className="curasphere-nav-link">Services</a>
             <a href="#about" className="curasphere-nav-link">About</a>
-            <a 
-              href="#login" 
-              className="curasphere-login-button"
-            >
-              Login
-            </a>
-          </nav>
+            <Link to="/register" className="curasphere-login-button">
+        Join Us
+      </Link>
+              </nav>
         </div>
       </header>
 
@@ -35,10 +33,10 @@ const Welcome = () => {
           className="curasphere-main-text"
         >
           <h2 className="curasphere-main-headline">
-            Transforming Healthcare, <br />Empowering Patients
+          Welcome to CuraSphere, <br /> Transforming Healthcare
           </h2>
           <p className="curasphere-main-description">
-          Welcome to CuraSphere
+          
 At CuraSphere, we are dedicated to revolutionizing your healthcare experience. Our innovative Hospital Management System is designed with one purpose: to prioritize your care and well-being.
 
 We understand that navigating the healthcare landscape can be challenging, which is why we offer a seamless, user-friendly platform that connects patients with healthcare providers, ensuring you receive the attention and support you deserve.
@@ -95,7 +93,7 @@ We understand that navigating the healthcare landscape can be challenging, which
             <span className="curasphere-footer-text">CuraSphere Healthcare Solutions</span>
           </div>
           <div className="curasphere-footer-copyright">
-            © 2024 CuraSphere. All Rights Reserved.
+            © 2025 CuraSphere. All Rights Reserved.
           </div>
         </div>
       </footer>
