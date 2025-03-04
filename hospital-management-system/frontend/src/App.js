@@ -1,9 +1,10 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import './App.css';
 
 // Import pages
 import Welcome from './pages/Welcome';
+/*
 import Login from './pages/Login';
 import Register from './pages/Register';
 
@@ -26,35 +27,36 @@ import NurseAppointments from './pages/nurse/Appointments';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminUsers from './pages/admin/Users';
 import AdminDepartments from './pages/admin/Departments';
-
+*/
 function App() {
   return (
     <Router>
       <div className="App">
         <Routes>
           <Route path="/" element={<Welcome />} />
+{/*}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           
-          {/* Patient routes */}
+          {/* Patient routes 
           <Route path="/patient/dashboard" element={<PatientDashboard />} />
           <Route path="/patient/appointments" element={<PatientAppointments />} />
           <Route path="/patient/medications" element={<PatientMedications />} />
           <Route path="/patient/profile" element={<PatientProfile />} />
           
-          {/* Doctor routes */}
+          {/* Doctor routes 
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
           <Route path="/doctor/appointments" element={<DoctorAppointments />} />
           <Route path="/doctor/patients" element={<DoctorPatients />} />
           
-          {/* Nurse routes */}
+          {/* Nurse routes 
           <Route path="/nurse/dashboard" element={<NurseDashboard />} />
           <Route path="/nurse/appointments" element={<NurseAppointments />} />
           
-          {/* Admin routes */}
+          {/* Admin routes 
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/users" element={<AdminUsers />} />
-          <Route path="/admin/departments" element={<AdminDepartments />} />
+          <Route path="/admin/departments" element={<AdminDepartments />} /> */}
         </Routes>
       </div>
     </Router>
