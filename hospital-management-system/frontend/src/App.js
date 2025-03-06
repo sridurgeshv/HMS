@@ -6,12 +6,10 @@ import './App.css';
 import Welcome from './pages/Welcome';
 import Register from './pages/Register';
 import Login from './pages/Login';
-
+import PatientDashboard from './pages/patient/Dashboard';
 /*
 
-
 // Patient pages
-import PatientDashboard from './pages/patient/Dashboard';
 import PatientAppointments from './pages/patient/Appointments';
 import PatientMedications from './pages/patient/Medications';
 import PatientProfile from './pages/patient/Profile';
@@ -38,9 +36,9 @@ function App() {
           <Route path="/" element={<Welcome />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/patient/dashboard" element={<PatientDashboard />} />
 {/*}          
           {/* Patient routes 
-          <Route path="/patient/dashboard" element={<PatientDashboard />} />
           <Route path="/patient/appointments" element={<PatientAppointments />} />
           <Route path="/patient/medications" element={<PatientMedications />} />
           <Route path="/patient/profile" element={<PatientProfile />} />
