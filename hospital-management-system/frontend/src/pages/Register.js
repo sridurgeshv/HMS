@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import axios from "axios";
 import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import '../styles/Register.css';
 
@@ -7,28 +8,38 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',  // Correct field name
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    role: 'patient'  // Default role
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+  
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
+      alert("Passwords do not match");
       return;
     }
-    // Add registration logic here
-    console.log("Registration Data:", formData);
+  
+    const payload = {
+      username: formData.username,  // Ensure this matches backend expectations
+      email: formData.email,
+      password: formData.password,
+      role: formData.role
+    };
+  
+    try {
+      const response = await axios.post(`http://localhost:8000/signup/`, payload);
+      alert(response.data.message);
+    } catch (error) {
+      alert(error.response?.data?.detail || "Error signing up");
+    }
   };
 
   return (
@@ -40,7 +51,7 @@ const Register = () => {
           transition={{ duration: 0.6 }}
           className="curasphere-register-card"
         >
-          <h2 className="curasphere-register-title">Patient Signup</h2>
+          <h2 className="curasphere-register-title">CuraSphere Signup</h2>
           <p className="curasphere-register-subtitle">Create your CuraSphere account</p>
           
           <form onSubmit={handleSubmit} className="curasphere-register-form">
@@ -48,9 +59,9 @@ const Register = () => {
               <User className="curasphere-input-icon" />
               <input 
                 type="text" 
-                name="name"
-                placeholder="Full Name"
-                value={formData.name}
+                name="username"  // Fixed field name
+                placeholder="Username"
+                value={formData.username}
                 onChange={handleChange}
                 required 
                 className="curasphere-input"
@@ -110,6 +121,21 @@ const Register = () => {
               </button>
             </div>
 
+            <div className="curasphere-input-group">
+              <select 
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                required 
+                className="curasphere-input"
+              >
+                <option value="patient">Patient</option>
+                <option value="doctor">Doctor</option>
+                <option value="nurse">Nurse</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -121,7 +147,7 @@ const Register = () => {
           </form>
 
           <div className="curasphere-register-footer">
-            <p>Already have an account? <a href="#login" className="curasphere-login-link">Login</a></p>
+            <p>Already have an account? <a href="/login" className="curasphere-login-link">Login</a></p>
           </div>
         </motion.div>
       </div>
