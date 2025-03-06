@@ -1,441 +1,285 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, FileText, PlusCircle, User, CreditCard, Pill, Activity, Menu, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { 
+  Calendar, 
+  Clock, 
+  Users, 
+  FileText, 
+  Pill, 
+  MessageSquare, 
+  Bell, 
+  Search,
+  Menu,
+  X
+} from 'lucide-react';
 import './Dashboard.css';
 
-const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState('appointments');
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
-
+const DoctorDashboard = () => {
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [selectedView, setSelectedView] = useState('daily');
+  
+  // Sample data
+  const appointments = [
+    { id: 1, patient: 'Sarah Johnson', time: '09:00 AM', status: 'Confirmed', type: 'Check-up' },
+    { id: 2, patient: 'Michael Brown', time: '10:30 AM', status: 'Confirmed', type: 'Follow-up' },
+    { id: 3, patient: 'Emily Davis', time: '01:00 PM', status: 'Confirmed', type: 'Consultation' },
+    { id: 4, patient: 'James Wilson', time: '03:30 PM', status: 'Tentative', type: 'Follow-up' },
+  ];
+  
+  const recentPatients = [
+    { id: 101, name: 'Sarah Johnson', age: 42, lastVisit: '2025-03-01', condition: 'Hypertension' },
+    { id: 102, name: 'Michael Brown', age: 35, lastVisit: '2025-03-03', condition: 'Diabetes' },
+    { id: 103, name: 'Emily Davis', age: 28, lastVisit: '2025-02-28', condition: 'Asthma' },
+  ];
+  
+  const notifications = [
+    { id: 1, message: 'New test results for Sarah Johnson', time: '30 minutes ago' },
+    { id: 2, message: 'Appointment request from David Miller', time: '2 hours ago' },
+    { id: 3, message: 'Nurse consultation needed for Room 204', time: '3 hours ago' },
+  ];
+  
+  // Update time every minute
   useEffect(() => {
-    // Simulate data loading
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+    
+    return () => clearInterval(timer);
   }, []);
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!isSidebarOpen);
+  
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
   };
-
-  // Mock data
-  const upcomingAppointments = [
-    { id: 1, doctor: "Dr. Sarah Wilson", specialty: "Cardiology", date: "2025-03-10", time: "10:00 AM" },
-    { id: 2, doctor: "Dr. Michael Chen", specialty: "Dermatology", date: "2025-03-15", time: "2:30 PM" }
-  ];
-
-  const medications = [
-    { id: 1, name: "Lisinopril", dosage: "10mg", frequency: "Once daily", refill: "3 refills left" },
-    { id: 2, name: "Atorvastatin", dosage: "20mg", frequency: "Once daily", refill: "2 refills left" },
-    { id: 3, name: "Metformin", dosage: "500mg", frequency: "Twice daily", refill: "1 refill left" }
-  ];
-
-  if (isLoading) {
-    return (
-      <div className="dashboard-loading">
-        <div className="pulse-loader"></div>
-        <p>Loading your health information...</p>
-      </div>
-    );
-  }
-
+  
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+  
   return (
-    <div className={`dashboard-container ${isSidebarOpen ? '' : 'sidebar-collapsed'}`}>
-      <div className="sidebar">
+    <div className="dashboard-container">
+      {/* Sidebar */}
+      <aside className={`sidebar ${isMenuOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-header">
-          <h2 className="logo">HealthHub</h2>
-          <button className="toggle-sidebar" onClick={toggleSidebar}>
-            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+          <h2 className="logo">MedPortal</h2>
+          <button className="close-menu" onClick={toggleMenu}>
+            <X size={24} />
           </button>
         </div>
-        <div className="sidebar-content">
-          <div className="user-profile">
-            <div className="avatar">JD</div>
-            <div className="user-info">
-              <h3>John Doe</h3>
-              <p>Patient ID: 12345678</p>
-            </div>
+        
+        <div className="doctor-profile">
+          <div className="profile-image">
+            <img src="/api/placeholder/100/100" alt="Doctor profile" />
           </div>
-          <nav className="sidebar-menu">
-            <button 
-              className={`menu-item ${activeTab === 'appointments' ? 'active' : ''}`} 
-              onClick={() => setActiveTab('appointments')}
-            >
-              <Calendar size={20} />
-              <span>Appointments</span>
-            </button>
-            <button 
-              className={`menu-item ${activeTab === 'medical-history' ? 'active' : ''}`} 
-              onClick={() => setActiveTab('medical-history')}
-            >
-              <FileText size={20} />
-              <span>Medical History</span>
-            </button>
-            <button 
-              className={`menu-item ${activeTab === 'medications' ? 'active' : ''}`} 
-              onClick={() => setActiveTab('medications')}
-            >
-              <Pill size={20} />
-              <span>Medications</span>
-            </button>
-            <button 
-              className={`menu-item ${activeTab === 'profile' ? 'active' : ''}`} 
-              onClick={() => setActiveTab('profile')}
-            >
-              <User size={20} />
-              <span>Profile</span>
-            </button>
-            <button 
-              className={`menu-item ${activeTab === 'billing' ? 'active' : ''}`} 
-              onClick={() => setActiveTab('billing')}
-            >
-              <CreditCard size={20} />
-              <span>Billing</span>
-            </button>
-          </nav>
+          <div className="profile-info">
+            <h3>Dr. Jane Smith</h3>
+            <p>Cardiologist</p>
+          </div>
         </div>
-      </div>
-
-      <main className="dashboard-main">
-        <header className="main-header">
-          <h1>Patient Dashboard</h1>
-          <div className="header-actions">
+        
+        <nav className="sidebar-nav">
+          <Link to="/doctor/dashboard" className="nav-item active">
+            <Calendar size={20} />
+            <span>Dashboard</span>
+          </Link>
+          <Link to="/doctor/appointments" className="nav-item">
+            <Clock size={20} />
+            <span>Appointments</span>
+          </Link>
+          <Link to="/doctor/patients" className="nav-item">
+            <Users size={20} />
+            <span>Patients</span>
+          </Link>
+          <Link to="/doctor/prescriptions" className="nav-item">
+            <Pill size={20} />
+            <span>Prescriptions</span>
+          </Link>
+          <Link to="/doctor/medical-records" className="nav-item">
+            <FileText size={20} />
+            <span>Medical Records</span>
+          </Link>
+          <Link to="/doctor/messages" className="nav-item">
+            <MessageSquare size={20} />
+            <span>Messages</span>
+          </Link>
+        </nav>
+      </aside>
+      
+      {/* Main Content */}
+      <main className="main-content">
+        {/* Topbar */}
+        <header className="topbar">
+          <button className="menu-toggle" onClick={toggleMenu}>
+            <Menu size={24} />
+          </button>
+          
+          <div className="search-bar">
+            <Search size={18} />
+            <input type="text" placeholder="Search patients, appointments..." />
+          </div>
+          
+          <div className="topbar-right">
+            <div className="current-time">
+              <Clock size={18} />
+              <span>{currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+            
             <div className="notification-bell">
-              <span className="notification-dot"></span>
-              <bell size={24} />
+              <Bell size={20} />
+              <span className="notification-badge">{notifications.length}</span>
             </div>
           </div>
         </header>
-
+        
+        {/* Dashboard Content */}
         <div className="dashboard-content">
-          {activeTab === 'appointments' && (
-            <div className="tab-content appointments fade-in">
-              <div className="content-header">
-                <h2><Calendar size={20} /> Upcoming Appointments</h2>
-                <button className="action-button"><PlusCircle size={16} /> Book Appointment</button>
+          <div className="welcome-section">
+            <div className="welcome-text">
+              <h1>Welcome back, Dr. Smith</h1>
+              <p>{formatDate(currentTime)}</p>
+            </div>
+            
+            <div className="quick-stats">
+              <div className="stat-card">
+                <div className="stat-icon appointments-icon">
+                  <Clock size={24} />
+                </div>
+                <div className="stat-info">
+                  <h3>4</h3>
+                  <p>Today's Appointments</p>
+                </div>
               </div>
               
-              <div className="appointment-cards">
-                {upcomingAppointments.map(appointment => (
-                  <div className="appointment-card" key={appointment.id}>
-                    <div className="appointment-date">
-                      <div className="month">{new Date(appointment.date).toLocaleString('default', { month: 'short' })}</div>
-                      <div className="day">{new Date(appointment.date).getDate()}</div>
+              <div className="stat-card">
+                <div className="stat-icon patients-icon">
+                  <Users size={24} />
+                </div>
+                <div className="stat-info">
+                  <h3>12</h3>
+                  <p>Active Patients</p>
+                </div>
+              </div>
+              
+              <div className="stat-card">
+                <div className="stat-icon messages-icon">
+                  <MessageSquare size={24} />
+                </div>
+                <div className="stat-info">
+                  <h3>5</h3>
+                  <p>New Messages</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Appointment Schedule */}
+          <section className="appointments-section">
+            <div className="section-header">
+              <h2>Appointment Schedule</h2>
+              <div className="view-toggle">
+                <button 
+                  className={`toggle-btn ${selectedView === 'daily' ? 'active' : ''}`}
+                  onClick={() => setSelectedView('daily')}
+                >
+                  Daily
+                </button>
+                <button 
+                  className={`toggle-btn ${selectedView === 'weekly' ? 'active' : ''}`}
+                  onClick={() => setSelectedView('weekly')}
+                >
+                  Weekly
+                </button>
+              </div>
+            </div>
+            
+            <div className="appointment-list">
+              {appointments.map(appointment => (
+                <div className="appointment-card" key={appointment.id}>
+                  <div className="appointment-time">
+                    <Clock size={16} />
+                    <span>{appointment.time}</span>
+                  </div>
+                  
+                  <div className="appointment-details">
+                    <h3>{appointment.patient}</h3>
+                    <p>{appointment.type}</p>
+                  </div>
+                  
+                  <div className={`appointment-status ${appointment.status.toLowerCase()}`}>
+                    {appointment.status}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+          
+          {/* Two Column Layout */}
+          <div className="dashboard-columns">
+            {/* Recent Patients */}
+            <section className="recent-patients-section">
+              <div className="section-header">
+                <h2>Recent Patients</h2>
+                <Link to="/doctor/patients" className="view-all">View All</Link>
+              </div>
+              
+              <div className="patients-list">
+                {recentPatients.map(patient => (
+                  <div className="patient-card" key={patient.id}>
+                    <div className="patient-avatar">
+                      <img src={`/api/placeholder/40/40`} alt={patient.name} />
                     </div>
-                    <div className="appointment-details">
-                      <h3>{appointment.doctor}</h3>
-                      <p className="specialty">{appointment.specialty}</p>
-                      <p className="time"><Clock size={14} /> {appointment.time}</p>
+                    
+                    <div className="patient-info">
+                      <h3>{patient.name}</h3>
+                      <p>Age: {patient.age} • {patient.condition}</p>
+                      <p className="last-visit">Last visit: {patient.lastVisit}</p>
                     </div>
-                    <div className="appointment-actions">
-                      <button className="btn-reschedule">Reschedule</button>
-                      <button className="btn-cancel">Cancel</button>
+                    
+                    <div className="patient-actions">
+                      <button className="action-btn view-records">
+                        <FileText size={16} />
+                      </button>
+                      <button className="action-btn send-message">
+                        <MessageSquare size={16} />
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
-
-              <div className="booking-section">
-                <h3>Book New Appointment</h3>
-                <form className="booking-form">
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Department</label>
-                      <select>
-                        <option>Select Department</option>
-                        <option>Cardiology</option>
-                        <option>Dermatology</option>
-                        <option>Neurology</option>
-                        <option>Orthopedics</option>
-                      </select>
-                    </div>
-                    <div className="form-group">
-                      <label>Doctor</label>
-                      <select>
-                        <option>Select Doctor</option>
-                        <option>Dr. Sarah Wilson</option>
-                        <option>Dr. Michael Chen</option>
-                        <option>Dr. Emily Johnson</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Date</label>
-                      <input type="date" />
-                    </div>
-                    <div className="form-group">
-                      <label>Time</label>
-                      <select>
-                        <option>Select Time</option>
-                        <option>9:00 AM</option>
-                        <option>10:00 AM</option>
-                        <option>11:00 AM</option>
-                        <option>2:00 PM</option>
-                        <option>3:00 PM</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label>Reason for Visit</label>
-                    <textarea placeholder="Briefly describe your symptoms or reason for visit"></textarea>
-                  </div>
-                  <button type="button" className="submit-booking">Book Appointment</button>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'medications' && (
-            <div className="tab-content medications fade-in">
-              <div className="content-header">
-                <h2><Pill size={20} /> Current Medications</h2>
+            </section>
+            
+            {/* Notifications */}
+            <section className="notifications-section">
+              <div className="section-header">
+                <h2>Notifications</h2>
+                <button className="mark-all-read">Mark all as read</button>
               </div>
               
-              <div className="medications-list">
-                {medications.map(med => (
-                  <div className="medication-card" key={med.id}>
-                    <div className="medication-icon">
-                      <Pill size={24} />
+              <div className="notifications-list">
+                {notifications.map(notification => (
+                  <div className="notification-card" key={notification.id}>
+                    <div className="notification-icon">
+                      <Bell size={16} />
                     </div>
-                    <div className="medication-details">
-                      <h3>{med.name}</h3>
-                      <p className="dosage">{med.dosage} - {med.frequency}</p>
-                      <p className="refill">{med.refill}</p>
+                    
+                    <div className="notification-content">
+                      <p>{notification.message}</p>
+                      <span className="notification-time">{notification.time}</span>
                     </div>
-                    <button className="btn-refill">Request Refill</button>
                   </div>
                 ))}
               </div>
-
-              <div className="health-vitals">
-                <h3>Health Vitals</h3>
-                <div className="vitals-cards">
-                  <div className="vital-card">
-                    <Activity size={20} />
-                    <h4>Heart Rate</h4>
-                    <div className="vital-reading">72 <span>bpm</span></div>
-                    <div className="vital-chart"></div>
-                  </div>
-                  <div className="vital-card">
-                    <Activity size={20} />
-                    <h4>Blood Pressure</h4>
-                    <div className="vital-reading">120/80 <span>mmHg</span></div>
-                    <div className="vital-chart"></div>
-                  </div>
-                  <div className="vital-card">
-                    <Activity size={20} />
-                    <h4>Blood Sugar</h4>
-                    <div className="vital-reading">110 <span>mg/dL</span></div>
-                    <div className="vital-chart"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'medical-history' && (
-            <div className="tab-content medical-history fade-in">
-              <div className="content-header">
-                <h2><FileText size={20} /> Medical History</h2>
-              </div>
-              
-              <div className="timeline">
-                <div className="timeline-item">
-                  <div className="timeline-dot"></div>
-                  <div className="timeline-date">Feb 15, 2025</div>
-                  <div className="timeline-content">
-                    <h3>Annual Physical Examination</h3>
-                    <p>General checkup with Dr. Wilson. All vitals normal, recommended increased physical activity.</p>
-                    <button className="btn-view-details">View Details</button>
-                  </div>
-                </div>
-                
-                <div className="timeline-item">
-                  <div className="timeline-dot"></div>
-                  <div className="timeline-date">Dec 10, 2024</div>
-                  <div className="timeline-content">
-                    <h3>Flu Vaccination</h3>
-                    <p>Received seasonal flu vaccine. No adverse reactions.</p>
-                    <button className="btn-view-details">View Details</button>
-                  </div>
-                </div>
-                
-                <div className="timeline-item">
-                  <div className="timeline-dot"></div>
-                  <div className="timeline-date">Oct 5, 2024</div>
-                  <div className="timeline-content">
-                    <h3>Blood Work Results</h3>
-                    <p>Cholesterol levels slightly elevated. New medication prescribed.</p>
-                    <button className="btn-view-details">View Details</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'profile' && (
-            <div className="tab-content profile fade-in">
-              <div className="content-header">
-                <h2><User size={20} /> Personal Profile</h2>
-                <button className="action-button">Edit Profile</button>
-              </div>
-              
-              <div className="profile-card">
-                <div className="profile-header">
-                  <div className="profile-avatar">JD</div>
-                  <div className="profile-name">
-                    <h3>John Doe</h3>
-                    <p>Patient since: January 2020</p>
-                  </div>
-                </div>
-                
-                <div className="profile-details">
-                  <div className="detail-group">
-                    <h4>Personal Information</h4>
-                    <div className="detail-row">
-                      <span className="detail-label">Date of Birth</span>
-                      <span className="detail-value">05/12/1985</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Gender</span>
-                      <span className="detail-value">Male</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Blood Type</span>
-                      <span className="detail-value">O+</span>
-                    </div>
-                  </div>
-                  
-                  <div className="detail-group">
-                    <h4>Contact Information</h4>
-                    <div className="detail-row">
-                      <span className="detail-label">Email</span>
-                      <span className="detail-value">john.doe@example.com</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Phone</span>
-                      <span className="detail-value">(555) 123-4567</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Address</span>
-                      <span className="detail-value">123 Main St, Anytown, CA 91234</span>
-                    </div>
-                  </div>
-                  
-                  <div className="detail-group">
-                    <h4>Emergency Contact</h4>
-                    <div className="detail-row">
-                      <span className="detail-label">Name</span>
-                      <span className="detail-value">Jane Doe</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Relationship</span>
-                      <span className="detail-value">Spouse</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Phone</span>
-                      <span className="detail-value">(555) 987-6543</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'billing' && (
-            <div className="tab-content billing fade-in">
-              <div className="content-header">
-                <h2><CreditCard size={20} /> Billing Information</h2>
-              </div>
-              
-              <div className="billing-cards">
-                <div className="billing-card summary">
-                  <h3>Payment Summary</h3>
-                  <div className="billing-stats">
-                    <div className="stat-item">
-                      <span className="stat-value">$250</span>
-                      <span className="stat-label">Next Payment Due</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-value">Mar 15</span>
-                      <span className="stat-label">Due Date</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-value">$1,750</span>
-                      <span className="stat-label">YTD Medical Expenses</span>
-                    </div>
-                  </div>
-                  <button className="action-button">Make Payment</button>
-                </div>
-                
-                <div className="billing-card payment-methods">
-                  <h3>Payment Methods</h3>
-                  <div className="payment-method">
-                    <div className="card-icon visa"></div>
-                    <div className="card-details">
-                      <p className="card-number">VISA ending in 4567</p>
-                      <p className="expiry">Expires: 09/26</p>
-                    </div>
-                    <div className="default-badge">Default</div>
-                  </div>
-                  <div className="payment-method">
-                    <div className="card-icon mastercard"></div>
-                    <div className="card-details">
-                      <p className="card-number">MASTERCARD ending in 8901</p>
-                      <p className="expiry">Expires: 12/25</p>
-                    </div>
-                  </div>
-                  <button className="add-payment-method">+ Add Payment Method</button>
-                </div>
-              </div>
-              
-              <div className="transaction-history">
-                <h3>Payment History</h3>
-                <table className="transactions-table">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Description</th>
-                      <th>Amount</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>Feb 15, 2025</td>
-                      <td>Annual Physical Examination</td>
-                      <td>$150.00</td>
-                      <td><span className="status paid">Paid</span></td>
-                    </tr>
-                    <tr>
-                      <td>Jan 10, 2025</td>
-                      <td>Prescription Refill - Lisinopril</td>
-                      <td>$45.00</td>
-                      <td><span className="status paid">Paid</span></td>
-                    </tr>
-                    <tr>
-                      <td>Dec 28, 2024</td>
-                      <td>Specialist Consultation - Cardiology</td>
-                      <td>$250.00</td>
-                      <td><span className="status paid">Paid</span></td>
-                    </tr>
-                    <tr>
-                      <td>Dec 05, 2024</td>
-                      <td>Blood Work Panel</td>
-                      <td>$120.00</td>
-                      <td><span className="status paid">Paid</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+            </section>
+          </div>
         </div>
       </main>
     </div>
   );
 };
 
-export default Dashboard;
+export default DoctorDashboard;
