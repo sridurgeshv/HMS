@@ -18,7 +18,7 @@ const Welcome = () => {
             <a href="#home" className="curasphere-nav-link">Home</a>
             <a href="#services" className="curasphere-nav-link">Services</a>
             <a href="#about" className="curasphere-nav-link">About</a>
-            <Link to="/register" className="curasphere-login-button">
+            <Link to="/join" className="curasphere-login-button">
         Join Us
       </Link>
               </nav>

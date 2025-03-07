@@ -4,11 +4,17 @@ import './App.css';
 
 // Import pages
 import Welcome from './pages/Welcome';
-import Register from './pages/Register';
 import Login from './pages/Login';
+import RoleSelection from './pages/RoleSelection';
+import PatientRegister from './pages/patient/PatientRegister';
+import DoctorRegister from './pages/doctor/DoctorRegister';
+import NurseRegister from './pages/nurse/NurseRegister';
+import AdminRegister from './pages/admin/AdminRegister';
 import PatientDashboard from './pages/patient/Dashboard';
 import DoctorDashboard from './pages/doctor/Dashboard';
 import NurseDashboard from './pages/nurse/Dashboard';
+import AdminDashboard from './pages/admin/Dashboard';
+
 /*
 
 // Patient pages
@@ -36,11 +42,16 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={<Welcome />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/join" element={<RoleSelection />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register/patient" element={<PatientRegister />} />
+          <Route path="/register/doctor" element={<DoctorRegister />} />
+          <Route path="/register/nurse" element={<NurseRegister />} />
+          <Route path="/register/admin" element={<AdminRegister />} />
           <Route path="/patient/dashboard" element={<PatientDashboard />} />
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
           <Route path="/nurse/dashboard" element={<NurseDashboard />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
 {/*}          
           {/* Patient routes 
           <Route path="/patient/appointments" element={<PatientAppointments />} />
