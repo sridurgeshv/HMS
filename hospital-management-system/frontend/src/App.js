@@ -16,7 +16,6 @@ import NurseDashboard from './pages/nurse/Dashboard';
 import AdminDashboard from './pages/admin/Dashboard';
 
 /*
-
 // Patient pages
 import PatientAppointments from './pages/patient/Appointments';
 import PatientMedications from './pages/patient/Medications';
