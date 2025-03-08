@@ -7,7 +7,7 @@ import '../styles/RoleSelection.css';
 import patientImg from '../assets/patient.JPG';
 import doctorImg from '../assets/doctor.JPG';
 import nurseImg from '../assets/nurse.JPG';
-import adminImg from '../assets/admin.jpg';
+import adminImg from '../assets/admin.png';
 
 const RoleSelection = () => {
   const navigate = useNavigate();

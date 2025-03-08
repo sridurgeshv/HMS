@@ -44,7 +44,7 @@ const Dashboard = () => {
     <div className={`dashboard-container ${isSidebarOpen ? '' : 'sidebar-collapsed'}`}>
       <div className="sidebar">
         <div className="sidebar-header">
-          <h2 className="logo">HealthHub</h2>
+          <h2 className="logo">CuraSphere</h2>
           <button className="toggle-sidebar" onClick={toggleSidebar}>
             {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
