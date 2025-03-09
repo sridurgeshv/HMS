@@ -12,7 +12,7 @@
 5. Main Task is adding AI in two systems like Patient records and appointments handling part. if possible in inventory system as well to notify the head doctor to get the inventory updated with stocks.
 
 
-## Some Extra Data - [Project Feasibility for Hospital Management System](https://monica.im/share/chat?shareId=ZSO50tpgkKpDpffK)
+## Some Extra Data - [Hospital Management System](https://monica.im/share/chat?shareId=ZSO50tpgkKpDpffK)
 
 # Frontend Plan
 

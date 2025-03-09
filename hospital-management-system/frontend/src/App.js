@@ -31,7 +31,7 @@ import DoctorPatients from './pages/doctor/Patients';
 
 import NurseAppointments from './pages/nurse/Appointments';
 
-// Admin pages
+// Admin page
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminUsers from './pages/admin/Users';
 import AdminDepartments from './pages/admin/Departments';
