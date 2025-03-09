@@ -5,12 +5,13 @@ import {
   Clock, 
   Users, 
   FileText, 
-  Pill, 
-  MessageSquare, 
+  Pill,  
+  MessageSquare,
   Bell, 
   Search,
   Menu,
-  X
+  X,
+  User
 } from 'lucide-react';
 import './Dashboard.css';
 
@@ -66,7 +67,7 @@ const DoctorDashboard = () => {
       {/* Sidebar */}
       <aside className={`sidebar ${isMenuOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-header">
-          <h2 className="logo">MedPortal</h2>
+          <h2 className="logo">Curasphere</h2>
           <button className="close-menu" onClick={toggleMenu}>
             <X size={24} />
           </button>
@@ -95,17 +96,13 @@ const DoctorDashboard = () => {
             <Users size={20} />
             <span>Patients</span>
           </Link>
-          <Link to="/doctor/prescriptions" className="nav-item">
-            <Pill size={20} />
-            <span>Prescriptions</span>
-          </Link>
           <Link to="/doctor/medical-records" className="nav-item">
             <FileText size={20} />
             <span>Medical Records</span>
           </Link>
           <Link to="/doctor/messages" className="nav-item">
-            <MessageSquare size={20} />
-            <span>Messages</span>
+            <User size={20} />
+            <span>Profile</span>
           </Link>
         </nav>
       </aside>
@@ -162,16 +159,6 @@ const DoctorDashboard = () => {
                 <div className="stat-info">
                   <h3>12</h3>
                   <p>Active Patients</p>
-                </div>
-              </div>
-              
-              <div className="stat-card">
-                <div className="stat-icon messages-icon">
-                  <MessageSquare size={24} />
-                </div>
-                <div className="stat-info">
-                  <h3>5</h3>
-                  <p>New Messages</p>
                 </div>
               </div>
             </div>
