@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { User, Mail, Lock, Eye, EyeOff, Phone, Building, Shield } from 'lucide-react';
@@ -20,6 +20,17 @@ const AdminRegister = () => {
     role: 'admin'
   });
 
+  // Function to generate a random Admin Code
+  const generateAdminCode = () => {
+    return `ADMIN-${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
+  };
+
+  // Generate an admin code when the component mounts
+  useEffect(() => {
+    const newAdminCode = generateAdminCode();
+    setFormData((prev) => ({ ...prev, adminCode: newAdminCode }));
+  }, []);
+  
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -36,16 +47,20 @@ const AdminRegister = () => {
       username: formData.username,
       email: formData.email,
       password: formData.password,
-      fullName: formData.fullName,
+      full_name: formData.fullName, // Ensure this matches the backend schema
       phone: formData.phone,
       department: formData.department,
-      adminCode: formData.adminCode,
-      role: formData.role
+      role: "admin", // Ensure this matches the backend schema
+      admin_code: formData.adminCode, // Ensure this matches the backend schema
     };
   
+    console.log("Payload being sent:", payload); // Debugging
+  
     try {
-      const response = await axios.post(`http://localhost:8000/signup/`, payload);
-      alert(response.data.message);
+      const response = await axios.post(`http://localhost:8000/adminsignup/`, payload);
+  
+      // Generate a new admin code for the next admin
+      setFormData((prev) => ({ ...prev, adminCode: generateAdminCode() }));
     } catch (error) {
       alert(error.response?.data?.detail || "Error signing up");
     }
@@ -132,12 +147,11 @@ const AdminRegister = () => {
             <div className="curasphere-input-group">
               <Shield className="curasphere-input-icon" />
               <input 
-                type="password" 
+                type="text" 
                 name="adminCode"
                 placeholder="Admin Authorization Code"
                 value={formData.adminCode}
-                onChange={handleChange}
-                required 
+                readOnly
                 className="curasphere-input"
               />
             </div>

@@ -36,11 +36,11 @@ const PatientRegister = () => {
       username: formData.username,
       email: formData.email,
       password: formData.password,
-      fullName: formData.fullName,
-      dateOfBirth: formData.dateOfBirth,
+      full_name: formData.fullName,
+      date_of_birth: formData.dateOfBirth,
       phone: formData.phone,
       address: formData.address,
-      role: formData.role
+      role: "patient" 
     };
   
     try {

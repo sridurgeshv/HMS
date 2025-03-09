@@ -40,19 +40,19 @@ const NurseRegister = () => {
       username: formData.username,
       email: formData.email,
       password: formData.password,
-      fullName: formData.fullName,
-      dateOfBirth: formData.dateOfBirth,
+      full_name: formData.fullName,
+      date_of_birth: formData.dateOfBirth,
       phone: formData.phone,
       address: formData.address,
-      licenseNumber: formData.licenseNumber,
+      license_number: formData.licenseNumber,
       department: formData.department,
       hospital: formData.hospital,
       experience: formData.experience,
-      role: formData.role
+      role: "nurse"
     };
   
     try {
-      const response = await axios.post(`http://localhost:8000/signup/`, payload);
+      const response = await axios.post(`http://localhost:8000/nursesignup/`, payload);
       alert(response.data.message);
     } catch (error) {
       alert(error.response?.data?.detail || "Error signing up");

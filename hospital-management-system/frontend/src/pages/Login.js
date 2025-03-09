@@ -122,7 +122,7 @@ const Login = () => {
           </form>
 
           <div className="curasphere-login-footer">
-            <p>Don't have an account? <a href="/register" className="curasphere-register-link">Sign Up</a></p>
+            <p>Don't have an account? <a href="/join" className="curasphere-register-link">Sign Up</a></p>
           </div>
         </motion.div>
       </div>
