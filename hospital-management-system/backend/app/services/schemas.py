@@ -9,6 +9,7 @@ class UserCreate(BaseModel):
     phone: str
     address: str
     role: str = "patient"  # Default role
+    status: str = "pending"  # Default status
 
 class DoctorCreate(UserCreate):
     specialization: str
@@ -37,4 +38,5 @@ class AdminCreate(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+    
     

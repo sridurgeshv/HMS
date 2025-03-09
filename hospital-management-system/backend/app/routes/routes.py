@@ -30,6 +30,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
         phone=user.phone,
         address=user.address,
         role="patient",  # Fixed role
+        status="approved"  # Patients are approved by default
     )
     
     db.add(db_user)
@@ -63,14 +64,15 @@ def create_doctor(doctor: DoctorCreate, db: Session = Depends(get_db)):
         license_number=doctor.license_number,
         hospital=doctor.hospital,
         experience=doctor.experience,
-        role="doctor"  # Ensure role is fixed
+        role="doctor" , # Ensure role is fixed
+        status="pending"  # Doctors need admin approval
     )
 
     db.add(new_doctor)
     db.commit()
     db.refresh(new_doctor)
 
-    return {"message": "Doctor registered successfully"}
+    return {"message": "Doctor registered successfully, pending admin approval"}
 
 @router.post("/nursesignup/")
 def create_nurse(nurse: NurseCreate, db: Session = Depends(get_db)):
@@ -96,14 +98,15 @@ def create_nurse(nurse: NurseCreate, db: Session = Depends(get_db)):
         license_number=nurse.license_number,
         hospital=nurse.hospital,
         experience=nurse.experience,
-        role="nurse"  # Ensure role is fixed
+        role="nurse" , # Ensure role is fixed
+        status="pending"  # Nurses need admin approval
     )
 
     db.add(new_nurse)
     db.commit()
     db.refresh(new_nurse)
 
-    return {"message": "Nurse registered successfully"}
+    return {"message": "Nurse registered successfully, pending admin approval"}
 
 
 @router.post("/adminsignup/")
@@ -122,8 +125,8 @@ def create_admin(admin: AdminCreate, db: Session = Depends(get_db)):
         phone=admin.phone,
         role="admin",  # Fixed role
         department=admin.department,
-        admin_code=admin.admin_code  # Ensure this field is required
-
+        admin_code=admin.admin_code , # Ensure this field is required
+        status="approved"  # Admins are approved by default
     )
 
     db.add(new_admin)
@@ -132,7 +135,6 @@ def create_admin(admin: AdminCreate, db: Session = Depends(get_db)):
 
     return {"message": "Admin created successfully", "username": new_admin.username}
 
-
 @router.post("/login/")
 def login_user(user: UserLogin, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == user.email).first()
@@ -140,4 +142,40 @@ def login_user(user: UserLogin, db: Session = Depends(get_db)):
     if not db_user or not verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
-    return {"message": "Login successful", "role": db_user.role}
+    # Only block login if the user is a doctor or nurse with pending status
+    if db_user.role in ["doctor", "nurse"] and db_user.status != "approved":
+        raise HTTPException(status_code=403, detail="Your account is pending approval")
+    
+    return {"message": "Login successful", "role": db_user.role, "status": db_user.status}
+
+@router.get("/pending-registrations/")
+def get_pending_registrations(db: Session = Depends(get_db)):
+    pending_users = db.query(User).filter(User.status == "pending").all()
+    return pending_users
+
+@router.post("/approve-registration/{user_id}")
+def approve_registration(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Update the status to "approved"
+    print(f"Before approval: {db_user.status}")  # Should be "pending"
+    db_user.status = "approved"
+    db.commit()
+    db.refresh(db_user)
+    print(f"After approval: {db_user.status}")  # Should be "approved"
+
+    return {"message": "User approved successfully"}
+
+@router.post("/reject-registration/{user_id}")
+def reject_registration(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    db_user.status = "rejected"
+    db.commit()
+    db.refresh(db_user)
+
+    return {"message": "User rejected successfully"}

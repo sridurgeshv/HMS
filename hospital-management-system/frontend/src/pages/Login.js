@@ -21,13 +21,18 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await axios.post(`http://localhost:8000/login/`, formData);
-      const { role } = response.data;
+    const response = await axios.post('http://localhost:8000/login/', formData);
+    const { role, status } = response.data;
 
-      alert("Login successful!");
+    // Only block login if the user is a doctor or nurse with pending status
+    if ((role === "doctor" || role === "nurse") && status !== "approved") {
+      alert("Your account is still pending approval.");
+      return;
+    }
 
+    alert("Login successful!");
+    
       // Redirect based on role
       switch (role) {
         case 'patient':

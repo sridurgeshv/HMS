@@ -10,6 +10,7 @@ import PatientRegister from './pages/patient/PatientRegister';
 import DoctorRegister from './pages/doctor/DoctorRegister';
 import NurseRegister from './pages/nurse/NurseRegister';
 import AdminRegister from './pages/admin/AdminRegister';
+import PendingApproval from './pages/PendingApproval';
 import PatientDashboard from './pages/patient/Dashboard';
 import DoctorDashboard from './pages/doctor/Dashboard';
 import NurseDashboard from './pages/nurse/Dashboard';
@@ -47,6 +48,7 @@ function App() {
           <Route path="/register/doctor" element={<DoctorRegister />} />
           <Route path="/register/nurse" element={<NurseRegister />} />
           <Route path="/register/admin" element={<AdminRegister />} />
+          <Route path="/pending-approval" element={<PendingApproval />} />
           <Route path="/patient/dashboard" element={<PatientDashboard />} />
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
           <Route path="/nurse/dashboard" element={<NurseDashboard />} />

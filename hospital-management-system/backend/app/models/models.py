@@ -13,6 +13,8 @@ class User(Base):
     phone = Column(String, nullable=False)
     address = Column(String, nullable=True)  # Allow NULL values
     role = Column(String, nullable=False, default="patient")  # Default role to "patient"
+    status = Column(String, nullable=False, default="pending")  # Add status field
+
 
      # Doctor-specific fields
     specialization = Column(String, nullable=True)

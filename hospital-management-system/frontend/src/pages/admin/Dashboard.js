@@ -18,6 +18,7 @@ import {
   Calendar,
   Clock
 } from 'lucide-react';
+import axios from 'axios';
 
 const AdminDashboard = () => {
   const location = useLocation();
@@ -27,6 +28,40 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
+  const [pendingRegistrations, setPendingRegistrations] = useState([]);
+
+  useEffect(() => {
+    const fetchPendingRegistrations = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/pending-registrations/');
+        setPendingRegistrations(response.data);
+      } catch (error) {
+        console.error('Error fetching pending registrations:', error);
+      }
+    };
+
+    fetchPendingRegistrations();
+  }, []);
+
+  const handleApprove = async (id) => {
+    try {
+      await axios.post(`http://localhost:8000/approve-registration/${id}/`);
+      setPendingRegistrations(pendingRegistrations.filter(reg => reg.id !== id));
+      alert('Registration approved');
+    } catch (error) {
+      console.error('Error approving registration:', error);
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      await axios.post(`http://localhost:8000/reject-registration/${id}/`);
+      setPendingRegistrations(pendingRegistrations.filter(reg => reg.id !== id));
+      alert('Registration rejected');
+    } catch (error) {
+      console.error('Error rejecting registration:', error);
+    }
+  };
 
   // Toggle sidebar
   const toggleSidebar = () => {
@@ -292,6 +327,29 @@ const AdminDashboard = () => {
               <h2 className="section-title">Department Status</h2>
               <Link to="/admin/departments" className="btn-primary">Manage Departments</Link>
             </div>
+
+          <section className="pending-registrations-section">
+          <h2 className="section-title">Pending Registrations</h2>
+          <div className="pending-registrations-list">
+            {pendingRegistrations.map(reg => (
+              <div key={reg.id} className="pending-registration-item">
+                <div className="registration-details">
+                  <p><strong>Name:</strong> {reg.full_name}</p>
+                  <p><strong>Email:</strong> {reg.email}</p>
+                  <p><strong>Role:</strong> {reg.role}</p>
+                  <p><strong>Department:</strong> {reg.department}</p>
+                  <p><strong>Specialization:</strong> {reg.specialization}</p>
+                  <p><strong>License Number:</strong> {reg.license_number}</p>
+                  
+                </div>
+                <div className="registration-actions">
+                  <button onClick={() => handleApprove(reg.id)} className="btn-approve">Approve</button>
+                  <button onClick={() => handleReject(reg.id)} className="btn-reject">Reject</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
             
             <div className="departments-grid">
               {loading ? (

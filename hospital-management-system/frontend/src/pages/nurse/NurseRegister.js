@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { User, Mail, Lock, Eye, EyeOff, Calendar, Phone, MapPin, Award, Building } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link , useNavigate } from 'react-router-dom';
 import '../../styles/Register.css';
 
 const NurseRegister = () => {
@@ -21,8 +21,11 @@ const NurseRegister = () => {
     department: '',
     hospital: '',
     experience: '',
-    role: 'nurse'
+    role: 'nurse',
+    status: 'pending' // Default status
   });
+
+  const navigate = useNavigate(); 
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -48,12 +51,14 @@ const NurseRegister = () => {
       department: formData.department,
       hospital: formData.hospital,
       experience: formData.experience,
-      role: "nurse"
+      role: "nurse",
+      status: "pending" // Include status in payload
     };
   
     try {
       const response = await axios.post(`http://localhost:8000/nursesignup/`, payload);
       alert(response.data.message);
+      navigate('/pending-approval'); // Redirect to pending approval page
     } catch (error) {
       alert(error.response?.data?.detail || "Error signing up");
     }
