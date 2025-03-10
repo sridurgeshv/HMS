@@ -4,7 +4,6 @@ import './Dashboard.css';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('appointments');
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -14,10 +13,6 @@ const Dashboard = () => {
     }, 1500);
     return () => clearTimeout(timer);
   }, []);
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!isSidebarOpen);
-  };
 
   // Mock data
   const upcomingAppointments = [
@@ -41,13 +36,10 @@ const Dashboard = () => {
   }
 
   return (
-    <div className={`dashboard-container ${isSidebarOpen ? '' : 'sidebar-collapsed'}`}>
+    <div className="dashboard-container">
       <div className="sidebar">
         <div className="sidebar-header">
           <h2 className="logo">CuraSphere</h2>
-          <button className="toggle-sidebar" onClick={toggleSidebar}>
-            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
         </div>
         <div className="sidebar-content">
           <div className="user-profile">
