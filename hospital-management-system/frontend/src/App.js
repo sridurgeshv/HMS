@@ -12,16 +12,15 @@ import NurseRegister from './pages/nurse/NurseRegister';
 import AdminRegister from './pages/admin/AdminRegister';
 import PendingApproval from './pages/PendingApproval';
 import PatientDashboard from './pages/patient/Dashboard';
+import Appointments from './pages/patient/Appointments';
+import MedicalHistory from './pages/patient/MedicalHistory';
+import Medications from './pages/patient/Medications';
+import Profile from './pages/patient/Profile';
 import DoctorDashboard from './pages/doctor/Dashboard';
 import NurseDashboard from './pages/nurse/Dashboard';
 import AdminDashboard from './pages/admin/Dashboard';
 
 /*
-// Patient pages
-import PatientAppointments from './pages/patient/Appointments';
-import PatientMedications from './pages/patient/Medications';
-import PatientProfile from './pages/patient/Profile';
-
 // Doctor pages
 
 import DoctorAppointments from './pages/doctor/Appointments';
@@ -50,15 +49,14 @@ function App() {
           <Route path="/register/admin" element={<AdminRegister />} />
           <Route path="/pending-approval" element={<PendingApproval />} />
           <Route path="/patient/dashboard" element={<PatientDashboard />} />
+          <Route path="/patient/appointments" element={<Appointments />} />
+          <Route path="/patient/medical-history" element={<MedicalHistory />} />
+          <Route path="/patient/medications" element={<Medications />} />
+          <Route path="/patient/profile" element={<Profile />} />
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
           <Route path="/nurse/dashboard" element={<NurseDashboard />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
-{/*}          
-          {/* Patient routes 
-          <Route path="/patient/appointments" element={<PatientAppointments />} />
-          <Route path="/patient/medications" element={<PatientMedications />} />
-          <Route path="/patient/profile" element={<PatientProfile />} />
-          
+{/*}                 
           {/* Doctor routes 
           
           <Route path="/doctor/appointments" element={<DoctorAppointments />} />
