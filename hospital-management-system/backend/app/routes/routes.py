@@ -179,3 +179,66 @@ def reject_registration(user_id: int, db: Session = Depends(get_db)):
     db.refresh(db_user)
 
     return {"message": "User rejected successfully"}
+
+ # Route to fetch doctors based on department
+@router.get("/doctors/{department}")
+def get_doctors_by_department(department: str, db: Session = Depends(get_db)):
+    doctors = db.query(User).filter(
+        User.role == "doctor",
+        User.specialization.ilike(f"%{department}%"), # Case insensitive match
+        User.status == "approved"
+    ).all()
+    return doctors
+
+@router.post("/book-appointment/")
+def book_appointment(appointment: AppointmentCreate, db: Session = Depends(get_db)):
+    if appointment.doctor_name and appointment.doctor_name != "no-doctor":  
+        assigned_doctor = appointment.doctor_name
+    else:
+        # Query for an available doctor
+        doctor = db.query(User).filter(
+            User.role == "doctor",
+            User.specialization == appointment.department,
+            User.status == "approved"
+        ).first()
+
+        assigned_doctor = doctor.full_name if doctor else None  # Ensure `None` is stored properly
+
+    # Create a new appointment record
+    new_appointment = Appointment(
+        patient_id=appointment.patient_id,
+        doctor_name=assigned_doctor if assigned_doctor else None,  # Store as `NULL` in DB
+        department=appointment.department,
+        date=appointment.date,
+        time=appointment.time,
+        reason=appointment.reason
+    )
+
+    db.add(new_appointment)
+    db.commit()
+    db.refresh(new_appointment)
+
+    return {
+        "message": "Appointment booked successfully",
+        "doctor": new_appointment.doctor_name if new_appointment.doctor_name else "Doctor will be assigned when available"
+    }
+
+@router.get("/appointments/{patient_id}")
+def get_all_appointments(patient_id: int, db: Session = Depends(get_db)):
+    appointments = db.query(Appointment).filter(
+        Appointment.patient_id == patient_id
+    ).order_by(Appointment.date.desc()).all()
+
+    return appointments if appointments else []  # Ensure empty list if no data
+
+@router.delete("/cancel-appointment/{appointment_id}")
+def cancel_appointment(appointment_id: int, db: Session = Depends(get_db)):
+    appointment = db.query(Appointment).filter(Appointment.id == appointment_id).first()
+    
+    if not appointment:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+    
+    db.delete(appointment)
+    db.commit()
+
+    return {"message": "Appointment cancelled successfully"}

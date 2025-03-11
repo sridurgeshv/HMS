@@ -38,5 +38,13 @@ class AdminCreate(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
-    
+
+class AppointmentCreate(BaseModel):
+    patient_id: int
+    doctor_name: Optional[str] = None  # ✅ Now allows None
+    department: str
+    date: datetime
+    time: str
+    reason: str
+
     
