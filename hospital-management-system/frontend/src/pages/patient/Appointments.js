@@ -11,6 +11,7 @@ const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [departments] = useState(["Cardiology", "Dermatology", "Neurology", "Orthopedics"]);
   const [doctors, setDoctors] = useState([]);
+  const [profile, setProfile] = useState(null);
   const [formData, setFormData] = useState({
     department: '',
     doctor: '',
@@ -19,12 +20,37 @@ const Appointments = () => {
     reason: ''
   });
   const location = useLocation();
+  
+  // Assuming username is stored in local storage after signup
+  const username = localStorage.getItem("username");
 
   useEffect(() => {
-    if (patientId) {
-      fetchAppointments();
+    const loadData = async () => {
+      if (patientId) {
+        await fetchAppointments();
+      }
+      
+      if (username) {
+        await fetchProfile();
+      }
+      
+      setIsLoading(false);
+    };
+    
+    loadData();
+  }, [patientId, username]);
+
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/user-profile/${username}`);
+      if (!response.ok) throw new Error("Failed to fetch profile data");
+      
+      const data = await response.json();
+      setProfile(data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
     }
-  }, [patientId]);
+  };
 
   const fetchAppointments = async () => {
     try {
@@ -39,8 +65,6 @@ const Appointments = () => {
     } catch (error) {
       console.error('Error fetching appointments:', error);
       setAppointments([]); // Set empty array on error
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -136,10 +160,10 @@ const Appointments = () => {
         </div>
         <div className="sidebar-content">
           <div className="user-profile">
-            <div className="avatar">JD</div>
+            <div className="avatar">{profile ? profile.full_name[0] : username ? username[0] : "JD"}</div>
             <div className="user-info">
-              <h3>John Doe</h3>
-              <p>Patient ID: 12345678</p>
+              <h3>{profile ? profile.full_name : "John Doe"}</h3>
+              <p>Patient ID: {profile ? profile.patient_id : patientId || "12345678"}</p>
             </div>
           </div>
           <nav className="sidebar-menu">

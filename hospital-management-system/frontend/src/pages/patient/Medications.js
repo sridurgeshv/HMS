@@ -12,7 +12,11 @@ const Medications = () => {
   const [prompt, setPrompt] = useState("");
   const [aiResponse, setAiResponse] = useState("");
   const [doctorResponse, setDoctorResponse] = useState("");
+  const [profile, setProfile] = useState(null);
   const location = useLocation();
+  
+  // Assuming username is stored in local storage after signup
+  const username = localStorage.getItem("username");
 
   // Fetch medications when component loads
   const fetchMedications = async () => {
@@ -28,10 +32,26 @@ const Medications = () => {
     }
   };
 
-  // Fetch medications when component mounts or patientId changes
+  // Fetch profile data
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/user-profile/${username}`);
+      if (!response.ok) throw new Error("Failed to fetch profile data");
+      
+      const data = await response.json();
+      setProfile(data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
+
+  // Fetch medications and profile when component mounts
   useEffect(() => {
     fetchMedications();
-  }, [patientId]);
+    if (username) {
+      fetchProfile();
+    }
+  }, [patientId, username]);
 
   // Function to add a new medication
   const addMedication = async () => {
@@ -100,10 +120,10 @@ const Medications = () => {
         </div>
         <div className="sidebar-content">
           <div className="user-profile">
-            <div className="avatar">JD</div>
+            <div className="avatar">{profile ? profile.full_name[0] : username ? username[0] : "JD"}</div>
             <div className="user-info">
-              <h3>John Doe</h3>
-              <p>Patient ID: 12345678</p>
+              <h3>{profile ? profile.full_name : "John Doe"}</h3>
+              <p>Patient ID: {profile ? profile.patient_id : patientId || "12345678"}</p>
             </div>
           </div>
           <nav className="sidebar-menu">
