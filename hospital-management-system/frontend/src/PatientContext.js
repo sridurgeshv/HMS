@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
 
-export const PatientContext = createContext();
+export const PatientContext = createContext(null);
 
 export const PatientProvider = ({ children }) => {
   const [patientId, setPatientId] = useState(null);

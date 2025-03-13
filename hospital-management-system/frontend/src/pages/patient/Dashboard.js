@@ -1,19 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, FileText, User, Pill, Activity, Bell } from 'lucide-react';
+import React, { useState, useEffect, useContext } from 'react';
+import { Calendar, FileText, User, Pill, Activity, Bell, Clock } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import axios from 'axios';
+import { PatientContext } from "../../PatientContext";
 import './Dashboard.css';
 
 const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const [appointments, setAppointments] = useState([]);
+  const context = useContext(PatientContext);
+  const patientId = context?.patientId || null;
   const location = useLocation();
   
   useEffect(() => {
-    // Simulate data loading
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+    // Fetch the patient's data
+    const loadData = async () => {
+      if (patientId) {
+        await fetchAppointments();
+      }
+      
+      // Simulate other data loading
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+    };
+    
+    loadData();
+  }, [patientId]);
+
+  const fetchAppointments = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8000/appointments/${patientId}`);
+      if (Array.isArray(response.data)) {
+        setAppointments(response.data);
+      } else {
+        setAppointments([]);
+      }
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      setAppointments([]);
+    }
+  };
 
   const getActiveTab = () => {
     const path = location.pathname;
@@ -26,12 +53,16 @@ const Dashboard = () => {
 
   const activeTab = getActiveTab();
 
-  // Mock data
-  const stats = [
-    { title: "Upcoming Appointments", value: "2", icon: <Calendar size={24} /> },
-    { title: "Medications", value: "3", icon: <Pill size={24} /> },
-    { title: "Recent Reports", value: "1", icon: <FileText size={24} /> }
-  ];
+  // Get stats based on fetched data
+  const getStats = () => {
+    return [
+      { title: "Upcoming Appointments", value: appointments.length.toString(), icon: <Calendar size={24} /> },
+      { title: "Medications", value: "3", icon: <Pill size={24} /> },
+      { title: "Recent Reports", value: "1", icon: <FileText size={24} /> }
+    ];
+  };
+
+  const stats = getStats();
 
   if (isLoading) {
     return (
@@ -105,52 +136,75 @@ const Dashboard = () => {
               <Bell size={24} />
             </div>
           </div>
-        </header>
+        </header> 
 
         <div className="dashboard-content">
-          {activeTab === 'dashboard' && (
-            <div className="tab-content dashboard-home fade-in">
-              <div className="content-header">
-                <h2><Activity size={20} /> Health Overview</h2>
-              </div>
-              
-              <div className="stats-cards">
-                {stats.map((stat, index) => (
-                  <div className="stat-card" key={index}>
-                    <div className="stat-icon">{stat.icon}</div>
-                    <div className="stat-details">
-                      <h3>{stat.title}</h3>
-                      <p className="stat-value">{stat.value}</p>
-                    </div>
+          <div className="tab-content dashboard-home fade-in">
+            <div className="content-header">
+              <h2><Activity size={20} /> Health Overview</h2>
+            </div>
+            
+            <div className="stats-cards">
+              {stats.map((stat, index) => (
+                <div className="stat-card" key={index}>
+                  <div className="stat-icon">{stat.icon}</div>
+                  <div className="stat-details">
+                    <h3>{stat.title}</h3>
+                    <p className="stat-value">{stat.value}</p>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
+            </div>
 
-              <div className="health-vitals mt-30">
-                <h3>Health Vitals</h3>
-                <div className="vitals-cards">
-                  <div className="vital-card">
-                    <Activity size={20} />
-                    <h4>Heart Rate</h4>
-                    <div className="vital-reading">72 <span>bpm</span></div>
-                    <div className="vital-chart"></div>
-                  </div>
-                  <div className="vital-card">
-                    <Activity size={20} />
-                    <h4>Blood Pressure</h4>
-                    <div className="vital-reading">120/80 <span>mmHg</span></div>
-                    <div className="vital-chart"></div>
-                  </div>
-                  <div className="vital-card">
-                    <Activity size={20} />
-                    <h4>Blood Sugar</h4>
-                    <div className="vital-reading">110 <span>mg/dL</span></div>
-                    <div className="vital-chart"></div>
-                  </div>
+            {/* Upcoming Appointments Section */}
+            {appointments.length > 0 && (
+              <div className="upcoming-appointments mt-30">
+                <h3>Upcoming Appointments</h3>
+                <div className="appointment-cards">
+                  {appointments.slice(0, 2).map(appointment => (
+                    <div className="appointment-card" key={appointment.id}>
+                      <div className="appointment-date">
+                        <div className="month">{new Date(appointment.date).toLocaleString('default', { month: 'short' })}</div>
+                        <div className="day">{new Date(appointment.date).getDate()}</div>
+                      </div>
+                      <div className="appointment-details">
+                        <h3>{appointment.doctor_name || "Doctor will be assigned"}</h3>
+                        <p className="specialty">{appointment.department}</p>
+                        <p className="time"><Clock size={14} /> {appointment.time}</p>
+                      </div>
+                      <Link to="/patient/appointments" className="view-more-link">
+                        Manage
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="health-vitals mt-30">
+              <h3>Health Vitals</h3>
+              <div className="vitals-cards">
+                <div className="vital-card">
+                  <Activity size={20} />
+                  <h4>Heart Rate</h4>
+                  <div className="vital-reading">72 <span>bpm</span></div>
+                  <div className="vital-chart"></div>
+                </div>
+                <div className="vital-card">
+                  <Activity size={20} />
+                  <h4>Blood Pressure</h4>
+                  <div className="vital-reading">120/80 <span>mmHg</span></div>
+                  <div className="vital-chart"></div>
+                </div>
+                <div className="vital-card">
+                  <Activity size={20} />
+                  <h4>Blood Sugar</h4>
+                  <div className="vital-reading">110 <span>mg/dL</span></div>
+                  <div className="vital-chart"></div>
                 </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </main>
     </div>
