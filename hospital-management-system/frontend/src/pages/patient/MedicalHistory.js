@@ -24,7 +24,7 @@ const MedicalHistory = () => {
     try {
       setLoading(true);
       const response = await fetch(`http://localhost:8000/medical-history/${patientId}`);
-      if (!response.ok) throw new Error("Failed to fetch medical history");
+      if (!response.ok) throw new Error("Medical History Unavailable");
 
       const data = await response.json();
       setHistory(data);
