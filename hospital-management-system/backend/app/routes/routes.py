@@ -8,9 +8,28 @@ from app.services.schemas import DoctorCreate
 from app.services.schemas import NurseCreate
 from app.services.schemas import AdminCreate
 from app.services.schemas import UserLogin
+from app.models.models import Appointment
+from app.services.schemas import AppointmentCreate
 from app.services.services import verify_password
+from app.models.models import MedicalHistory
+from app.services.schemas import MedicalHistoryCreate
+import uuid
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from app.services.schemas import AIRequest
+from app.models.models import Medication
+from app.services.schemas import MedicationCreate
 
 router = APIRouter()
+
+# Load the Microsoft Phi-4-mini-instruct model
+model_name = "microsoft/Phi-4-mini-instruct"
+model = AutoModelForCausalLM.from_pretrained(
+    model_name,
+    torch_dtype="auto",
+    device_map="auto",
+    trust_remote_code=True
+)
+tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 # Signup route
 @router.post("/signup/")
@@ -30,14 +49,31 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
         phone=user.phone,
         address=user.address,
         role="patient",  # Fixed role
-        status="approved"  # Patients are approved by default
+        status="approved"  ,# Patients are approved by default
+        patient_id=str(uuid.uuid4())[:8]  # Generate unique patient ID
     )
     
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
 
-    return {"message": "User created successfully", "username": db_user.username}
+    return {"message": "User created successfully", "username": db_user.username, "patient_id": db_user.patient_id}
+
+@router.get("/user-profile/{username}")
+def get_user_profile(username: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {
+        "username": user.username,
+        "full_name": user.full_name,
+        "date_of_birth": user.date_of_birth,
+        "email": user.email,
+        "phone": user.phone,
+        "address": user.address,
+        "patient_id": user.patient_id
+    }
 
 
 @router.post("/doctorsignup/")
@@ -146,7 +182,7 @@ def login_user(user: UserLogin, db: Session = Depends(get_db)):
     if db_user.role in ["doctor", "nurse"] and db_user.status != "approved":
         raise HTTPException(status_code=403, detail="Your account is pending approval")
     
-    return {"message": "Login successful", "role": db_user.role, "status": db_user.status}
+    return {"message": "Login successful", "role": db_user.role, "status": db_user.status , "patient_id": db_user.patient_id if db_user.role == "patient" else None}
 
 @router.get("/pending-registrations/")
 def get_pending_registrations(db: Session = Depends(get_db)):
@@ -179,6 +215,7 @@ def reject_registration(user_id: int, db: Session = Depends(get_db)):
     db.refresh(db_user)
 
     return {"message": "User rejected successfully"}
+
 
  # Route to fetch doctors based on department
 @router.get("/doctors/{department}")
@@ -224,7 +261,7 @@ def book_appointment(appointment: AppointmentCreate, db: Session = Depends(get_d
     }
 
 @router.get("/appointments/{patient_id}")
-def get_all_appointments(patient_id: int, db: Session = Depends(get_db)):
+def get_all_appointments(patient_id: str, db: Session = Depends(get_db)):
     appointments = db.query(Appointment).filter(
         Appointment.patient_id == patient_id
     ).order_by(Appointment.date.desc()).all()
@@ -242,3 +279,93 @@ def cancel_appointment(appointment_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return {"message": "Appointment cancelled successfully"}
+
+# Get medical history for a patient
+@router.get("/medical-history/{patient_id}")
+def get_medical_history(patient_id: str, db: Session = Depends(get_db)):
+    patient = db.query(User).filter(User.patient_id == patient_id, User.role == "patient").first()
+    
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    medical_records = db.query(MedicalHistory).filter(MedicalHistory.patient_id == patient_id).all()
+    
+    if not medical_records:
+        raise HTTPException(status_code=404, detail="No medical history found for this patient")
+    
+    return medical_records
+
+# Add new medical history entry for a patient
+@router.post("/medical-history/{patient_id}")
+def add_medical_history(patient_id: str, history: MedicalHistoryCreate, db: Session = Depends(get_db)):
+    patient = db.query(User).filter(User.patient_id == patient_id, User.role == "patient").first()
+
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    new_record = MedicalHistory(
+        id=str(uuid.uuid4()),  # Unique ID for each history entry
+        patient_id=patient_id,
+        visit_date=history.visit_date,
+        doctor_name=history.doctor_name,
+        notes=history.notes,
+        medications=history.medications
+    )
+
+    db.add(new_record)
+    db.commit()
+    db.refresh(new_record)
+
+    return {"message": "Medical history added successfully"}
+
+@router.post("/ai")
+async def ask_ai(request: AIRequest):
+    messages = [{"role": "user", "content": request.prompt}]
+    text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
+
+    generated_ids = model.generate(
+        **model_inputs,
+        max_new_tokens=100,
+        temperature=0.7,
+        do_sample=True
+    )
+
+    generated_ids = [output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)]
+    response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+
+    return {"response": response}
+
+# Add Medication Route
+@router.post("/medications/{patient_id}")
+def add_medication(patient_id: str, medication: MedicationCreate, db: Session = Depends(get_db)):
+    patient = db.query(User).filter(User.patient_id == patient_id, User.role == "patient").first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    # Check if the patient already has a medication record
+
+    new_med = Medication(
+        id=str(uuid.uuid4())[:8],
+        patient_id=patient_id,  # Generate unique ID
+        name=medication.name,
+        dosage=medication.dosage,
+        frequency=medication.frequency,
+        
+    )
+
+    db.add(new_med)
+    db.commit()
+    db.refresh(new_med)
+    return {"message": "Medication added successfully", "medication": new_med}
+
+# Fetch Medications for a Patient
+@router.get("/medications/{patient_id}")
+def get_medical_history(patient_id: str, db: Session = Depends(get_db)):
+    patient = db.query(User).filter(User.patient_id == patient_id, User.role == "patient").first()
+    
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    medical_records = db.query(Medication).filter(Medication.patient_id == patient_id).all()
+    
+    return medical_records if medical_records else []  # Return an empty list instead of 404

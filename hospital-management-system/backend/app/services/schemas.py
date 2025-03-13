@@ -1,4 +1,6 @@
 from pydantic import BaseModel, EmailStr
+from datetime import datetime, date
+from typing import Optional
 
 class UserCreate(BaseModel):
     username: str
@@ -39,12 +41,28 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
+
 class AppointmentCreate(BaseModel):
-    patient_id: int
+    patient_id: str
     doctor_name: Optional[str] = None  # ✅ Now allows None
     department: str
     date: datetime
     time: str
     reason: str
 
-    
+
+class MedicalHistoryCreate(BaseModel):
+    visit_date: date
+    doctor_name: str
+    notes: Optional[str]
+    medications: Optional[str]
+
+
+class AIRequest(BaseModel):
+    prompt: str
+
+
+class MedicationCreate(BaseModel):
+    name: str
+    dosage: str
+    frequency: str

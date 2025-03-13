@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String , ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String , ForeignKey, DateTime , Date, Text
 from app.utils.database import Base
-from sqlalchemy.orm import relationship
+
 
 class User(Base):
     __tablename__ = "users"
@@ -41,3 +41,23 @@ class Appointment(Base):
     date = Column(DateTime, nullable=False)
     time = Column(String, nullable=False)
     reason = Column(String, nullable=False)
+
+    
+class MedicalHistory(Base):
+    __tablename__ = "medical_history"
+
+    id = Column(String, primary_key=True, index=True)
+    patient_id = Column(String, ForeignKey("users.patient_id"), nullable=False)
+    visit_date = Column(Date, nullable=False)
+    doctor_name = Column(String, nullable=False)
+    notes = Column(Text, nullable=True)
+    medications = Column(Text, nullable=True)
+
+class Medication(Base):
+    __tablename__ = "medications"
+
+    id = Column(String, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    dosage = Column(String, nullable=False)
+    frequency= Column(String, nullable=False)
+    patient_id = Column(String, ForeignKey("users.patient_id"), nullable=False)
