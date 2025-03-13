@@ -45,7 +45,12 @@ const PatientRegister = () => {
   
     try {
       const response = await axios.post(`http://localhost:8000/signup/`, payload);
+
+      localStorage.setItem('patient_id', response.data.patient_id);
+      localStorage.setItem("username", response.data.username);
+
     alert(`Registration successful! Your Patient ID: ${response.data.patient_id}`);
+    
     } catch (error) {
       alert(error.response?.data?.detail || "Error signing up");
     }

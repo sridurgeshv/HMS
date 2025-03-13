@@ -23,7 +23,7 @@ const Login = () => {
     e.preventDefault();
     try {
     const response = await axios.post('http://localhost:8000/login/', formData);
-    const { role, status } = response.data;
+    const { role, status, patient_id  } = response.data;
 
     // Only block login if the user is a doctor or nurse with pending status
     if ((role === "doctor" || role === "nurse") && status !== "approved") {
@@ -31,12 +31,17 @@ const Login = () => {
       return;
     }
 
+     // Store patient_id in local storage if the user is a patient
+     if (role === "patient" && patient_id) {
+      localStorage.setItem('patient_id', patient_id);
+    }
+
     alert("Login successful!");
     
       // Redirect based on role
       switch (role) {
         case 'patient':
-          navigate('/dashboard/patient');
+          navigate('/patient/dashboard');
           break;
         case 'doctor':
           navigate('/dashboard/doctor');

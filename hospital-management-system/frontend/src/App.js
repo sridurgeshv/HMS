@@ -19,6 +19,7 @@ import Profile from './pages/patient/Profile';
 import DoctorDashboard from './pages/doctor/Dashboard';
 import NurseDashboard from './pages/nurse/Dashboard';
 import AdminDashboard from './pages/admin/Dashboard';
+import { PatientProvider } from "./PatientContext";
 
 /*
 // Doctor pages
@@ -49,10 +50,10 @@ function App() {
           <Route path="/register/admin" element={<AdminRegister />} />
           <Route path="/pending-approval" element={<PendingApproval />} />
           <Route path="/patient/dashboard" element={<PatientDashboard />} />
-          <Route path="/patient/appointments" element={<Appointments />} />
-          <Route path="/patient/medical-history" element={<MedicalHistory />} />
-          <Route path="/patient/medications" element={<Medications />} />
-          <Route path="/patient/profile" element={<Profile />} />
+          <Route path="/patient/appointments" element={<PatientProvider><Appointments /></PatientProvider>} />
+          <Route path="/patient/medical-history" element={<PatientProvider><MedicalHistory /></PatientProvider>} />
+          <Route path="/patient/medications" element={<PatientProvider><Medications /></PatientProvider>} />
+          <Route path="/patient/profile" element={<PatientProvider><Profile /></PatientProvider>} />
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
           <Route path="/nurse/dashboard" element={<NurseDashboard />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
