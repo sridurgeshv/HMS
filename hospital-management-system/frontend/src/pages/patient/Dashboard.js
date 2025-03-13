@@ -129,7 +129,7 @@ const Dashboard = () => {
 
       <main className="dashboard-main">
         <header className="main-header">
-          <h1>Patient Dashboard</h1>
+          <h1>Personal Health Dashboard</h1>
           <div className="header-actions">
             <div className="notification-bell">
               <span className="notification-dot"></span>
