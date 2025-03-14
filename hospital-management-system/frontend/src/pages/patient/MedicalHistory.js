@@ -9,6 +9,7 @@ const MedicalHistory = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [newEntry, setNewEntry] = useState({
     visit_date: "",
     doctor_name: "",
@@ -16,6 +17,7 @@ const MedicalHistory = () => {
     medications: "",
   });
   const location = useLocation();
+  const username = localStorage.getItem("username");
 
   // Fetch medical history function
   const fetchMedicalHistory = useCallback(async () => {
@@ -34,6 +36,23 @@ const MedicalHistory = () => {
       setLoading(false);
     }
   }, [patientId]);
+
+  // Fetch profile data
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/user-profile/${username}`);
+        if (!response.ok) throw new Error("Failed to fetch profile data");
+        
+        const data = await response.json();
+        setProfile(data);
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+      }
+    };
+
+    if (username) fetchProfile();
+  }, [username]);
 
   // Fetch data on mount and when patientId changes
   useEffect(() => {
@@ -81,10 +100,10 @@ const MedicalHistory = () => {
         </div>
         <div className="sidebar-content">
           <div className="user-profile">
-            <div className="avatar">JD</div>
+            <div className="avatar">{profile ? profile.full_name[0] : username ? username[0] : "U"}</div>
             <div className="user-info">
-              <h3>John Doe</h3>
-              <p>Patient ID: 12345678</p>
+              <h3>{profile ? profile.full_name : "Loading..."}</h3>
+              <p>Patient ID: {profile ? profile.patient_id : patientId || "..."}</p>
             </div>
           </div>
           <nav className="sidebar-menu">
