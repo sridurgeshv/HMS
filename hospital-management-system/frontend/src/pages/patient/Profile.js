@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Calendar, FileText, User, Pill, Activity, Bell } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Calendar, FileText, User, Pill, Activity, Bell, LogOut } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { PatientContext } from "../../PatientContext";
 import './Dashboard.css';
 
@@ -8,6 +8,7 @@ const Profile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
   
   // Assuming username is stored in local storage after signup
   const username = localStorage.getItem("username");
@@ -43,6 +44,15 @@ const Profile = () => {
   };
 
   const activeTab = getActiveTab();
+
+  const handleLogout = () => {
+    // Clear all local storage items
+    localStorage.removeItem('username');
+    localStorage.removeItem('patient_id');
+    
+    // Redirect to welcome page
+    navigate('/');
+  };
 
   return (
     <div className="dashboard-container">
@@ -94,6 +104,13 @@ const Profile = () => {
               <User size={20} />
               <span>Profile</span>
             </Link>
+            <button 
+              onClick={handleLogout}
+              className="menu-item logout-button"
+            >
+              <LogOut size={20} />
+              <span>Logout</span>
+            </button>
           </nav>
         </div>
       </div>

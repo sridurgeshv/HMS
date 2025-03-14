@@ -1073,3 +1073,40 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+.logout-button {
+  margin-top: auto;
+  color: #ff3b30;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.logout-button:hover {
+  background-color: black;
+  color: white;
+}
+
+.logout-button span {
+  margin-left: 12px;
+}
+
+/* Make the sidebar display flex and column to push logout to bottom */
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 70px); /* Adjust based on your sidebar header height */
+}
+
+.sidebar-menu {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
