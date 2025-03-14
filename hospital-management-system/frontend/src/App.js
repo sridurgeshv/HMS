@@ -17,6 +17,10 @@ import MedicalHistory from './pages/patient/MedicalHistory';
 import Medications from './pages/patient/Medications';
 import Profile from './pages/patient/Profile';
 import DoctorDashboard from './pages/doctor/Dashboard';
+import DoctorAppointments from './pages/doctor/Appointments';
+import DoctorPatients from './pages/doctor/Patients';
+import MedicalRecords from './pages/doctor/MedicalRecords';
+import DoctorProfile from './pages/doctor/Profile';
 import NurseDashboard from './pages/nurse/Dashboard';
 import AdminDashboard from './pages/admin/Dashboard';
 import { PatientProvider } from "./PatientContext";
@@ -55,6 +59,10 @@ function App() {
           <Route path="/patient/medications" element={<PatientProvider><Medications /></PatientProvider>} />
           <Route path="/patient/profile" element={<PatientProvider><Profile /></PatientProvider>} />
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+          <Route path="/doctor/appointments" element={<DoctorAppointments />} />
+          <Route path="/doctor/medical-records" element={<MedicalRecords />} />
+          <Route path="/doctor/Patients" element={<DoctorPatients />} />
+          <Route path="/doctor/profile" element={<DoctorProfile />} />
           <Route path="/nurse/dashboard" element={<NurseDashboard />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
 {/*}                 
