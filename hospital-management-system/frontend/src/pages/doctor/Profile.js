@@ -118,128 +118,160 @@ const Profile = () => {
         
         {/* Profile Content */}
         <div className="dashboard-content">
-          <div className="profile-header">
-            <div className="profile-image-large">
-              <img src="/api/placeholder/150/150" alt="Doctor profile" />
-            </div>
-            <div className="profile-title">
-              <h1>{doctorProfile.name}</h1>
-              <p>{doctorProfile.specialty}</p>
-            </div>
-            <button className="edit-profile-btn">
-              <Edit size={18} />
-              <span>Edit Profile</span>
-            </button>
-          </div>
-          
-          <div className="profile-tabs">
-            <button 
-              className={`tab-btn ${activeTab === 'personal' ? 'active' : ''}`}
-              onClick={() => setActiveTab('personal')}
-            >
-              Personal Information
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'education' ? 'active' : ''}`}
-              onClick={() => setActiveTab('education')}
-            >
-              Education & Experience
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'schedule' ? 'active' : ''}`}
-              onClick={() => setActiveTab('schedule')}
-            >
-              Schedule
-            </button>
-          </div>
-          
-          <div className="profile-content">
-            {activeTab === 'personal' && (
-              <div className="personal-info">
-                <div className="info-card">
-                  <div className="info-item">
-                    <Mail size={20} />
-                    <div className="info-details">
-                      <label>Email</label>
-                      <p>{doctorProfile.email}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="info-item">
-                    <Phone size={20} />
-                    <div className="info-details">
-                      <label>Phone</label>
-                      <p>{doctorProfile.phone}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="info-item">
-                    <MapPin size={20} />
-                    <div className="info-details">
-                      <label>Address</label>
-                      <p>{doctorProfile.address}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="info-item">
-                    <CalendarIcon size={20} />
-                    <div className="info-details">
-                      <label>Date of Birth</label>
-                      <p>{new Date(doctorProfile.dob).toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="info-item">
-                    <User size={20} />
-                    <div className="info-details">
-                      <label>Gender</label>
-                      <p>{doctorProfile.gender}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="info-item">
-                    <Award size={20} />
-                    <div className="info-details">
-                      <label>License Number</label>
-                      <p>{doctorProfile.licenseNumber}</p>
-                    </div>
-                  </div>
+          <div className="profile-container">
+            <div className="profile-card">
+              <div className="profile-card-header">
+                <div className="profile-pic">
+                  <img src="/api/placeholder/150/150" alt="Doctor profile" />
+                </div>
+                <h2 className="profile-name">{doctorProfile.name}</h2>
+                <p className="profile-title">{doctorProfile.specialty}</p>
+              </div>
+              
+              <div className="profile-detail">
+                <div className="profile-detail-icon">
+                  <Mail size={16} />
+                </div>
+                <div className="profile-detail-content">
+                  <span className="profile-detail-label">Email</span>
+                  <p className="profile-detail-value">{doctorProfile.email}</p>
                 </div>
               </div>
-            )}
+              
+              <div className="profile-detail">
+                <div className="profile-detail-icon">
+                  <Phone size={16} />
+                </div>
+                <div className="profile-detail-content">
+                  <span className="profile-detail-label">Phone</span>
+                  <p className="profile-detail-value">{doctorProfile.phone}</p>
+                </div>
+              </div>
+              
+              <div className="profile-detail">
+                <div className="profile-detail-icon">
+                  <Award size={16} />
+                </div>
+                <div className="profile-detail-content">
+                  <span className="profile-detail-label">License</span>
+                  <p className="profile-detail-value">{doctorProfile.licenseNumber}</p>
+                </div>
+              </div>
+            </div>
             
-            {activeTab === 'education' && (
-              <div className="education-info">
-                <div className="info-card">
-                  <h3>Education</h3>
-                  {doctorProfile.education.map((edu, index) => (
-                    <div className="education-item" key={index}>
-                      <div className="education-year">{edu.year}</div>
-                      <div className="education-details">
-                        <h4>{edu.degree}</h4>
-                        <p>{edu.university}</p>
+            <div className="profile-content">
+              <div className="tabs">
+                <div 
+                  className={`tab ${activeTab === 'personal' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('personal')}
+                >
+                  Personal Information
+                </div>
+                <div 
+                  className={`tab ${activeTab === 'education' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('education')}
+                >
+                  Education & Experience
+                </div>
+                <div 
+                  className={`tab ${activeTab === 'schedule' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('schedule')}
+                >
+                  Schedule
+                </div>
+              </div>
+              
+              <div className={`tab-content ${activeTab === 'personal' ? 'active' : ''}`}>
+                <div className="profile-section">
+                  <div className="profile-section-header">
+                    <h3 className="profile-section-title">Personal Details</h3>
+                    <button className="profile-edit-button">
+                      <Edit size={16} /> Edit
+                    </button>
+                  </div>
+                  
+                  <div className="profile-card">
+                    <div className="profile-detail">
+                      <div className="profile-detail-icon">
+                        <User size={16} />
+                      </div>
+                      <div className="profile-detail-content">
+                        <span className="profile-detail-label">Gender</span>
+                        <p className="profile-detail-value">{doctorProfile.gender}</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {activeTab === 'schedule' && (
-              <div className="schedule-info">
-                <div className="info-card">
-                  <h3>Working Hours</h3>
-                  <div className="schedule-grid">
-                    {Object.entries(doctorProfile.workHours).map(([day, hours]) => (
-                      <div className="schedule-item" key={day}>
-                        <div className="schedule-day">{day.charAt(0).toUpperCase() + day.slice(1)}</div>
-                        <div className="schedule-hours">{hours}</div>
+                    
+                    <div className="profile-detail">
+                      <div className="profile-detail-icon">
+                        <CalendarIcon size={16} />
                       </div>
-                    ))}
+                      <div className="profile-detail-content">
+                        <span className="profile-detail-label">Date of Birth</span>
+                        <p className="profile-detail-value">{new Date(doctorProfile.dob).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="profile-detail">
+                      <div className="profile-detail-icon">
+                        <MapPin size={16} />
+                      </div>
+                      <div className="profile-detail-content">
+                        <span className="profile-detail-label">Address</span>
+                        <p className="profile-detail-value">{doctorProfile.address}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            )}
+              
+              <div className={`tab-content ${activeTab === 'education' ? 'active' : ''}`}>
+                <div className="profile-section">
+                  <div className="profile-section-header">
+                    <h3 className="profile-section-title">Education</h3>
+                    <button className="profile-edit-button">
+                      <Edit size={16} /> Edit
+                    </button>
+                  </div>
+                  
+                  <div className="profile-card">
+                    <div className="timeline">
+                      {doctorProfile.education.map((edu, index) => (
+                        <div className="timeline-item" key={index}>
+                          <div className="timeline-dot"></div>
+                          <div className="timeline-content">
+                            <div className="timeline-date">{edu.year}</div>
+                            <h4 className="timeline-title">{edu.degree}</h4>
+                            <p className="timeline-description">{edu.university}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className={`tab-content ${activeTab === 'schedule' ? 'active' : ''}`}>
+                <div className="profile-section">
+                  <div className="profile-section-header">
+                    <h3 className="profile-section-title">Working Hours</h3>
+                    <button className="profile-edit-button">
+                      <Edit size={16} /> Edit
+                    </button>
+                  </div>
+                  
+                  <div className="profile-card">
+                    <div className="schedule-grid">
+                      {Object.entries(doctorProfile.workHours).map(([day, hours]) => (
+                        <div className="schedule-item" key={day}>
+                          <div className="schedule-day">{day.charAt(0).toUpperCase() + day.slice(1)}</div>
+                          <div className="schedule-hours">{hours}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </main>

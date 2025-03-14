@@ -128,6 +128,41 @@ const MedicalRecords = () => {
             </div>
           </div>
           
+          <div className="cards-grid">
+            {records.map(record => (
+              <div className="card" key={record.id}>
+                <div className="card-header">
+                  <h3 className="card-title">{record.recordType}</h3>
+                  <span className={`card-badge ${record.status.toLowerCase()}`}>
+                    {record.status}
+                  </span>
+                </div>
+                <div className="card-body">
+                  <div className="card-detail">
+                    <span className="card-detail-label">Patient</span>
+                    <p className="card-detail-value">{record.patient}</p>
+                  </div>
+                  <div className="card-detail">
+                    <span className="card-detail-label">Date</span>
+                    <p className="card-detail-value">{new Date(record.date).toLocaleDateString()}</p>
+                  </div>
+                  <div className="card-detail">
+                    <span className="card-detail-label">Doctor</span>
+                    <p className="card-detail-value">{record.doctor}</p>
+                  </div>
+                </div>
+                <div className="card-footer">
+                  <button className="action-btn" title="View Record">
+                    <Eye size={16} />
+                  </button>
+                  <button className="action-btn" title="Download">
+                    <Download size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          
           <div className="records-table-container">
             <table className="records-table">
               <thead>
