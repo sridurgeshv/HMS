@@ -3,18 +3,18 @@ import { Calendar, FileText, User, Pill, Activity, Bell, Clock } from 'lucide-re
 import { Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { PatientContext } from "../../PatientContext";
+import { UserContext } from "../../UserContext";
 import './Dashboard.css';
 
 const Dashboard = () => {
+  const { username } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(true);
   const [appointments, setAppointments] = useState([]);
   const [profile, setProfile] = useState(null);
   const context = useContext(PatientContext);
   const patientId = context?.patientId || null;
   const location = useLocation();
-  
-  // Assuming username is stored in local storage after signup
-  const username = localStorage.getItem("username");
+
   
   useEffect(() => {
     // Fetch the patient's data

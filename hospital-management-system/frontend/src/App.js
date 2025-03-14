@@ -24,6 +24,7 @@ import DoctorProfile from './pages/doctor/Profile';
 import NurseDashboard from './pages/nurse/Dashboard';
 import AdminDashboard from './pages/admin/Dashboard';
 import { PatientProvider } from "./PatientContext";
+import {UserProvider} from "./UserContext";
 
 /*
 // Doctor pages
@@ -57,7 +58,7 @@ function App() {
           <Route path="/patient/appointments" element={<PatientProvider><Appointments /></PatientProvider>} />
           <Route path="/patient/medical-history" element={<PatientProvider><MedicalHistory /></PatientProvider>} />
           <Route path="/patient/medications" element={<PatientProvider><Medications /></PatientProvider>} />
-          <Route path="/patient/profile" element={<PatientProvider><Profile /></PatientProvider>} />
+          <Route path="/patient/profile" element={<PatientProvider><UserProvider><Profile /></UserProvider></PatientProvider>} />
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
           <Route path="/doctor/appointments" element={<DoctorAppointments />} />
           <Route path="/doctor/medical-records" element={<MedicalRecords />} />

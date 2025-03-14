@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from app.utils.database import get_db
 from app.models.models import User
@@ -30,6 +31,20 @@ model = AutoModelForCausalLM.from_pretrained(
     trust_remote_code=True
 )
 tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+# Initialize FastAPI App
+app = FastAPI()
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
+
+app.include_router(router)
 
 # Signup route
 @router.post("/signup/")
@@ -182,7 +197,7 @@ def login_user(user: UserLogin, db: Session = Depends(get_db)):
     if db_user.role in ["doctor", "nurse"] and db_user.status != "approved":
         raise HTTPException(status_code=403, detail="Your account is pending approval")
     
-    return {"message": "Login successful", "role": db_user.role, "status": db_user.status , "patient_id": db_user.patient_id if db_user.role == "patient" else None}
+    return {"message": "Login successful", "role": db_user.role, "status": db_user.status , "patient_id": db_user.patient_id if db_user.role == "patient" else None, "username": db_user.username if db_user.role == "patient" else None }
 
 @router.get("/pending-registrations/")
 def get_pending_registrations(db: Session = Depends(get_db)):

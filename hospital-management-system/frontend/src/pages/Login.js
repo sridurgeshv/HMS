@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -23,7 +24,7 @@ const Login = () => {
     e.preventDefault();
     try {
     const response = await axios.post('http://localhost:8000/login/', formData);
-    const { role, status, patient_id  } = response.data;
+    const { role, status, patient_id , username  } = response.data;
 
     // Only block login if the user is a doctor or nurse with pending status
     if ((role === "doctor" || role === "nurse") && status !== "approved") {
@@ -34,6 +35,11 @@ const Login = () => {
      // Store patient_id in local storage if the user is a patient
      if (role === "patient" && patient_id) {
       localStorage.setItem('patient_id', patient_id);
+    }
+
+     // Store username in local storage if the user is a patient
+     if (role === "patient" && username) {
+      localStorage.setItem('username', username);
     }
 
     alert("Login successful!");

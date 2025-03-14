@@ -3,9 +3,11 @@ import { Calendar, Clock, PlusCircle, Activity, FileText, User, Pill, Bell } fro
 import { Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { PatientContext } from "../../PatientContext";
+import { UserContext } from "../../UserContext";
 import './Dashboard.css';
 
 const Appointments = () => {
+  const { username } = useContext(UserContext);
   const { patientId } = useContext(PatientContext);
   const [isLoading, setIsLoading] = useState(true);
   const [appointments, setAppointments] = useState([]);
@@ -22,7 +24,7 @@ const Appointments = () => {
   const location = useLocation();
   
   // Assuming username is stored in local storage after signup
-  const username = localStorage.getItem("username");
+  
 
   useEffect(() => {
     const loadData = async () => {

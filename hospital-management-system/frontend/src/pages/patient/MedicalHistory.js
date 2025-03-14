@@ -2,9 +2,12 @@ import React, { useState, useEffect, useContext, useCallback } from "react";
 import { Calendar, FileText, User, Pill, Activity, Bell } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { PatientContext } from "../../PatientContext";
+import { UserContext } from "../../UserContext";
+
 import './Dashboard.css';
 
 const MedicalHistory = () => {
+   const { username } = useContext(UserContext);
   const { patientId } = useContext(PatientContext);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +20,6 @@ const MedicalHistory = () => {
     medications: "",
   });
   const location = useLocation();
-  const username = localStorage.getItem("username");
 
   // Fetch medical history function
   const fetchMedicalHistory = useCallback(async () => {

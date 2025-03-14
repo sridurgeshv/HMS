@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Calendar, FileText, User, Pill, Activity, Bell, LogOut } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { UserContext } from "../../UserContext";
 import { PatientContext } from "../../PatientContext";
 import './Dashboard.css';
 
 const Profile = () => {
+  const { username } = useContext(UserContext);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   
   // Assuming username is stored in local storage after signup
-  const username = localStorage.getItem("username");
   const context = useContext(PatientContext);
   const patientId = context?.patientId || null;
   const location = useLocation();
