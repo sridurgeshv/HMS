@@ -6,7 +6,7 @@ import { PatientContext } from "../../PatientContext";
 import './Dashboard.css';
 
 const Profile = () => {
-  const { username } = useContext(UserContext);
+  const { username } = useContext(UserContext) || {};
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

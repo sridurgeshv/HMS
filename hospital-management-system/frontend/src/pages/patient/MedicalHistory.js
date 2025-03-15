@@ -7,7 +7,7 @@ import { UserContext } from "../../UserContext";
 import './Dashboard.css';
 
 const MedicalHistory = () => {
-   const { username } = useContext(UserContext);
+   const { username } = useContext(UserContext) || {};
   const { patientId } = useContext(PatientContext);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);

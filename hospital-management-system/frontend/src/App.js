@@ -22,16 +22,15 @@ import DoctorPatients from './pages/doctor/Patients';
 import MedicalRecords from './pages/doctor/MedicalRecords';
 import DoctorProfile from './pages/doctor/Profile';
 import NurseDashboard from './pages/nurse/Dashboard';
+import PatientNotes from './pages/nurse/PatientNotes';
+import DoctorAssignments from './pages/nurse/DoctorAssignments';
+import MedicationTracking from './pages/nurse/MedicationTracking';
+import NurseProfile from './pages/nurse/Profile';
 import AdminDashboard from './pages/admin/Dashboard';
 import { PatientProvider } from "./PatientContext";
 import {UserProvider} from "./UserContext";
 
 /*
-// Doctor pages
-
-import DoctorAppointments from './pages/doctor/Appointments';
-import DoctorPatients from './pages/doctor/Patients';
-
 // Nurse pages
 
 import NurseAppointments from './pages/nurse/Appointments';
@@ -65,16 +64,12 @@ function App() {
           <Route path="/doctor/Patients" element={<DoctorPatients />} />
           <Route path="/doctor/profile" element={<DoctorProfile />} />
           <Route path="/nurse/dashboard" element={<NurseDashboard />} />
+          <Route path="/nurse/patient-notes" element={<PatientNotes />} />
+          <Route path="/nurse/doctor-assignments" element={<DoctorAssignments />} />
+          <Route path="/nurse/medication-tracking" element={<MedicationTracking />} />
+          <Route path="/nurse/profile" element={<NurseProfile />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
-{/*}                 
-          {/* Doctor routes 
-          
-          <Route path="/doctor/appointments" element={<DoctorAppointments />} />
-          <Route path="/doctor/patients" element={<DoctorPatients />} />
-          
-          {/* Nurse routes 
-          
-          <Route path="/nurse/appointments" element={<NurseAppointments />} />
+{/*}                           
           
           {/* Admin routes 
           <Route path="/admin/dashboard" element={<AdminDashboard />} />

@@ -5,7 +5,7 @@ import { Link, useLocation } from "react-router-dom";
 import { UserContext } from "../../UserContext";
 
 const Medications = () => {
-  const { username } = useContext(UserContext);
+  const { username } = useContext(UserContext) || {};
   const { patientId } = useContext(PatientContext); // Get patient ID
   const [medications, setMedications] = useState([]);
   const [medName, setMedName] = useState("");

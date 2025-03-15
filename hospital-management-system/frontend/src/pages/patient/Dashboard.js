@@ -7,7 +7,7 @@ import { UserContext } from "../../UserContext";
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { username } = useContext(UserContext);
+  const { username } = useContext(UserContext) || {};
   const [isLoading, setIsLoading] = useState(true);
   const [appointments, setAppointments] = useState([]);
   const [profile, setProfile] = useState(null);
