@@ -5,7 +5,6 @@ import {
   Clock, 
   Users, 
   FileText, 
-  Pill,  
   MessageSquare,
   Bell, 
   Search,
@@ -20,24 +19,21 @@ const DoctorDashboard = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedView, setSelectedView] = useState('daily');
   
-  // Sample data
+  // Minimal sample data
   const appointments = [
     { id: 1, patient: 'Sarah Johnson', time: '09:00 AM', status: 'Confirmed', type: 'Check-up' },
     { id: 2, patient: 'Michael Brown', time: '10:30 AM', status: 'Confirmed', type: 'Follow-up' },
-    { id: 3, patient: 'Emily Davis', time: '01:00 PM', status: 'Confirmed', type: 'Consultation' },
-    { id: 4, patient: 'James Wilson', time: '03:30 PM', status: 'Tentative', type: 'Follow-up' },
+    { id: 3, patient: 'Emily Davis', time: '01:00 PM', status: 'Pending', type: 'Consultation' },
   ];
   
   const recentPatients = [
     { id: 101, name: 'Sarah Johnson', age: 42, lastVisit: '2025-03-01', condition: 'Hypertension' },
     { id: 102, name: 'Michael Brown', age: 35, lastVisit: '2025-03-03', condition: 'Diabetes' },
-    { id: 103, name: 'Emily Davis', age: 28, lastVisit: '2025-02-28', condition: 'Asthma' },
   ];
   
   const notifications = [
     { id: 1, message: 'New test results for Sarah Johnson', time: '30 minutes ago' },
     { id: 2, message: 'Appointment request from David Miller', time: '2 hours ago' },
-    { id: 3, message: 'Nurse consultation needed for Room 204', time: '3 hours ago' },
   ];
   
   // Update time every minute
@@ -64,7 +60,7 @@ const DoctorDashboard = () => {
   
   return (
     <div className="dashboard-container">
-      {/* Sidebar */}
+      {/* Sidebar - Keeping original */}
       <aside className={`sidebar ${isMenuOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-header">
           <h2 className="logo">Curasphere</h2>
@@ -100,7 +96,7 @@ const DoctorDashboard = () => {
             <FileText size={20} />
             <span>Medical Records</span>
           </Link>
-          <Link to="/doctor/messages" className="nav-item">
+          <Link to="/doctor/profile" className="nav-item">
             <User size={20} />
             <span>Profile</span>
           </Link>
@@ -147,7 +143,7 @@ const DoctorDashboard = () => {
                   <Clock size={24} />
                 </div>
                 <div className="stat-info">
-                  <h3>4</h3>
+                  <h3>{appointments.length}</h3>
                   <p>Today's Appointments</p>
                 </div>
               </div>
@@ -157,7 +153,7 @@ const DoctorDashboard = () => {
                   <Users size={24} />
                 </div>
                 <div className="stat-info">
-                  <h3>12</h3>
+                  <h3>{recentPatients.length}</h3>
                   <p>Active Patients</p>
                 </div>
               </div>
