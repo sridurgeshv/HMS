@@ -7,8 +7,9 @@ import { UserContext } from "../../UserContext";
 import './Dashboard.css';
 
 const Appointments = () => {
-  const { username } = useContext(UserContext);
-  const { patientId } = useContext(PatientContext);
+  const { username } = useContext(UserContext) || {};
+  const patientId = context?.patientId || null;
+  const context = useContext(PatientContext);
   const [isLoading, setIsLoading] = useState(true);
   const [appointments, setAppointments] = useState([]);
   const [departments] = useState(["Cardiology", "Dermatology", "Neurology", "Orthopedics"]);

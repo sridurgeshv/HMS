@@ -6,7 +6,6 @@ export const UserProvider = ({ children }) => {
   const [username, setUsername] = useState(null);
 
   useEffect(() => {
-    // Retrieve username from localStorage when component mounts
     const storedUsername = localStorage.getItem("username");
     if (storedUsername) {
       setUsername(storedUsername);
