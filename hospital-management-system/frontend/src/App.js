@@ -27,8 +27,10 @@ import DoctorAssignments from './pages/nurse/DoctorAssignments';
 import MedicationTracking from './pages/nurse/MedicationTracking';
 import NurseProfile from './pages/nurse/Profile';
 import AdminDashboard from './pages/admin/Dashboard';
+
 import { PatientProvider } from "./PatientContext";
-import {UserProvider} from "./UserContext";
+import { UserProvider } from "./UserContext";
+
 
 /*
 // Nurse pages
@@ -42,6 +44,8 @@ import AdminDepartments from './pages/admin/Departments';
 */
 function App() {
   return (
+    <UserProvider> {/* Wrap the entire app with UserProvider */}
+      <PatientProvider> {/* Wrap the entire app with PatientProvider */}
     <Router>
       <div className="App">
         <Routes>
@@ -53,11 +57,11 @@ function App() {
           <Route path="/register/nurse" element={<NurseRegister />} />
           <Route path="/register/admin" element={<AdminRegister />} />
           <Route path="/pending-approval" element={<PendingApproval />} />
-          <Route path="/patient/dashboard" element={<PatientProvider><PatientDashboard /></PatientProvider>} />
-          <Route path="/patient/appointments" element={<PatientProvider><Appointments /></PatientProvider>} />
-          <Route path="/patient/medical-history" element={<PatientProvider><MedicalHistory /></PatientProvider>} />
-          <Route path="/patient/medications" element={<PatientProvider><Medications /></PatientProvider>} />
-          <Route path="/patient/profile" element={<PatientProvider><UserProvider><Profile /></UserProvider></PatientProvider>} />
+          <Route path="/patient/dashboard" element={<PatientDashboard />} />
+          <Route path="/patient/appointments" element={<Appointments />} />
+          <Route path="/patient/medical-history" element={<MedicalHistory />} />
+          <Route path="/patient/medications" element={<Medications />} />
+          <Route path="/patient/profile" element={<Profile />} />
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
           <Route path="/doctor/appointments" element={<DoctorAppointments />} />
           <Route path="/doctor/medical-records" element={<MedicalRecords />} />
@@ -76,8 +80,10 @@ function App() {
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/admin/departments" element={<AdminDepartments />} /> */}
         </Routes>
-      </div>
-    </Router>
+       </div>
+      </Router>
+    </PatientProvider>
+   </UserProvider>
   );
 }
 

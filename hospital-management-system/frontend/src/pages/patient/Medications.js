@@ -6,7 +6,8 @@ import { UserContext } from "../../UserContext";
 
 const Medications = () => {
   const { username } = useContext(UserContext) || {};
-  const { patientId } = useContext(PatientContext); // Get patient ID
+  const context = useContext(PatientContext);
+  const patientId = context?.patientId || null;
   const [medications, setMedications] = useState([]);
   const [medName, setMedName] = useState("");
   const [dosage, setDosage] = useState("");
@@ -15,6 +16,7 @@ const Medications = () => {
   const [aiResponse, setAiResponse] = useState("");
   const [doctorResponse, setDoctorResponse] = useState("");
   const [profile, setProfile] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(true); // Add loading state for profile
   const location = useLocation();
   
   // Fetch medications when component loads
@@ -41,6 +43,8 @@ const Medications = () => {
       setProfile(data);
     } catch (error) {
       console.error('Error fetching profile:', error);
+    } finally {
+      setLoadingProfile(false); // Set loading to false after fetching
     }
   };
 
@@ -121,8 +125,8 @@ const Medications = () => {
           <div className="user-profile">
             <div className="avatar">{profile ? profile.full_name[0] : username ? username[0] : "JD"}</div>
             <div className="user-info">
-              <h3>{profile ? profile.full_name : "John Doe"}</h3>
-              <p>Patient ID: {profile ? profile.patient_id : patientId || "12345678"}</p>
+              <h3>{profile ? profile.full_name : loadingProfile ? "Loading..." : "John Doe"}</h3> {/* Use loading state */}
+              <p>Patient ID: {profile ? profile.patient_id : patientId || "..."}</p>
             </div>
           </div>
           <nav className="sidebar-menu">
