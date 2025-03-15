@@ -7,9 +7,9 @@ import { UserContext } from "../../UserContext";
 import './Dashboard.css';
 
 const Appointments = () => {
+  const context = useContext(PatientContext); // Move this line above
   const { username } = useContext(UserContext) || {};
-  const patientId = context?.patientId || null;
-  const context = useContext(PatientContext);
+  const patientId = context?.patientId || null; // Now this will work
   const [isLoading, setIsLoading] = useState(true);
   const [appointments, setAppointments] = useState([]);
   const [departments] = useState(["Cardiology", "Dermatology", "Neurology", "Orthopedics"]);
@@ -24,9 +24,6 @@ const Appointments = () => {
   });
   const location = useLocation();
   
-  // Assuming username is stored in local storage after signup
-  
-
   useEffect(() => {
     const loadData = async () => {
       if (patientId) {

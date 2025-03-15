@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Calendar, FileText, User, Pill, Activity, Bell, Clock } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
@@ -7,7 +7,8 @@ import { UserContext } from "../../UserContext";
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { username } = useContext(UserContext) || {};
+  const userContext = useContext(UserContext);
+  const { username } = userContext || {};
   const [isLoading, setIsLoading] = useState(true);
   const [appointments, setAppointments] = useState([]);
   const [profile, setProfile] = useState(null);
@@ -15,27 +16,7 @@ const Dashboard = () => {
   const patientId = context?.patientId || null;
   const location = useLocation();
 
-  
-  useEffect(() => {
-    // Fetch the patient's data
-    const loadData = async () => {
-      if (patientId) {
-        await fetchAppointments();
-      }
-      
-      if (username) {
-        await fetchProfile();
-      }
-      
-      // Simulate other data loading
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1000);
-    };
-    
-    loadData();
-  }, [patientId, username]);
-
+  // Move the function declarations before useCallback
   const fetchAppointments = async () => {
     try {
       const response = await axios.get(`http://localhost:8000/appointments/${patientId}`);
@@ -49,18 +30,51 @@ const Dashboard = () => {
       setAppointments([]);
     }
   };
-  
+
   const fetchProfile = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/user-profile/${username}`);
-      if (!response.ok) throw new Error("Failed to fetch profile data");
-      
-      const data = await response.json();
-      setProfile(data);
+      const response = await axios.get(`http://localhost:8000/user-profile/${username}`);
+      if (response.data) {
+        setProfile(response.data);
+        console.log("Profile data loaded:", response.data);
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
+      // Don't set profile to null here, keep the previous value
+    } finally {
+      // Make sure we're not stuck in loading state
+      setIsLoading(false);
     }
   };
+
+  const memoizedFetchAppointments = useCallback(fetchAppointments, [patientId]);
+  const memoizedFetchProfile = useCallback(fetchProfile, [username]);
+
+  useEffect(() => {
+    // Fetch the patient's data
+    const loadData = async () => {
+      console.log("Loading data with patientId:", patientId, "and username:", username);
+      
+      try {
+        if (patientId) {
+          console.log("Fetching appointments for patient:", patientId);
+          await memoizedFetchAppointments();
+        }
+        
+        if (username) {
+          console.log("Fetching profile for user:", username);
+          await memoizedFetchProfile();
+        }
+      } catch (err) {
+        console.error("Error loading data:", err);
+      } finally {
+        // Always set loading to false, even if there are errors
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
+  }, [patientId, username, memoizedFetchAppointments, memoizedFetchProfile]);
 
   const getActiveTab = () => {
     const path = location.pathname;

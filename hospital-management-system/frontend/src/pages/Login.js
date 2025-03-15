@@ -34,11 +34,16 @@ const Login = () => {
       // Store patient_id in local storage if the user is a patient
       if (role === "patient" && patient_id) {
         localStorage.setItem('patient_id', patient_id);
+        console.log("Stored patient_id:", patient_id);
       }
+
+      localStorage.setItem('username', username);
+      console.log("Stored username:", username);
   
       // Store username in local storage for all users
       if (username) {
         localStorage.setItem('username', username);
+        console.log("Stored username:", username);
       }
   
       alert("Login successful!");

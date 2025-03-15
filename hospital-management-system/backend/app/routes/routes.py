@@ -375,7 +375,7 @@ def add_medication(patient_id: str, medication: MedicationCreate, db: Session = 
 
 # Fetch Medications for a Patient
 @router.get("/medications/{patient_id}")
-def get_medical_history(patient_id: str, db: Session = Depends(get_db)):
+def get_medications(patient_id: str, db: Session = Depends(get_db)):  # Changed function name from get_medical_history
     patient = db.query(User).filter(User.patient_id == patient_id, User.role == "patient").first()
     
     if not patient:
@@ -383,4 +383,4 @@ def get_medical_history(patient_id: str, db: Session = Depends(get_db)):
     
     medical_records = db.query(Medication).filter(Medication.patient_id == patient_id).all()
     
-    return medical_records if medical_records else []  # Return an empty list instead of 404
+    return medical_records if medical_records else []
