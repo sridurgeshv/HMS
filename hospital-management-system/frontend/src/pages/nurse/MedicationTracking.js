@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar, Clock, User, Clipboard, FileText, Bell, Package } from 'lucide-react';
+import { Calendar, Clock, User, Clipboard, FileText, Bell, Package, Settings } from 'lucide-react';
 import './Dashboard.css';
 
 const MedicationTracking = () => {
@@ -45,6 +45,9 @@ const MedicationTracking = () => {
           </Link>
           <Link to="/nurse/medication-tracking" className={location.pathname === "/nurse/medication-tracking" ? "active" : ""}>
             <Package size={18} /> Medication Tracking
+          </Link>
+          <Link to="/nurse/profile" className={location.pathname === "/nurse/profile" ? "active" : ""}>
+            <Settings size={18} /> Profile
           </Link>
         </nav>
       </div>
