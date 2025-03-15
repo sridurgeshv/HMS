@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { User, Mail, Lock, Eye, EyeOff, Calendar, Phone, MapPin } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate
 import '../../styles/Register.css';
 
 const PatientRegister = () => {
@@ -19,6 +19,8 @@ const PatientRegister = () => {
     address: '',
     role: 'patient'
   });
+
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -49,8 +51,11 @@ const PatientRegister = () => {
       localStorage.setItem('patient_id', response.data.patient_id);
       localStorage.setItem("username", response.data.username);
 
-    alert(`Registration successful! Your Patient ID: ${response.data.patient_id}`);
-    
+      alert(`Registration successful! Your Patient ID: ${response.data.patient_id}`);
+      
+      // Redirect to login page after successful registration
+      navigate('/login');
+
     } catch (error) {
       alert(error.response?.data?.detail || "Error signing up");
     }
