@@ -122,7 +122,7 @@ const AdminDashboard = () => {
       {/* Sidebar */}
       <aside className="dashboard-sidebar">
         <div className="sidebar-header">
-          <h2 className="sidebar-logo">MedAdmin</h2>
+          <h2 className="sidebar-logo">CuraSphere</h2>
           <button className="sidebar-toggle" onClick={toggleSidebar}>
             {activeSidebar ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -141,17 +141,9 @@ const AdminDashboard = () => {
             <Briefcase size={20} />
             <span>Departments</span>
           </Link>
-          <Link to="/admin/analytics" className={location.pathname === '/admin/analytics' ? 'active' : ''}>
-            <BarChart2 size={20} />
-            <span>Analytics</span>
-          </Link>
-          <Link to="/admin/settings" className={location.pathname === '/admin/settings' ? 'active' : ''}>
+          <Link to="/admin/profile" className={location.pathname === '/admin/settings' ? 'active' : ''}>
             <Settings size={20} />
-            <span>Configuration</span>
-          </Link>
-          <Link to="/admin/resources" className={location.pathname === '/admin/resources' ? 'active' : ''}>
-            <Grid size={20} />
-            <span>Resources</span>
+            <span>Profile</span>
           </Link>
         </div>
         

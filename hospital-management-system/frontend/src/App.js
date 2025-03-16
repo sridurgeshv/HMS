@@ -32,16 +32,10 @@ import { PatientProvider } from "./PatientContext";
 import { UserProvider } from "./UserContext";
 
 
-/*
-// Nurse pages
-
-import NurseAppointments from './pages/nurse/Appointments';
-
-// Admin page
-import AdminDashboard from './pages/admin/Dashboard';
-import AdminUsers from './pages/admin/Users';
+import UserManagement from './pages/admin/Users';
 import AdminDepartments from './pages/admin/Departments';
-*/
+import AdminProfile from './pages/admin/AdminProfile';
+
 function App() {
   return (
     <UserProvider> {/* Wrap the entire app with UserProvider */}
@@ -73,12 +67,12 @@ function App() {
           <Route path="/nurse/medication-tracking" element={<MedicationTracking />} />
           <Route path="/nurse/profile" element={<NurseProfile />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
-{/*}                           
-          
-          {/* Admin routes 
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
-          <Route path="/admin/departments" element={<AdminDepartments />} /> */}
+
+        {/* Admin Routes */}
+
+          <Route path="/admin/users" element={<UserManagement />} />
+          <Route path="/admin/departments" element={<AdminDepartments />} />
+          <Route path="/admin/profile" element={<AdminProfile />} /> 
         </Routes>
        </div>
       </Router>
