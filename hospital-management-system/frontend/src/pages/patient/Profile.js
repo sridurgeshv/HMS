@@ -65,7 +65,7 @@ const Profile = () => {
           <div className="user-profile">
             <div className="avatar">{profile ? profile.full_name[0] : username ? username[0] : "JD"}</div>
             <div className="user-info">
-              <h3>{profile ? profile.username : "Loading..."}</h3>
+              <h3>{profile ? profile.full_name : "Loading..."}</h3>
               <p>Patient ID: {profile ? profile.patient_id : patientId || "..."}</p>
             </div>
           </div>

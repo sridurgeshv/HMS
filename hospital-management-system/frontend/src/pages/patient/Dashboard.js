@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { Calendar, FileText, User, Pill, Activity, Bell, Clock } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Calendar, FileText, User, Pill, Activity, Bell, Clock, LogOut } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { PatientContext } from "../../PatientContext";
 import { UserContext } from "../../UserContext";
@@ -15,6 +15,7 @@ const Dashboard = () => {
   const context = useContext(PatientContext);
   const patientId = context?.patientId || null;
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Move the function declarations before useCallback
   const fetchAppointments = async () => {
@@ -100,91 +101,107 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="dashboard-loading">
-        <div className="pulse-loader"></div>
+      <div className="patient-loading">
+        <div className="patient-loading-spinner"></div>
         <p>Loading your health information...</p>
       </div>
     );
   }
 
+  const handleLogout = () => {
+    // Clear all local storage items
+    localStorage.removeItem('username');
+    localStorage.removeItem('patient_id');
+    
+    // Redirect to welcome page
+    navigate('/');
+  };
+
   return (
-    <div className="dashboard-container">
-      <div className="sidebar">
-        <div className="sidebar-header">
-          <h2 className="logo">CuraSphere</h2>
+    <div className="patient-layout">
+      <div className="patient-sidebar">
+        <div className="patient-sidebar-brand">
+          <h2 className="patient-logo">CuraSphere</h2>
         </div>
-        <div className="sidebar-content">
-          <div className="user-profile">
-            <div className="avatar">{profile ? profile.full_name[0] : username ? username[0] : "JD"}</div>
-            <div className="user-info">
+        <div className="patient-sidebar-body">
+          <div className="patient-user-card">
+            <div className="patient-user-avatar">{profile ? profile.full_name[0] : username ? username[0] : "JD"}</div>
+            <div className="patient-user-details">
               <h3>{profile ? profile.full_name : "John Doe"}</h3>
               <p>Patient ID: {profile ? profile.patient_id : patientId || "12345678"}</p>
             </div>
           </div>
-          <nav className="sidebar-menu">
+          <nav className="patient-nav">
             <Link 
               to="/patient/dashboard" 
-              className={`menu-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'dashboard' ? 'patient-nav-active' : ''}`}
             >
               <Activity size={20} />
               <span>Dashboard</span>
             </Link>
             <Link 
               to="/patient/appointments" 
-              className={`menu-item ${activeTab === 'appointments' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'appointments' ? 'patient-nav-active' : ''}`}
             >
               <Calendar size={20} />
               <span>Appointments</span>
             </Link>
             <Link 
               to="/patient/medical-history" 
-              className={`menu-item ${activeTab === 'medical-history' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'medical-history' ? 'patient-nav-active' : ''}`}
             >
               <FileText size={20} />
               <span>Medical History</span>
             </Link>
             <Link 
               to="/patient/medications" 
-              className={`menu-item ${activeTab === 'medications' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'medications' ? 'patient-nav-active' : ''}`}
             >
               <Pill size={20} />
               <span>Medications</span>
             </Link>
             <Link 
               to="/patient/profile" 
-              className={`menu-item ${activeTab === 'profile' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'profile' ? 'patient-nav-active' : ''}`}
             >
-              <User size={20} />
+               <User size={20} />
               <span>Profile</span>
             </Link>
+            <button 
+              onClick={handleLogout}
+              className="menu-item logout-button"
+            >
+              <LogOut size={20} />
+              <span>Logout</span>
+            </button>
           </nav>
         </div>
       </div>
 
-      <main className="dashboard-main">
-        <header className="main-header">
+      <main className="patient-content">
+        <header className="patient-header">
           <h1>Personal Health Dashboard</h1>
-          <div className="header-actions">
-            <div className="notification-bell">
-              <span className="notification-dot"></span>
+          <div className="patient-header-controls">
+            <div className="patient-notification">
+              <span className="patient-notification-indicator"></span>
               <Bell size={24} />
             </div>
           </div>
         </header> 
 
-        <div className="dashboard-content">
-          <div className="tab-content dashboard-home fade-in">
-            <div className="content-header">
+        <div className="patient-page-content">
+          <div className="patient-dashboard-view patient-fade-in">
+            <div className="patient-section-header">
               <h2><Activity size={20} /> Health Overview</h2>
             </div>
             
-            <div className="stats-cards">
+            <div className="patient-metric-grid">
               {stats.map((stat, index) => (
-                <div className="stat-card" key={index}>
-                  <div className="stat-icon">{stat.icon}</div>
-                  <div className="stat-details">
+                <div className="patient-metric-tile" key={index}>
+                  <div className="patient-metric-icon">{stat.icon}</div>
+                  <div className="patient-metric-info">
                     <h3>{stat.title}</h3>
-                    <p className="stat-value">{stat.value}</p>
+                    <p className="patient-metric-value">{stat.value}</p>
                   </div>
                 </div>
               ))}
@@ -192,21 +209,21 @@ const Dashboard = () => {
 
             {/* Upcoming Appointments Section */}
             {appointments.length > 0 && (
-              <div className="upcoming-appointments mt-30">
+              <div className="patient-appointments-container">
                 <h3>Upcoming Appointments</h3>
-                <div className="appointment-cards">
+                <div className="patient-appointments-grid">
                   {appointments.slice(0, 2).map(appointment => (
-                    <div className="appointment-card" key={appointment.id}>
-                      <div className="appointment-date">
-                        <div className="month">{new Date(appointment.date).toLocaleString('default', { month: 'short' })}</div>
-                        <div className="day">{new Date(appointment.date).getDate()}</div>
+                    <div className="patient-appointment-tile" key={appointment.id}>
+                      <div className="patient-appointment-date">
+                        <div className="patient-appointment-month">{new Date(appointment.date).toLocaleString('default', { month: 'short' })}</div>
+                        <div className="patient-appointment-day">{new Date(appointment.date).getDate()}</div>
                       </div>
-                      <div className="appointment-details">
+                      <div className="patient-appointment-info">
                         <h3>{appointment.doctor_name || "Doctor will be assigned"}</h3>
-                        <p className="specialty">{appointment.department}</p>
-                        <p className="time"><Clock size={14} /> {appointment.time}</p>
+                        <p className="patient-appointment-dept">{appointment.department}</p>
+                        <p className="patient-appointment-time"><Clock size={14} /> {appointment.time}</p>
                       </div>
-                      <Link to="/patient/appointments" className="view-more-link">
+                      <Link to="/patient/appointments" className="patient-action-link">
                         Manage
                       </Link>
                     </div>
@@ -215,26 +232,26 @@ const Dashboard = () => {
               </div>
             )}
 
-            <div className="health-vitals mt-30">
+            <div className="patient-vitals-container">
               <h3>Health Vitals</h3>
-              <div className="vitals-cards">
-                <div className="vital-card">
+              <div className="patient-vitals-grid">
+                <div className="patient-vital-tile">
                   <Activity size={20} />
                   <h4>Heart Rate</h4>
-                  <div className="vital-reading">72 <span>bpm</span></div>
-                  <div className="vital-chart"></div>
+                  <div className="patient-vital-measurement">72 <span>bpm</span></div>
+                  <div className="patient-vital-graph"></div>
                 </div>
-                <div className="vital-card">
+                <div className="patient-vital-tile">
                   <Activity size={20} />
                   <h4>Blood Pressure</h4>
-                  <div className="vital-reading">120/80 <span>mmHg</span></div>
-                  <div className="vital-chart"></div>
+                  <div className="patient-vital-measurement">120/80 <span>mmHg</span></div>
+                  <div className="patient-vital-graph"></div>
                 </div>
-                <div className="vital-card">
+                <div className="patient-vital-tile">
                   <Activity size={20} />
                   <h4>Blood Sugar</h4>
-                  <div className="vital-reading">110 <span>mg/dL</span></div>
-                  <div className="vital-chart"></div>
+                  <div className="patient-vital-measurement">110 <span>mg/dL</span></div>
+                  <div className="patient-vital-graph"></div>
                 </div>
               </div>
             </div>
