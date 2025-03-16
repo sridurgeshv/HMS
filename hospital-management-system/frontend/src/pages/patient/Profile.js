@@ -56,123 +56,121 @@ const Profile = () => {
   };
 
   return (
-    <div className="dashboard-container">
-      <div className="sidebar">
-        <div className="sidebar-header">
-          <h2 className="logo">CuraSphere</h2>
+    <div className="patient-layout">
+      <div className="patient-sidebar">
+        <div className="patient-sidebar-brand">
+          <h2 className="patient-logo">CuraSphere</h2>
         </div>
-        <div className="sidebar-content">
-          <div className="user-profile">
-            <div className="avatar">{profile ? profile.full_name[0] : username ? username[0] : "JD"}</div>
-            <div className="user-info">
-              <h3>{profile ? profile.full_name : "Loading..."}</h3>
-              <p>Patient ID: {profile ? profile.patient_id : patientId || "..."}</p>
+        <div className="patient-sidebar-body">
+          <div className="patient-user-card">
+            <div className="patient-user-avatar">{profile ? profile.full_name[0] : username ? username[0] : "JD"}</div>
+            <div className="patient-user-details">
+              <h3>{profile ? profile.full_name : "John Doe"}</h3>
+              <p>Patient ID: {profile ? profile.patient_id : patientId || "12345678"}</p>
             </div>
           </div>
-          <nav className="sidebar-menu">
+          <nav className="patient-nav">
             <Link 
               to="/patient/dashboard" 
-              className={`menu-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'dashboard' ? 'patient-nav-active' : ''}`}
             >
               <Activity size={20} />
               <span>Dashboard</span>
             </Link>
             <Link 
               to="/patient/appointments" 
-              className={`menu-item ${activeTab === 'appointments' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'appointments' ? 'patient-nav-active' : ''}`}
             >
               <Calendar size={20} />
               <span>Appointments</span>
             </Link>
             <Link 
               to="/patient/medical-history" 
-              className={`menu-item ${activeTab === 'medical-history' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'medical-history' ? 'patient-nav-active' : ''}`}
             >
               <FileText size={20} />
               <span>Medical History</span>
             </Link>
             <Link 
               to="/patient/medications" 
-              className={`menu-item ${activeTab === 'medications' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'medications' ? 'patient-nav-active' : ''}`}
             >
               <Pill size={20} />
               <span>Medications</span>
             </Link>
             <Link 
               to="/patient/profile" 
-              className={`menu-item ${activeTab === 'profile' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'profile' ? 'patient-nav-active' : ''}`}
             >
-              <User size={20} />
+               <User size={20} />
               <span>Profile</span>
             </Link>
-            <button 
-              onClick={handleLogout}
-              className="menu-item logout-button"
+            <Link 
+              onClick={handleLogout} 
+              className="patient-nav-item patient-logout-button"
             >
               <LogOut size={20} />
               <span>Logout</span>
-            </button>
+            </Link>
           </nav>
         </div>
       </div>
 
-      <main className="dashboard-main">
-        <header className="main-header">
+      <main className="patient-content">
+        <header className="patient-header">
           <h1>Personal Profile</h1>
-          <div className="header-actions">
-            <div className="notification-bell">
-              <span className="notification-dot"></span>
+          <div className="patient-header-controls">
+            <div className="patient-notification">
+              <span className="patient-notification-indicator"></span>
               <Bell size={24} />
             </div>
           </div>
         </header> 
 
-        <div className="dashboard-content">
-          <div className="tab-content profile fade-in">
-            <div className="content-header">
-              <h2>
-                <User size={20} /> Personal Information
-              </h2>
+        <div className="patient-page-content">
+          <div className="patient-profile-view patient-fade-in">
+            <div className="patient-section-header">
+              <h2><User size={20} /> Personal Information</h2>
             </div>
 
-            {loading && <p>Loading profile...</p>}
-            {error && <p className="error">{error}</p>}
+            {loading && <p className="patient-loading-text">Loading profile...</p>}
+            {error && <p className="patient-error-message">{error}</p>}
             {profile && (
-              <div className="profile-card">
-                <div className="profile-header">
-                  <div className="profile-avatar">{profile.full_name[0]}</div>
-                  <div className="profile-name">
+              <div className="patient-profile-card">
+                <div className="patient-profile-header">
+                  <div className="patient-profile-avatar">{profile.full_name[0]}</div>
+                  <div className="patient-profile-name">
                     <h3>{profile.full_name}</h3>
                     <p>Patient ID: {profile.patient_id}</p>
                   </div>
                 </div>
 
-                <div className="profile-details">
-                  <div className="detail-group">
+                <div className="patient-profile-details">
+                  <div className="patient-detail-group">
                     <h4>Personal Information</h4>
-                    <div className="detail-row">
-                      <span className="detail-label">Date of Birth</span>
-                      <span className="detail-value">{profile.date_of_birth}</span>
+                    <div className="patient-detail-row">
+                      <span className="patient-detail-label">Date of Birth</span>
+                      <span className="patient-detail-value">{profile.date_of_birth}</span>
                     </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Username</span>
-                      <span className="detail-value">{profile.username}</span>
+                    <div className="patient-detail-row">
+                      <span className="patient-detail-label">Username</span>
+                      <span className="patient-detail-value">{profile.username}</span>
                     </div>
                   </div>
 
-                  <div className="detail-group">
+                  <div className="patient-detail-group">
                     <h4>Contact Information</h4>
-                    <div className="detail-row">
-                      <span className="detail-label">Email</span>
-                      <span className="detail-value">{profile.email}</span>
+                    <div className="patient-detail-row">
+                      <span className="patient-detail-label">Email</span>
+                      <span className="patient-detail-value">{profile.email}</span>
                     </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Phone</span>
-                      <span className="detail-value">{profile.phone}</span>
+                    <div className="patient-detail-row">
+                      <span className="patient-detail-label">Phone</span>
+                      <span className="patient-detail-value">{profile.phone}</span>
                     </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Address</span>
-                      <span className="detail-value">{profile.address}</span>
+                    <div className="patient-detail-row">
+                      <span className="patient-detail-label">Address</span>
+                      <span className="patient-detail-value">{profile.address}</span>
                     </div>
                   </div>
                 </div>

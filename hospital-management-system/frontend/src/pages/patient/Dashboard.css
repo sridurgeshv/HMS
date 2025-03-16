@@ -1317,3 +1317,149 @@ body {
 }
 
 /* Profile Page */
+/* Profile Page Styles */
+
+/* Profile View Container */
+.patient-profile-view {
+  padding: 20px;
+  width: 100%;
+}
+
+/* Loading and Error States */
+.patient-loading-text {
+  text-align: center;
+  color: #666;
+  margin: 20px 0;
+  font-size: 16px;
+}
+
+.patient-error-message {
+  color: #e53935;
+  text-align: center;
+  margin: 20px 0;
+  padding: 10px;
+  background-color: rgba(229, 57, 53, 0.1);
+  border-radius: 8px;
+}
+
+/* Profile Card */
+.patient-profile-card {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.patient-profile-header {
+  display: flex;
+  align-items: center;
+  padding: 24px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.patient-profile-avatar {
+  width: 64px;
+  height: 64px;
+  background-color: #4c84ff;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 600;
+  margin-right: 20px;
+}
+
+.patient-profile-name {
+  flex: 1;
+}
+
+.patient-profile-name h3 {
+  margin: 0 0 5px 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.patient-profile-name p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Profile Details */
+.patient-profile-details {
+  padding: 24px;
+}
+
+.patient-detail-group {
+  margin-bottom: 32px;
+}
+
+.patient-detail-group h4 {
+  font-size: 16px;
+  color: #333;
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.patient-detail-row {
+  display: flex;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.patient-detail-label {
+  width: 130px;
+  color: #666;
+  font-size: 14px;
+}
+
+.patient-detail-value {
+  flex: 1;
+  color: #333;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+/* Animation */
+.patient-fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .patient-profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .patient-profile-avatar {
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+  
+  .patient-detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .patient-detail-label {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+}

@@ -114,3 +114,13 @@ hospital-management-system/
 3. [Add Firebase to your JavaScript project](https://firebase.google.com/docs/web/setup)
 4. [Authenticate with Firebase using Password-Based Accounts using Javascript](https://firebase.google.com/docs/auth/web/password-auth)
 5. [snippets->auth-next->email->auth_signup_password.js](https://github.com/firebase/snippets-web/blob/467eaa165dcbd9b3ab15711e76fa52237ba37f8b/snippets/auth-next/email/auth_signup_password.js#L8-L21)
+
+
+### Backend Code
+```py
+python -c "from app.utils.database import Base, engine; Base.metadata.create_all(bind=engine)"
+```
+
+```bash
+uvicorn app.run:app --reload
+```
