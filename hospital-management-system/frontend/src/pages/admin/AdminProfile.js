@@ -116,7 +116,7 @@ const AdminProfile = () => {
             <Briefcase size={20} />
             <span>Departments</span>
           </Link>
-          <Link to="/admin/settings" className={location.pathname === '/admin/settings' ? 'active' : ''}>
+          <Link to="/admin/profile" className={location.pathname === '/admin/settings' ? 'active' : ''}>
             <Settings size={20} />
             <span>Profile</span>
           </Link>
