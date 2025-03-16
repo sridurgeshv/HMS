@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { User, Mail, Lock, Eye, EyeOff, Calendar, Phone, MapPin, Award, Building } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, Calendar, Phone, MapPin, Award, Building , Plus, Trash } from 'lucide-react';
 import { Link , useNavigate  } from 'react-router-dom';
 import '../../styles/Register.css';
 
@@ -21,14 +21,32 @@ const DoctorRegister = () => {
     licenseNumber: '',
     hospital: '',
     experience: '',
+    gender: '',  // Add gender field
     role: 'doctor',
-    status: 'pending' // Default status
+    status: 'pending' , // Default status
+    degrees: [{ degree: '', university: '', year: '' }] // Initialize with one degree
   });
 
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+  
+  const handleDegreeChange = (index, e) => {
+    const newDegrees = [...formData.degrees];
+    newDegrees[index][e.target.name] = e.target.value;
+    setFormData({ ...formData, degrees: newDegrees });
+  };
+
+  const addDegree = () => {
+    setFormData({ ...formData, degrees: [...formData.degrees, { degree: '', university: '', year: '' }] });
+  };
+
+  const removeDegree = (index) => {
+    const newDegrees = [...formData.degrees];
+    newDegrees.splice(index, 1);
+    setFormData({ ...formData, degrees: newDegrees });
   };
 
   const handleSubmit = async (e) => {
@@ -51,12 +69,17 @@ const DoctorRegister = () => {
       license_number: formData.licenseNumber,
       hospital: formData.hospital,
       experience: formData.experience,
+      gender: formData.gender, 
       role: "doctor" ,
-      status: "pending" // Include status in payload
+      status: "pending" , // Include status in payload
+      degrees: formData.degrees
     };
   
     try {
       const response = await axios.post(`http://localhost:8000/doctorsignup/`, payload);
+
+      localStorage.setItem('doctor_id', response.data.doctor_id);
+
       alert(response.data.message);
       navigate('/pending-approval'); // Redirect to pending approval page
     } catch (error) {
@@ -89,7 +112,7 @@ const DoctorRegister = () => {
                 className="curasphere-input"
               />
             </div>
-
+            
             <div className="curasphere-input-group">
               <User className="curasphere-input-icon" />
               <input 
@@ -112,6 +135,19 @@ const DoctorRegister = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required 
+                className="curasphere-input"
+              />
+            </div>
+
+            <div className="curasphere-input-group">
+              <User className="curasphere-input-icon" />
+              <input
+                type="text"
+                name="gender"
+                placeholder="Gender"
+                value={formData.gender}
+                onChange={handleChange}
+                required
                 className="curasphere-input"
               />
             </div>
@@ -246,6 +282,67 @@ const DoctorRegister = () => {
                 {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+
+            {formData.degrees.map((degree, index) => (
+              <div key={index} className="curasphere-degree-group">
+                <div className="curasphere-input-group">
+                  <Award className="curasphere-input-icon" />
+                  <input 
+                    type="text" 
+                    name="degree"
+                    placeholder="Degree"
+                    value={degree.degree}
+                    onChange={(e) => handleDegreeChange(index, e)}
+                    required 
+                    className="curasphere-input"
+                  />
+                </div>
+
+                <div className="curasphere-input-group">
+                  <Building className="curasphere-input-icon" />
+                  <input 
+                    type="text" 
+                    name="university"
+                    placeholder="University"
+                    value={degree.university}
+                    onChange={(e) => handleDegreeChange(index, e)}
+                    required 
+                    className="curasphere-input"
+                  />
+                </div>
+
+                <div className="curasphere-input-group">
+                  <Calendar className="curasphere-input-icon" />
+                  <input 
+                    type="number" 
+                    name="year"
+                    placeholder="Year"
+                    value={degree.year}
+                    onChange={(e) => handleDegreeChange(index, e)}
+                    required 
+                    className="curasphere-input"
+                  />
+                </div>
+
+                {index > 0 && (
+                  <button 
+                    type="button"
+                    onClick={() => removeDegree(index)}
+                    className="curasphere-remove-degree"
+                  >
+                    <Trash size={20} />
+                  </button>
+                )}
+              </div>
+            ))}
+
+            <button 
+              type="button"
+              onClick={addDegree}
+              className="curasphere-add-degree"
+            >
+              <Plus size={20} /> Add Degree
+            </button>
 
             <motion.button
               whileHover={{ scale: 1.05 }}

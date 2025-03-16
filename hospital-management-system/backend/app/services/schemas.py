@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, date
-from typing import Optional
+from typing import Optional,List
 
 class UserCreate(BaseModel):
     username: str
@@ -13,12 +13,19 @@ class UserCreate(BaseModel):
     role: str = "patient"  # Default role
     status: str = "pending"  # Default status
 
+class DegreeCreate(BaseModel):
+    degree: str
+    university: str
+    year: int    
+
 class DoctorCreate(UserCreate):
     specialization: str
     license_number: str
     hospital: str
     experience: int
     role: str = "doctor"  # Fixed role for doctors
+    degrees: List[DegreeCreate]
+    gender: str  # Add gender field
 
 class NurseCreate(UserCreate):
     department: str

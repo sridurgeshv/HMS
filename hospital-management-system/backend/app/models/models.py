@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String , ForeignKey, DateTime , Date, Text
 from app.utils.database import Base
+from sqlalchemy.orm import relationship
 
 
 class User(Base):
@@ -16,6 +17,7 @@ class User(Base):
     address = Column(String, nullable=True)  # Allow NULL values
     role = Column(String, nullable=False, default="patient")  # Default role to "patient"
     status = Column(String, nullable=False, default="pending")  # Add status field
+    gender = Column(String, nullable=True)  # Add gender field
 
 
      # Doctor-specific fields
@@ -23,12 +25,27 @@ class User(Base):
     license_number = Column(String, unique=True, index=True, nullable=True)
     hospital = Column(String, nullable=True)
     experience = Column(Integer, nullable=True)
+    doctor_id = Column(String, unique=True, index=True, nullable=True)  # Unique doctor ID
 
        # Nurse-specific fields
     department = Column(String, nullable=True)
 
 
     admin_code = Column(String, unique=True, nullable=True)  # Admin code field
+
+    degrees = relationship("Degree", back_populates="user")
+
+
+class Degree(Base):
+    __tablename__ = "degrees"
+
+    id = Column(Integer, primary_key=True, index=True)
+    degree = Column(String, nullable=False)
+    university = Column(String, nullable=False)
+    year = Column(Integer, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"))
+
+    user = relationship("User", back_populates="degrees")
 
 
 class Appointment(Base):

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from app.utils.database import get_db
-from app.models.models import User
+from app.models.models import User, Degree
 from app.services.schemas import UserCreate
 from app.services.services import get_password_hash
 from app.services.schemas import DoctorCreate
@@ -90,7 +90,6 @@ def get_user_profile(username: str, db: Session = Depends(get_db)):
         "patient_id": user.patient_id
     }
 
-
 @router.post("/doctorsignup/")
 def create_doctor(doctor: DoctorCreate, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.username == doctor.username).first()
@@ -115,15 +114,60 @@ def create_doctor(doctor: DoctorCreate, db: Session = Depends(get_db)):
         license_number=doctor.license_number,
         hospital=doctor.hospital,
         experience=doctor.experience,
-        role="doctor" , # Ensure role is fixed
-        status="pending"  # Doctors need admin approval
+        role="doctor",
+        status="pending",
+        doctor_id=str(uuid.uuid4())[:8] ,
+        gender=doctor.gender
     )
 
     db.add(new_doctor)
     db.commit()
     db.refresh(new_doctor)
 
-    return {"message": "Doctor registered successfully, pending admin approval"}
+    for degree in doctor.degrees:
+        new_degree = Degree(
+            degree=degree.degree,
+            university=degree.university,
+            year=degree.year,
+            user_id=new_doctor.id
+        )
+        db.add(new_degree)
+
+    db.commit()
+
+    return {"message": "Doctor registered successfully, pending admin approval" , "doctor_id": new_doctor.doctor_id}
+
+@router.get("/doctor/{doctor_id}")
+def get_doctor_profile(doctor_id: str, db: Session = Depends(get_db)):
+    # Fetch the doctor's details from the database
+    doctor = db.query(User).filter(User.doctor_id == doctor_id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+
+    # Fetch the doctor's degrees
+    degrees = db.query(Degree).filter(Degree.user_id == doctor.id).all()
+
+    # Prepare the response
+    doctor_profile = {
+        "name": doctor.full_name,
+        "specialty": doctor.specialization,
+        "email": doctor.email,
+        "phone": doctor.phone,
+        "address": doctor.address,
+        "dob": doctor.date_of_birth,
+        "gender": doctor.gender, 
+        "licenseNumber": doctor.license_number,
+        "education": [
+            {
+                "degree": degree.degree,
+                "university": degree.university,
+                "year": degree.year
+            }
+            for degree in degrees
+        ]
+    }
+
+    return doctor_profile    
 
 @router.post("/nursesignup/")
 def create_nurse(nurse: NurseCreate, db: Session = Depends(get_db)):

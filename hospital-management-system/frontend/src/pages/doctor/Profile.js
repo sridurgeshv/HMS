@@ -1,32 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, Users, FileText, Bell, Search, Menu, X, User, Mail,
-  Phone,
-  MapPin,
-  Calendar as CalendarIcon,
-  Award,
-  Edit
-} from 'lucide-react';
+import { Calendar, Clock, Users, FileText, Bell, Search, Menu, X, User, Mail, Phone, MapPin, Calendar as CalendarIcon, Award, Edit } from 'lucide-react';
+import axios from 'axios';
 
 const Profile = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('personal');
-  
-  // Sample data
-  const doctorProfile = {
-    name: 'Dr. Jane Smith',
-    specialty: 'Cardiologist',
-    email: 'dr.jane.smith@curasphere.com',
-    phone: '(555) 123-4567',
-    address: '123 Medical Center Drive, Healthcare City, HC 12345',
-    dob: '1980-05-15',
-    gender: 'Female',
-    licenseNumber: 'MED123456',
-    education: [
-      { degree: 'M.D.', university: 'Harvard Medical School', year: '2005' },
-      { degree: 'Residency', university: 'Mayo Clinic', year: '2009' },
-      { degree: 'Fellowship', university: 'Johns Hopkins Hospital', year: '2011' }
-    ],
+  const [doctorProfile, setDoctorProfile] = useState({
+    name: '',
+    specialty: '',
+    email: '',
+    phone: '',
+    address: '',
+    dob: '',
+    gender: '',
+    licenseNumber: '',
+    education: [],
     workHours: {
       monday: '9:00 AM - 5:00 PM',
       tuesday: '9:00 AM - 5:00 PM',
@@ -34,12 +23,33 @@ const Profile = () => {
       thursday: '9:00 AM - 5:00 PM',
       friday: '9:00 AM - 3:00 PM'
     }
-  };
-  
+  });
+
+  useEffect(() => {
+    // Fetch doctor profile data
+    const fetchDoctorProfile = async () => {
+      const doctorId = localStorage.getItem('doctor_id'); // Retrieve doctor_id from local storage
+      if (!doctorId) {
+        alert("Doctor ID not found. Please log in again.");
+        return;
+      }
+
+      try {
+        const response = await axios.get(`http://localhost:8000/doctor/${doctorId}`);
+        setDoctorProfile(response.data);
+      } catch (error) {
+        console.error("Error fetching doctor profile:", error);
+        alert("Failed to fetch doctor profile. Please try again.");
+      }
+    };
+
+    fetchDoctorProfile();
+  }, []);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-  
+
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
@@ -56,8 +66,8 @@ const Profile = () => {
             <img src="/api/placeholder/100/100" alt="Doctor profile" />
           </div>
           <div className="profile-info">
-            <h3>Dr. Jane Smith</h3>
-            <p>Cardiologist</p>
+            <h3>{doctorProfile.name}</h3>
+            <p>{doctorProfile.specialty}</p>
           </div>
         </div>
         
@@ -251,7 +261,13 @@ const Profile = () => {
                   
                   <div className="profile-card">
                     <div className="schedule-grid">
-                      {Object.entries(doctorProfile.workHours).map(([day, hours]) => (
+                      {Object.entries({
+                        monday: '9:00 AM - 5:00 PM',
+                        tuesday: '9:00 AM - 5:00 PM',
+                        wednesday: '9:00 AM - 5:00 PM',
+                        thursday: '9:00 AM - 5:00 PM',
+                        friday: '9:00 AM - 3:00 PM'
+                      }).map(([day, hours]) => (
                         <div className="schedule-item" key={day}>
                           <div className="schedule-day">{day.charAt(0).toUpperCase() + day.slice(1)}</div>
                           <div className="schedule-hours">{hours}</div>
