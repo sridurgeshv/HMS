@@ -167,13 +167,13 @@ const Dashboard = () => {
                <User size={20} />
               <span>Profile</span>
             </Link>
-            <button 
-              onClick={handleLogout}
-              className="menu-item logout-button"
+            <Link 
+              onClick={handleLogout} 
+              className="patient-nav-item"
             >
               <LogOut size={20} />
               <span>Logout</span>
-            </button>
+            </Link>
           </nav>
         </div>
       </div>

@@ -123,7 +123,7 @@ body {
   display: flex;
   align-items: center;
   padding: 0.875rem 1.5rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: black;
   transition: all 0.2s ease;
   text-decoration: none;
   font-weight: 500;
@@ -131,13 +131,13 @@ body {
 }
 
 .patient-nav-item:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: black;
   color: var(--color-white);
 }
 
 .patient-nav-active {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: var(--color-white);
+  background-color: grey;
+  color: black;
 }
 
 .patient-nav-active::before {
