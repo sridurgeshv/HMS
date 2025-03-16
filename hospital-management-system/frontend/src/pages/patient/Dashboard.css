@@ -571,3 +571,491 @@ body {
     padding: 1.5rem;
   }
 }
+
+/* CSS for Appointments View */
+
+/* Main Appointments View */
+.patient-appointments-view {
+  width: 100%;
+  padding: 1rem;
+}
+
+/* Section Header */
+.patient-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.patient-section-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.4rem;
+  color: #2c3e50;
+}
+
+.patient-action-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.patient-action-button:hover {
+  background-color: #2980b9;
+}
+
+/* Appointments List */
+.patient-appointments-list {
+  margin-bottom: 2rem;
+}
+
+.patient-appointment-card {
+  display: flex;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: transform 0.2s;
+}
+
+.patient-appointment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.patient-appointment-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #3498db;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 6px;
+  min-width: 60px;
+  margin-right: 1rem;
+}
+
+.patient-appointment-month {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.patient-appointment-day {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.patient-appointment-details {
+  flex: 1;
+}
+
+.patient-appointment-details h3 {
+  margin: 0 0 0.3rem 0;
+  font-size: 1.1rem;
+  color: #2c3e50;
+}
+
+.patient-appointment-dept {
+  margin: 0 0 0.3rem 0;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+.patient-appointment-time {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.patient-appointment-actions {
+  display: flex;
+  align-items: center;
+  padding-left: 1rem;
+  margin-left: auto;
+}
+
+.patient-cancel-btn {
+  background-color: #fff;
+  color: #e74c3c;
+  border: 1px solid #e74c3c;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.patient-cancel-btn:hover {
+  background-color: #e74c3c;
+  color: white;
+}
+
+/* No appointments message */
+.patient-no-data {
+  text-align: center;
+  padding: 2rem;
+  color: #7f8c8d;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+/* Booking Form Section */
+.patient-booking-section {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.patient-booking-section h3 {
+  color: #2c3e50;
+  font-size: 1.2rem;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #ecf0f1;
+  padding-bottom: 0.75rem;
+}
+
+.patient-booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.patient-form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .patient-form-row {
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+}
+
+.patient-form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.patient-form-group label {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+.patient-form-group input,
+.patient-form-group select,
+.patient-form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  background-color: #f9f9f9;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.patient-form-group input:focus,
+.patient-form-group select:focus,
+.patient-form-group textarea:focus {
+  outline: none;
+  border-color: #3498db;
+  background-color: #fff;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.patient-form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.patient-submit-booking {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
+  align-self: flex-start;
+}
+
+.patient-submit-booking:hover {
+  background-color: #27ae60;
+}
+
+/* Fade in animation */
+.patient-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Medical History Specific Styles */
+
+.patient-medical-history-view {
+  width: 100%;
+  padding: 20px;
+}
+
+.patient-medical-records-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.patient-medical-record-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.patient-medical-record-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.patient-record-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.patient-record-indicator {
+  width: 10px;
+  height: 10px;
+  background-color: #4285f4;
+  border-radius: 50%;
+}
+
+.patient-record-date {
+  font-size: 14px;
+  color: #667085;
+  font-weight: 500;
+}
+
+.patient-record-doctor {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.patient-record-notes {
+  font-size: 15px;
+  color: #475569;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.patient-record-medications {
+  font-size: 14px;
+  color: #64748b;
+  padding-top: 8px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.patient-add-record-section {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.patient-medical-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.patient-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.patient-form-field label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+}
+
+.patient-form-input,
+.patient-form-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 15px;
+  color: #1e293b;
+  transition: border-color 0.2s ease;
+}
+
+.patient-form-input:focus,
+.patient-form-textarea:focus {
+  border-color: #4285f4;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+}
+
+.patient-form-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.patient-primary-button {
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 8px;
+}
+
+.patient-primary-button:hover {
+  background-color: #3367d6;
+}
+
+.patient-primary-button:active {
+  background-color: #2756b3;
+}
+
+.patient-error-message {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.patient-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background-color: #f8fafc;
+  border-radius: 10px;
+  color: #64748b;
+  margin-bottom: 30px;
+}
+
+.patient-empty-state svg {
+  margin-bottom: 16px;
+  color: #94a3b8;
+}
+
+.patient-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.patient-section-header h2,
+.patient-section-header h3 {
+  font-weight: 600;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.patient-section-header h2 {
+  font-size: 20px;
+}
+
+.patient-section-header h3 {
+  font-size: 18px;
+  color: #4285f4;
+}
+
+.patient-section-header svg {
+  color: #4285f4;
+}
+
+.patient-fade-in {
+  animation: fadeIn 0.5s ease;
+}
+
+.patient-logout-button {
+  color: #ef4444;
+  margin-top: auto;
+  margin-bottom: 20px;
+}
+
+.patient-logout-button:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+  .patient-medical-records-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .patient-medical-form {
+    max-width: 800px;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

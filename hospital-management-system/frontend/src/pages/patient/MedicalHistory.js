@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
-import { Calendar, FileText, User, Pill, Activity, Bell } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Calendar, FileText, User, Pill, Activity, Bell, LogOut } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { PatientContext } from "../../PatientContext";
 import { UserContext } from "../../UserContext";
 
 import './Dashboard.css';
 
 const MedicalHistory = () => {
-   const { username } = useContext(UserContext) || {};
-  const { patientId } = useContext(PatientContext);
+  const userContext = useContext(UserContext);
+  const { username } = userContext || {};
+  const context = useContext(PatientContext);
+  const patientId = context?.patientId || null;
   const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [profile, setProfile] = useState(null);
   const [newEntry, setNewEntry] = useState({
@@ -20,13 +22,14 @@ const MedicalHistory = () => {
     medications: "",
   });
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Fetch medical history function
   const fetchMedicalHistory = useCallback(async () => {
     if (!patientId) return;
 
     try {
-      setLoading(true);
+      setIsLoading(true);
       const response = await fetch(`http://localhost:8000/medical-history/${patientId}`);
       if (!response.ok) throw new Error("Medical History Unavailable");
 
@@ -35,7 +38,7 @@ const MedicalHistory = () => {
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }, [patientId]);
 
@@ -94,136 +97,179 @@ const MedicalHistory = () => {
 
   const activeTab = getActiveTab();
 
+  const handleLogout = () => {
+    // Clear all local storage items
+    localStorage.removeItem('username');
+    localStorage.removeItem('patient_id');
+    
+    // Redirect to welcome page
+    navigate('/');
+  };
+
+  if (isLoading && !history.length) {
+    return (
+      <div className="patient-loading">
+        <div className="patient-loading-spinner"></div>
+        <p>Loading your medical records...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="dashboard-container">
-      <div className="sidebar">
-        <div className="sidebar-header">
-          <h2 className="logo">CuraSphere</h2>
+    <div className="patient-layout">
+      <div className="patient-sidebar">
+        <div className="patient-sidebar-brand">
+          <h2 className="patient-logo">CuraSphere</h2>
         </div>
-        <div className="sidebar-content">
-          <div className="user-profile">
-            <div className="avatar">{profile ? profile.full_name[0] : username ? username[0] : "U"}</div>
-            <div className="user-info">
-              <h3>{profile ? profile.full_name : "Loading..."}</h3>
-              <p>Patient ID: {profile ? profile.patient_id : patientId || "..."}</p>
+        <div className="patient-sidebar-body">
+          <div className="patient-user-card">
+            <div className="patient-user-avatar">{profile ? profile.full_name[0] : username ? username[0] : "JD"}</div>
+            <div className="patient-user-details">
+              <h3>{profile ? profile.full_name : "John Doe"}</h3>
+              <p>Patient ID: {profile ? profile.patient_id : patientId || "12345678"}</p>
             </div>
           </div>
-          <nav className="sidebar-menu">
+          <nav className="patient-nav">
             <Link 
               to="/patient/dashboard" 
-              className={`menu-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'dashboard' ? 'patient-nav-active' : ''}`}
             >
               <Activity size={20} />
               <span>Dashboard</span>
             </Link>
             <Link 
               to="/patient/appointments" 
-              className={`menu-item ${activeTab === 'appointments' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'appointments' ? 'patient-nav-active' : ''}`}
             >
               <Calendar size={20} />
               <span>Appointments</span>
             </Link>
             <Link 
               to="/patient/medical-history" 
-              className={`menu-item ${activeTab === 'medical-history' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'medical-history' ? 'patient-nav-active' : ''}`}
             >
               <FileText size={20} />
               <span>Medical History</span>
             </Link>
             <Link 
               to="/patient/medications" 
-              className={`menu-item ${activeTab === 'medications' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'medications' ? 'patient-nav-active' : ''}`}
             >
               <Pill size={20} />
               <span>Medications</span>
             </Link>
             <Link 
               to="/patient/profile" 
-              className={`menu-item ${activeTab === 'profile' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'profile' ? 'patient-nav-active' : ''}`}
             >
-              <User size={20} />
+               <User size={20} />
               <span>Profile</span>
+            </Link>
+            <Link 
+              onClick={handleLogout} 
+              className="patient-nav-item patient-logout-button"
+            >
+              <LogOut size={20} />
+              <span>Logout</span>
             </Link>
           </nav>
         </div>
       </div>
 
-      <main className="dashboard-main">
-        <header className="main-header">
+      <main className="patient-content">
+        <header className="patient-header">
           <h1>Medical History</h1>
-          <div className="header-actions">
-            <div className="notification-bell">
-              <span className="notification-dot"></span>
+          <div className="patient-header-controls">
+            <div className="patient-notification">
+              <span className="patient-notification-indicator"></span>
               <Bell size={24} />
             </div>
           </div>
         </header> 
 
-        <div className="dashboard-content">
-          <div className="p-6 bg-gray-100 rounded-lg shadow-md">
-            <div className="mb-4 flex items-center space-x-2 text-blue-600">
-              <FileText size={24} />
-              <h2 className="text-xl font-semibold">Medical Records</h2>
+        <div className="patient-page-content">
+          <div className="patient-medical-history-view patient-fade-in">
+            <div className="patient-section-header">
+              <h2><FileText size={20} /> Medical Records</h2>
             </div>
 
-            {loading && <p className="text-gray-600">Loading medical history...</p>}
-            {error && <p className="text-red-500">{error}</p>}
-            {!loading && !error && history.length === 0 && <p className="text-gray-600">No medical history found.</p>}
+            {error && <div className="patient-error-message">{error}</div>}
+            
+            {!isLoading && !error && history.length === 0 && (
+              <div className="patient-empty-state">
+                <FileText size={48} />
+                <p>No medical history records found.</p>
+              </div>
+            )}
 
-            {!loading && !error && history.length > 0 && (
-              <div className="space-y-4">
+            {!isLoading && !error && history.length > 0 && (
+              <div className="patient-medical-records-list">
                 {history.map((record) => (
-                  <div key={record.id} className="bg-white p-4 rounded-lg shadow">
-                    <div className="flex items-center space-x-2 text-sm text-gray-500">
-                      <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                      <p className="font-medium">{record.visit_date}</p>
+                  <div key={record.id} className="patient-medical-record-card">
+                    <div className="patient-record-header">
+                      <div className="patient-record-indicator"></div>
+                      <p className="patient-record-date">{record.visit_date}</p>
                     </div>
-                    <h3 className="text-lg font-semibold mt-2">{record.doctor_name}</h3>
-                    <p className="text-gray-700">{record.notes}</p>
-                    <p className="mt-2 text-sm text-gray-600">
+                    <h3 className="patient-record-doctor">{record.doctor_name}</h3>
+                    <p className="patient-record-notes">{record.notes}</p>
+                    <div className="patient-record-medications">
                       <strong>Medications:</strong> {record.medications}
-                    </p>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
 
-            <div className="mt-6 bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-semibold text-blue-600">Add Medical History</h3>
-              <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-                <input
-                  type="date"
-                  value={newEntry.visit_date}
-                  onChange={(e) => setNewEntry({ ...newEntry, visit_date: e.target.value })}
-                  required
-                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="text"
-                  placeholder="Doctor's Name"
-                  value={newEntry.doctor_name}
-                  onChange={(e) => setNewEntry({ ...newEntry, doctor_name: e.target.value })}
-                  required
-                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <textarea
-                  placeholder="Clinical Notes"
-                  value={newEntry.notes}
-                  onChange={(e) => setNewEntry({ ...newEntry, notes: e.target.value })}
-                  required
-                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="text"
-                  placeholder="Medications"
-                  value={newEntry.medications}
-                  onChange={(e) => setNewEntry({ ...newEntry, medications: e.target.value })}
-                  required
-                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+            <div className="patient-add-record-section">
+              <div className="patient-section-header">
+                <h3><FileText size={18} /> Add Medical Record</h3>
+              </div>
+              <form onSubmit={handleSubmit} className="patient-medical-form">
+                <div className="patient-form-field">
+                  <label>Visit Date</label>
+                  <input
+                    type="date"
+                    value={newEntry.visit_date}
+                    onChange={(e) => setNewEntry({ ...newEntry, visit_date: e.target.value })}
+                    required
+                    className="patient-form-input"
+                  />
+                </div>
+                <div className="patient-form-field">
+                  <label>Doctor's Name</label>
+                  <input
+                    type="text"
+                    placeholder="Enter doctor's name"
+                    value={newEntry.doctor_name}
+                    onChange={(e) => setNewEntry({ ...newEntry, doctor_name: e.target.value })}
+                    required
+                    className="patient-form-input"
+                  />
+                </div>
+                <div className="patient-form-field">
+                  <label>Clinical Notes</label>
+                  <textarea
+                    placeholder="Enter clinical notes"
+                    value={newEntry.notes}
+                    onChange={(e) => setNewEntry({ ...newEntry, notes: e.target.value })}
+                    required
+                    className="patient-form-textarea"
+                  />
+                </div>
+                <div className="patient-form-field">
+                  <label>Medications</label>
+                  <input
+                    type="text"
+                    placeholder="Enter prescribed medications"
+                    value={newEntry.medications}
+                    onChange={(e) => setNewEntry({ ...newEntry, medications: e.target.value })}
+                    required
+                    className="patient-form-input"
+                  />
+                </div>
                 <button
                   type="submit"
-                  className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+                  className="patient-primary-button"
                 >
                   Add Entry
                 </button>
