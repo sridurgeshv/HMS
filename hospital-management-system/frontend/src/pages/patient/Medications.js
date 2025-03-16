@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { PatientContext } from "../../PatientContext";
-import { Pill, Activity, Calendar, FileText, User, Bell } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Pill, Activity, Calendar, FileText, User, Bell, LogOut } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../../UserContext";
 
 const Medications = () => {
@@ -16,8 +16,9 @@ const Medications = () => {
   const [aiResponse, setAiResponse] = useState("");
   const [doctorResponse, setDoctorResponse] = useState("");
   const [profile, setProfile] = useState(null);
-  const [loadingProfile, setLoadingProfile] = useState(true); // Add loading state for profile
+  const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Fetch medications when component loads
   const fetchMedications = async () => {
@@ -44,7 +45,7 @@ const Medications = () => {
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
-      setLoadingProfile(false); // Set loading to false after fetching
+      setIsLoading(false);
     }
   };
 
@@ -53,6 +54,8 @@ const Medications = () => {
     fetchMedications();
     if (username) {
       fetchProfile();
+    } else {
+      setIsLoading(false);
     }
   }, [patientId, username]);
 
@@ -115,121 +118,185 @@ const Medications = () => {
 
   const activeTab = getActiveTab();
 
+  const handleLogout = () => {
+    // Clear all local storage items
+    localStorage.removeItem('username');
+    localStorage.removeItem('patient_id');
+    
+    // Redirect to welcome page
+    navigate('/');
+  };
+
+  if (isLoading) {
+    return (
+      <div className="patient-loading">
+        <div className="patient-loading-spinner"></div>
+        <p>Loading your health information...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="dashboard-container">
-      <div className="sidebar">
-        <div className="sidebar-header">
-          <h2 className="logo">CuraSphere</h2>
+    <div className="patient-layout">
+      <div className="patient-sidebar">
+        <div className="patient-sidebar-brand">
+          <h2 className="patient-logo">CuraSphere</h2>
         </div>
-        <div className="sidebar-content">
-          <div className="user-profile">
-            <div className="avatar">{profile ? profile.full_name[0] : username ? username[0] : "JD"}</div>
-            <div className="user-info">
-              <h3>{profile ? profile.full_name : loadingProfile ? "Loading..." : "John Doe"}</h3> {/* Use loading state */}
-              <p>Patient ID: {profile ? profile.patient_id : patientId || "..."}</p>
+        <div className="patient-sidebar-body">
+          <div className="patient-user-card">
+            <div className="patient-user-avatar">{profile ? profile.full_name[0] : username ? username[0] : "JD"}</div>
+            <div className="patient-user-details">
+              <h3>{profile ? profile.full_name : "John Doe"}</h3>
+              <p>Patient ID: {profile ? profile.patient_id : patientId || "12345678"}</p>
             </div>
           </div>
-          <nav className="sidebar-menu">
+          <nav className="patient-nav">
             <Link 
               to="/patient/dashboard" 
-              className={`menu-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'dashboard' ? 'patient-nav-active' : ''}`}
             >
               <Activity size={20} />
               <span>Dashboard</span>
             </Link>
             <Link 
               to="/patient/appointments" 
-              className={`menu-item ${activeTab === 'appointments' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'appointments' ? 'patient-nav-active' : ''}`}
             >
               <Calendar size={20} />
               <span>Appointments</span>
             </Link>
             <Link 
               to="/patient/medical-history" 
-              className={`menu-item ${activeTab === 'medical-history' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'medical-history' ? 'patient-nav-active' : ''}`}
             >
               <FileText size={20} />
               <span>Medical History</span>
             </Link>
             <Link 
               to="/patient/medications" 
-              className={`menu-item ${activeTab === 'medications' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'medications' ? 'patient-nav-active' : ''}`}
             >
               <Pill size={20} />
               <span>Medications</span>
             </Link>
             <Link 
               to="/patient/profile" 
-              className={`menu-item ${activeTab === 'profile' ? 'active' : ''}`}
+              className={`patient-nav-item ${activeTab === 'profile' ? 'patient-nav-active' : ''}`}
             >
               <User size={20} />
               <span>Profile</span>
+            </Link>
+            <Link 
+              onClick={handleLogout} 
+              className="patient-nav-item"
+            >
+              <LogOut size={20} />
+              <span>Logout</span>
             </Link>
           </nav>
         </div>
       </div>
 
-      <main className="dashboard-main">
-        <header className="main-header">
+      <main className="patient-content">
+        <header className="patient-header">
           <h1>Medications</h1>
-          <div className="header-actions">
-            <div className="notification-bell">
-              <span className="notification-dot"></span>
+          <div className="patient-header-controls">
+            <div className="patient-notification">
+              <span className="patient-notification-indicator"></span>
               <Bell size={24} />
             </div>
           </div>
         </header>
 
-        <div className="dashboard-content">
-          <div className="p-6 max-w-2xl mx-auto bg-white rounded-xl shadow-md space-y-6">
-            <h2 className="text-xl font-semibold flex items-center gap-2">
-              <Pill size={20} /> Current Medications
-            </h2>
+        <div className="patient-page-content">
+          <div className="patient-medications-view patient-fade-in">
+            <div className="patient-section-header">
+              <h2><Pill size={20} /> Current Medications</h2>
+            </div>
 
             {/* Medication Input Form */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium">Add Medication</h3>
-              <input type="text" value={medName} onChange={(e) => setMedName(e.target.value)} placeholder="Medication Name" className="w-full p-2 border rounded" />
-              <input type="text" value={dosage} onChange={(e) => setDosage(e.target.value)} placeholder="Dosage (e.g., 10mg)" className="w-full p-2 border rounded" />
-              <input type="text" value={frequency} onChange={(e) => setFrequency(e.target.value)} placeholder="Frequency (e.g., Once daily)" className="w-full p-2 border rounded" />
-              <button onClick={addMedication} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add Medication</button>
+            <div className="patient-medications-form">
+              <h3 className="patient-medications-subheader">Add Medication</h3>
+              <div className="patient-medications-inputs">
+                <input 
+                  type="text" 
+                  value={medName} 
+                  onChange={(e) => setMedName(e.target.value)} 
+                  placeholder="Medication Name" 
+                  className="patient-input" 
+                />
+                <input 
+                  type="text" 
+                  value={dosage} 
+                  onChange={(e) => setDosage(e.target.value)} 
+                  placeholder="Dosage (e.g., 10mg)" 
+                  className="patient-input" 
+                />
+                <input 
+                  type="text" 
+                  value={frequency} 
+                  onChange={(e) => setFrequency(e.target.value)} 
+                  placeholder="Frequency (e.g., Once daily)" 
+                  className="patient-input" 
+                />
+                <button 
+                  onClick={addMedication} 
+                  className="patient-button patient-button-primary"
+                >
+                  Add Medication
+                </button>
+              </div>
             </div>
 
             {/* Medications List */}
-            <div className="space-y-3">
+            <div className="patient-medications-list">
               {medications.length > 0 ? medications.map(med => (
-                <div key={med.id} className="flex items-center gap-4 p-4 border rounded">
-                  <Pill size={24} className="text-blue-500" />
-                  <div>
-                    <h3 className="font-semibold">{med.name}</h3>
-                    <p className="text-gray-600">{med.dosage} - {med.frequency}</p>
+                <div key={med.id} className="patient-medication-item">
+                  <div className="patient-medication-icon">
+                    <Pill size={24} />
+                  </div>
+                  <div className="patient-medication-details">
+                    <h3 className="patient-medication-name">{med.name}</h3>
+                    <p className="patient-medication-instructions">{med.dosage} - {med.frequency}</p>
                   </div>
                 </div>
-              )) : <p className="text-gray-500">No medications added yet.</p>}
+              )) : <p className="patient-empty-message">No medications added yet.</p>}
             </div>
 
             {/* AI Chat Feature */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium">Ask AI for Advice</h3>
-              <input 
-                type="text" 
-                value={prompt} 
-                onChange={(e) => setPrompt(e.target.value)} 
-                placeholder="Ask about interactions, side effects..." 
-                className="w-full p-2 border rounded"
-              />
-              <button onClick={fetchAIResponse} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Ask AI</button>
-              {aiResponse && <p className="p-3 bg-gray-100 rounded"><strong>AI Response:</strong> {aiResponse}</p>}
+            <div className="patient-ai-section">
+              <h3 className="patient-medications-subheader">Ask AI for Advice</h3>
+              <div className="patient-ai-input-group">
+                <input 
+                  type="text" 
+                  value={prompt} 
+                  onChange={(e) => setPrompt(e.target.value)} 
+                  placeholder="Ask about interactions, side effects..." 
+                  className="patient-input patient-ai-input"
+                />
+                <button 
+                  onClick={fetchAIResponse} 
+                  className="patient-button patient-button-secondary"
+                >
+                  Ask AI
+                </button>
+              </div>
+              {aiResponse && (
+                <div className="patient-ai-response">
+                  <strong>AI Response:</strong> 
+                  <p>{aiResponse}</p>
+                </div>
+              )}
             </div>
 
             {/* Doctor Response Section */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium">Doctor's Response</h3>
+            <div className="patient-doctor-section">
+              <h3 className="patient-medications-subheader">Doctor's Response</h3>
               <textarea
                 value={doctorResponse}
                 onChange={(e) => setDoctorResponse(e.target.value)}
                 placeholder="Doctor will respond here..."
-                className="w-full p-2 border rounded h-24"
+                className="patient-textarea"
                 readOnly
               ></textarea>
             </div>
