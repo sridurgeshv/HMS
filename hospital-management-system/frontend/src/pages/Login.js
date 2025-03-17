@@ -42,9 +42,6 @@ const Login = () => {
         localStorage.setItem('doctor_id', doctor_id);
         console.log("Stored doctor_id:", doctor_id);
       }
-
-      localStorage.setItem('username', username);
-      console.log("Stored username:", username);
   
       // Store username in local storage for all users
       if (username) {
@@ -52,7 +49,11 @@ const Login = () => {
         console.log("Stored username:", username);
       }
   
-      alert("Login successful!");
+       // Add this line here to store the role
+        localStorage.setItem('role', role);
+        console.log("Stored role:", role);
+
+        alert("Login successful!");
       
       // Redirect based on role
       switch (role) {

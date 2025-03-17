@@ -1,5 +1,5 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import React, { useContext } from 'react';
 import './App.css';
 
 // Import pages
@@ -28,48 +28,157 @@ import MedicationTracking from './pages/nurse/MedicationTracking';
 import NurseProfile from './pages/nurse/Profile';
 import AdminDashboard from './pages/admin/Dashboard';
 
-import { PatientProvider } from "./PatientContext";
-import { UserProvider } from "./UserContext";
-
+import { PatientContext, PatientProvider } from "./PatientContext";
+import { UserContext, UserProvider } from "./UserContext";
 
 import UserManagement from './pages/admin/Users';
 import AdminDepartments from './pages/admin/Departments';
 import AdminProfile from './pages/admin/AdminProfile';
 
+// Protected Route Components
+const ProtectedPatientRoute = ({ children }) => {
+  const { patientId } = useContext(PatientContext);
+  
+  if (!patientId) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
+
+const ProtectedDoctorRoute = ({ children }) => {
+  const { username } = useContext(UserContext);
+  const doctorId = localStorage.getItem('doctor_id');
+  
+  if (!username || !doctorId) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
+
+const ProtectedNurseRoute = ({ children }) => {
+  const { username } = useContext(UserContext);
+  const role = localStorage.getItem('role') === 'nurse';
+  
+  if (!username || !role) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
+
+const ProtectedAdminRoute = ({ children }) => {
+  const { username } = useContext(UserContext);
+  const role = localStorage.getItem('role') === 'admin';
+  
+  if (!username || !role) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
+
 function App() {
   return (
-    <UserProvider> {/* Wrap the entire app with UserProvider */}
-      <PatientProvider> {/* Wrap the entire app with PatientProvider */}
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<Welcome />} />
-          <Route path="/join" element={<RoleSelection />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register/patient" element={<PatientRegister />} />
-          <Route path="/register/doctor" element={<DoctorRegister />} />
-          <Route path="/register/nurse" element={<NurseRegister />} />
-          <Route path="/register/admin" element={<AdminRegister />} />
-          <Route path="/pending-approval" element={<PendingApproval />} />
-          <Route path="/patient/dashboard" element={<PatientDashboard />} />
-          <Route path="/patient/appointments" element={<Appointments />} />
-          <Route path="/patient/medical-history" element={<MedicalHistory />} />
-          <Route path="/patient/medications" element={<Medications />} />
-          <Route path="/patient/profile" element={<Profile />} />
-          <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-          <Route path="/doctor/appointments" element={<DoctorAppointments />} />
-          <Route path="/doctor/medical-records" element={<MedicalRecords />} />
-          <Route path="/doctor/Patients" element={<DoctorPatients />} />
-          <Route path="/doctor/profile" element={<DoctorProfile />} />
-          <Route path="/nurse/dashboard" element={<NurseDashboard />} />
-          <Route path="/nurse/patient-notes" element={<PatientNotes />} />
-          <Route path="/nurse/doctor-assignments" element={<DoctorAssignments />} />
-          <Route path="/nurse/medication-tracking" element={<MedicationTracking />} />
-          <Route path="/nurse/profile" element={<NurseProfile />} />
+    <UserProvider>
+      <PatientProvider>
+        <Router>
+          <div className="App">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Welcome />} />
+              <Route path="/join" element={<RoleSelection />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register/patient" element={<PatientRegister />} />
+              <Route path="/register/doctor" element={<DoctorRegister />} />
+              <Route path="/register/nurse" element={<NurseRegister />} />
+              <Route path="/register/admin" element={<AdminRegister />} />
+              <Route path="/pending-approval" element={<PendingApproval />} />
+              
+              {/* Protected Patient Routes */}
+              <Route path="/patient/dashboard" element={
+                <ProtectedPatientRoute>
+                  <PatientDashboard />
+                </ProtectedPatientRoute>
+              } />
+              <Route path="/patient/appointments" element={
+                <ProtectedPatientRoute>
+                  <Appointments />
+                </ProtectedPatientRoute>
+              } />
+              <Route path="/patient/medical-history" element={
+                <ProtectedPatientRoute>
+                  <MedicalHistory />
+                </ProtectedPatientRoute>
+              } />
+              <Route path="/patient/medications" element={
+                <ProtectedPatientRoute>
+                  <Medications />
+                </ProtectedPatientRoute>
+              } />
+              <Route path="/patient/profile" element={
+                <ProtectedPatientRoute>
+                  <Profile />
+                </ProtectedPatientRoute>
+              } />
+              
+              {/* Protected Doctor Routes */}
+              <Route path="/doctor/dashboard" element={
+                <ProtectedDoctorRoute>
+                  <DoctorDashboard />
+                </ProtectedDoctorRoute>
+              } />
+              <Route path="/doctor/appointments" element={
+                <ProtectedDoctorRoute>
+                  <DoctorAppointments />
+                </ProtectedDoctorRoute>
+              } />
+              <Route path="/doctor/medical-records" element={
+                <ProtectedDoctorRoute>
+                  <MedicalRecords />
+                </ProtectedDoctorRoute>
+              } />
+              <Route path="/doctor/Patients" element={
+                <ProtectedDoctorRoute>
+                  <DoctorPatients />
+                </ProtectedDoctorRoute>
+              } />
+              <Route path="/doctor/profile" element={
+                <ProtectedDoctorRoute>
+                  <DoctorProfile />
+                </ProtectedDoctorRoute>
+              } />
+              
+              {/* Protected Nurse Routes */}
+              <Route path="/nurse/dashboard" element={
+                <ProtectedNurseRoute>
+                  <NurseDashboard />
+                </ProtectedNurseRoute>
+              } />
+              <Route path="/nurse/patient-notes" element={
+                <ProtectedNurseRoute>
+                  <PatientNotes />
+                </ProtectedNurseRoute>
+              } />
+              <Route path="/nurse/doctor-assignments" element={
+                <ProtectedNurseRoute>
+                  <DoctorAssignments />
+                </ProtectedNurseRoute>
+              } />
+              <Route path="/nurse/medication-tracking" element={
+                <ProtectedNurseRoute>
+                  <MedicationTracking />
+                </ProtectedNurseRoute>
+              } />
+              <Route path="/nurse/profile" element={
+                <ProtectedNurseRoute>
+                  <NurseProfile />
+                </ProtectedNurseRoute>
+              } />
+
+ {/* Admin Routes */}          
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
-
-        {/* Admin Routes */}
-
           <Route path="/admin/users" element={<UserManagement />} />
           <Route path="/admin/departments" element={<AdminDepartments />} />
           <Route path="/admin/profile" element={<AdminProfile />} /> 
