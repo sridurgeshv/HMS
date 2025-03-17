@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Calendar, 
@@ -12,44 +12,86 @@ import {
   User,
   Filter,
   Download,
-  Eye
+  Eye,
+  Pill
 } from 'lucide-react';
+import axios from 'axios';
 
 const MedicalRecords = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
-  // Sample data
-  const records = [
-    { 
-      id: 201, 
-      patient: 'Sarah Johnson', 
-      recordType: 'Blood Test',
-      date: '2025-03-01',
-      doctor: 'Dr. Jane Smith',
-      status: 'Completed'
-    },
-    { 
-      id: 202, 
-      patient: 'Michael Brown', 
-      recordType: 'X-Ray',
-      date: '2025-03-03',
-      doctor: 'Dr. Jane Smith',
-      status: 'Pending'
-    },
-    { 
-      id: 203, 
-      patient: 'Emily Davis', 
-      recordType: 'Prescription',
-      date: '2025-02-28',
-      doctor: 'Dr. Jane Smith',
-      status: 'Completed'
-    }
-  ];
-  
+  const [patientMedications, setPatientMedications] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [doctor, setDoctor] = useState({ full_name: "", specialization: "" });
+
+  // Fetch patient medications when the component mounts
+  useEffect(() => {
+    const fetchPatientMedications = async () => {
+      const doctorId = localStorage.getItem('doctor_id'); // Retrieve doctor_id from local storage
+      if (!doctorId) {
+        setError("Doctor ID not found. Please log in again.");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:8000/doctor-medications/${doctorId}`);
+        if (!response.ok) throw new Error("Failed to fetch patient medications");
+
+        const data = await response.json();
+        setPatientMedications(data);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPatientMedications();
+  }, []);
+
+  // Fetch doctor profile data
+  useEffect(() => {
+    const fetchDoctorProfile = async () => {
+      const doctorId = localStorage.getItem('doctor_id');
+      if (!doctorId) return;
+
+      try {
+        const response = await axios.get(`http://localhost:8000/doctor/${doctorId}`);
+        setDoctor({
+          full_name: response.data.name,
+          specialization: response.data.specialty
+        });
+      } catch (error) {
+        console.error("Error fetching doctor profile:", error);
+      }
+    };
+
+    fetchDoctorProfile();
+  }, []);
+
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-  
+
+  if (isLoading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading patient medications...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <p className="error-message">{error}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
@@ -66,8 +108,8 @@ const MedicalRecords = () => {
             <img src="/api/placeholder/100/100" alt="Doctor profile" />
           </div>
           <div className="profile-info">
-            <h3>Dr. Jane Smith</h3>
-            <p>Cardiologist</p>
+          <h3>{doctor.full_name || "Loading..."}</h3>
+          <p>{doctor.specialization || "Loading..."}</p>
           </div>
         </div>
         
@@ -119,7 +161,7 @@ const MedicalRecords = () => {
         {/* Medical Records Content */}
         <div className="dashboard-content">
           <div className="content-header">
-            <h1>Medical Records</h1>
+            <h1>Patient Previous Medical Records</h1>
             <div className="header-actions">
               <button className="secondary-button">
                 <Filter size={18} />
@@ -128,76 +170,54 @@ const MedicalRecords = () => {
             </div>
           </div>
           
-          <div className="cards-grid">
-            {records.map(record => (
-              <div className="card" key={record.id}>
-                <div className="card-header">
-                  <h3 className="card-title">{record.recordType}</h3>
-                  <span className={`card-badge ${record.status.toLowerCase()}`}>
-                    {record.status}
-                  </span>
-                </div>
-                <div className="card-body">
-                  <div className="card-detail">
-                    <span className="card-detail-label">Patient</span>
-                    <p className="card-detail-value">{record.patient}</p>
+          {/* Patient Medications Section */}
+          <section className="patient-medications-section">
+            <h2><Pill size={20} /> Patient Medications</h2>
+            <div className="patient-medications-list">
+              {patientMedications.length > 0 ? (
+                patientMedications.map(patient => (
+                  <div key={patient.patient_id} className="patient-medication-card">
+                    <h3>{patient.full_name}</h3>
+                    <div className="medication-details">
+                      {patient.medications.length > 0 ? (
+                        patient.medications.map((med, index) => (
+                          <div key={index} className="medication-item">
+                            <p><strong>{med.name}</strong> - {med.dosage} ({med.frequency})</p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="no-medications">No medications found for this patient.</p>
+                      )}
+                    </div>
                   </div>
-                  <div className="card-detail">
-                    <span className="card-detail-label">Date</span>
-                    <p className="card-detail-value">{new Date(record.date).toLocaleDateString()}</p>
-                  </div>
-                  <div className="card-detail">
-                    <span className="card-detail-label">Doctor</span>
-                    <p className="card-detail-value">{record.doctor}</p>
-                  </div>
-                </div>
-                <div className="card-footer">
-                  <button className="action-btn" title="View Record">
-                    <Eye size={16} />
-                  </button>
-                  <button className="action-btn" title="Download">
-                    <Download size={16} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+                ))
+              ) : (
+                <p className="no-patients">No patients found in your department.</p>
+              )}
+            </div>
+          </section>
           
+          {/* Records Table (Optional) */}
           <div className="records-table-container">
             <table className="records-table">
               <thead>
                 <tr>
                   <th>Patient</th>
-                  <th>Record Type</th>
-                  <th>Date</th>
-                  <th>Doctor</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th>Medication</th>
+                  <th>Dosage</th>
+                  <th>Frequency</th>
                 </tr>
               </thead>
               <tbody>
-                {records.map(record => (
-                  <tr key={record.id}>
-                    <td>{record.patient}</td>
-                    <td>{record.recordType}</td>
-                    <td>{new Date(record.date).toLocaleDateString()}</td>
-                    <td>{record.doctor}</td>
-                    <td>
-                      <span className={`status-badge ${record.status.toLowerCase()}`}>
-                        {record.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="table-actions">
-                        <button className="action-btn" title="View Record">
-                          <Eye size={16} />
-                        </button>
-                        <button className="action-btn" title="Download">
-                          <Download size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                {patientMedications.map(patient => (
+                  patient.medications.map((med, index) => (
+                    <tr key={`${patient.patient_id}-${index}`}>
+                      <td>{patient.full_name}</td>
+                      <td>{med.name}</td>
+                      <td>{med.dosage}</td>
+                      <td>{med.frequency}</td>
+                    </tr>
+                  ))
                 ))}
               </tbody>
             </table>

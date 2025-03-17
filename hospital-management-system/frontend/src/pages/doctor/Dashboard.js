@@ -13,29 +13,65 @@ import {
   User
 } from 'lucide-react';
 import './Dashboard.css';
+import axios from 'axios';
 
 const DoctorDashboard = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedView, setSelectedView] = useState('daily');
-  
-  // Minimal sample data
-  const appointments = [
-    { id: 1, patient: 'Sarah Johnson', time: '09:00 AM', status: 'Confirmed', type: 'Check-up' },
-    { id: 2, patient: 'Michael Brown', time: '10:30 AM', status: 'Confirmed', type: 'Follow-up' },
-    { id: 3, patient: 'Emily Davis', time: '01:00 PM', status: 'Pending', type: 'Consultation' },
-  ];
-  
-  const recentPatients = [
-    { id: 101, name: 'Sarah Johnson', age: 42, lastVisit: '2025-03-01', condition: 'Hypertension' },
-    { id: 102, name: 'Michael Brown', age: 35, lastVisit: '2025-03-03', condition: 'Diabetes' },
-  ];
-  
-  const notifications = [
-    { id: 1, message: 'New test results for Sarah Johnson', time: '30 minutes ago' },
-    { id: 2, message: 'Appointment request from David Miller', time: '2 hours ago' },
-  ];
-  
+  const [appointments, setAppointments] = useState([]);
+  const [recentPatients, setRecentPatients] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [doctor, setDoctor] = useState({ full_name: "", specialization: "" });
+
+
+  // Fetch doctor profile data
+  useEffect(() => {
+    const fetchDoctorProfile = async () => {
+      const doctorId = localStorage.getItem('doctor_id');
+      if (!doctorId) return;
+
+      try {
+        const response = await axios.get(`http://localhost:8000/doctor/${doctorId}`);
+        setDoctor({
+          full_name: response.data.name,
+          specialization: response.data.specialty
+        });
+      } catch (error) {
+        console.error("Error fetching doctor profile:", error);
+      }
+    };
+
+    fetchDoctorProfile();
+  }, []);
+
+
+  // Fetch appointments and patients data
+  useEffect(() => {
+    const fetchData = async () => {
+      const doctorId = localStorage.getItem('doctor_id'); // Retrieve doctor_id from local storage
+      if (!doctorId) {
+        alert("Doctor ID not found. Please log in again.");
+        return;
+      }
+
+      try {
+        // Fetch appointments
+        const appointmentsResponse = await fetch(`http://localhost:8000/doctor-appointments/${doctorId}`);
+        const appointmentsData = await appointmentsResponse.json();
+        setAppointments(appointmentsData);
+
+        // Fetch patients
+        const patientsResponse = await fetch(`http://localhost:8000/doctor-patients/${doctorId}`);
+        const patientsData = await patientsResponse.json();
+        setRecentPatients(Array.isArray(patientsData) ? patientsData : []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
   // Update time every minute
   useEffect(() => {
     const timer = setInterval(() => {
@@ -44,7 +80,7 @@ const DoctorDashboard = () => {
     
     return () => clearInterval(timer);
   }, []);
-  
+
   const formatDate = (date) => {
     return date.toLocaleDateString('en-US', { 
       weekday: 'long', 
@@ -53,11 +89,11 @@ const DoctorDashboard = () => {
       day: 'numeric' 
     });
   };
-  
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-  
+
   return (
     <div className="dashboard-container">
       {/* Sidebar - Keeping original */}
@@ -74,8 +110,8 @@ const DoctorDashboard = () => {
             <img src="/api/placeholder/100/100" alt="Doctor profile" />
           </div>
           <div className="profile-info">
-            <h3>Dr. Jane Smith</h3>
-            <p>Cardiologist</p>
+          <h3>{doctor.full_name || "Loading..."}</h3>
+          <p>{doctor.specialization || "Loading..."}</p>
           </div>
         </div>
         
@@ -133,7 +169,7 @@ const DoctorDashboard = () => {
         <div className="dashboard-content">
           <div className="welcome-section">
             <div className="welcome-text">
-              <h1>Welcome back, Dr. Smith</h1>
+              <h1>Welcome back, {doctor.full_name} </h1>
               <p>{formatDate(currentTime)}</p>
             </div>
             
@@ -201,41 +237,46 @@ const DoctorDashboard = () => {
             </div>
           </section>
           
-          {/* Two Column Layout */}
-          <div className="dashboard-columns">
-            {/* Recent Patients */}
-            <section className="recent-patients-section">
-              <div className="section-header">
-                <h2>Recent Patients</h2>
-                <Link to="/doctor/patients" className="view-all">View All</Link>
-              </div>
-              
-              <div className="patients-list">
-                {recentPatients.map(patient => (
-                  <div className="patient-card" key={patient.id}>
-                    <div className="patient-avatar">
-                      <img src={`/api/placeholder/40/40`} alt={patient.name} />
-                    </div>
-                    
-                    <div className="patient-info">
-                      <h3>{patient.name}</h3>
-                      <p>Age: {patient.age} • {patient.condition}</p>
-                      <p className="last-visit">Last visit: {patient.lastVisit}</p>
-                    </div>
-                    
-                    <div className="patient-actions">
-                      <button className="action-btn view-records">
-                        <FileText size={16} />
-                      </button>
-                      <button className="action-btn send-message">
-                        <MessageSquare size={16} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-            
+         {/* Two Column Layout */}
+<div className="dashboard-columns">
+  {/* Recent Patients */}
+  <section className="recent-patients-section">
+    <div className="section-header">
+      <h2>Recent Patients</h2>
+      <Link to="/doctor/patients" className="view-all">View All</Link>
+    </div>
+
+    <div className="patients-list">
+      {recentPatients.length === 0 ? (
+        <p className="no-recentPatients-message">No appointments found.</p>
+      ) : (
+        recentPatients.map(patient => (  // ✅ Remove extra {}
+          <div className="patient-card" key={patient.id}>
+            <div className="patient-avatar">
+              <img src={`/api/placeholder/40/40`} alt={patient.full_name} />
+            </div>
+
+            <div className="patient-info">
+              <h3>{patient.full_name}</h3>
+              <p>Age: {patient.age} • Gender: {patient.gender}</p>
+              <p className="last-visit">Last visit: {patient.medical_history[0]?.visit_date || 'N/A'}</p>
+            </div>
+
+            <div className="patient-actions">
+              <button className="action-btn view-records">
+                <FileText size={16} />
+              </button>
+              <button className="action-btn send-message">
+                <MessageSquare size={16} />
+              </button>
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  </section>
+</div>
+
             {/* Notifications */}
             <section className="notifications-section">
               <div className="section-header">
@@ -259,9 +300,8 @@ const DoctorDashboard = () => {
               </div>
             </section>
           </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
   );
 };
 

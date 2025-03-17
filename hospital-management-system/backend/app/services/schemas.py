@@ -12,6 +12,8 @@ class UserCreate(BaseModel):
     address: str
     role: str = "patient"  # Default role
     status: str = "pending"  # Default status
+    age: int  # Ensure this is an integer
+    gender: str
 
 class DegreeCreate(BaseModel):
     degree: str
@@ -25,7 +27,7 @@ class DoctorCreate(UserCreate):
     experience: int
     role: str = "doctor"  # Fixed role for doctors
     degrees: List[DegreeCreate]
-    gender: str  # Add gender field
+    
 
 class NurseCreate(UserCreate):
     department: str

@@ -22,6 +22,7 @@ const DoctorRegister = () => {
     hospital: '',
     experience: '',
     gender: '',  // Add gender field
+    age:'',
     role: 'doctor',
     status: 'pending' , // Default status
     degrees: [{ degree: '', university: '', year: '' }] // Initialize with one degree
@@ -70,6 +71,7 @@ const DoctorRegister = () => {
       hospital: formData.hospital,
       experience: formData.experience,
       gender: formData.gender, 
+      age:formData.age, 
       role: "doctor" ,
       status: "pending" , // Include status in payload
       degrees: formData.degrees
@@ -151,6 +153,19 @@ const DoctorRegister = () => {
                 className="curasphere-input"
               />
             </div>
+
+             <div className="curasphere-input-group">
+                          <User className="curasphere-input-icon" />
+                          <input 
+                            type="text" 
+                            name="age"
+                            placeholder="Age"
+                            value={formData.age}
+                            onChange={handleChange}
+                            required 
+                            className="curasphere-input"
+                          />
+                        </div>
 
             <div className="curasphere-input-group">
               <Award className="curasphere-input-icon" />

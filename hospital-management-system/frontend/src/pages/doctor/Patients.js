@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Calendar, 
@@ -16,48 +16,88 @@ import {
   Phone,
   Mail
 } from 'lucide-react';
+import axios from 'axios';
 
 const Patients = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
-  // Sample data
-  const patients = [
-    { 
-      id: 101, 
-      name: 'Sarah Johnson', 
-      age: 42, 
-      gender: 'Female',
-      phone: '(555) 123-4567',
-      email: 'sarah.j@example.com',
-      condition: 'Hypertension',
-      lastVisit: '2025-03-01'
-    },
-    { 
-      id: 102, 
-      name: 'Michael Brown', 
-      age: 35, 
-      gender: 'Male',
-      phone: '(555) 234-5678',
-      email: 'mbrown@example.com',
-      condition: 'Diabetes',
-      lastVisit: '2025-03-03'
-    },
-    { 
-      id: 103, 
-      name: 'Emily Davis', 
-      age: 28, 
-      gender: 'Female',
-      phone: '(555) 345-6789',
-      email: 'emily.d@example.com',
-      condition: 'Asthma',
-      lastVisit: '2025-02-28'
-    }
-  ];
-  
+  const [patients, setPatients] = useState([]); // Initialize as an empty array
+  const [doctor, setDoctor] = useState({ full_name: "", specialization: "" });
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [error, setError] = useState(null); // Add error state
+
+  useEffect(() => {
+    // Fetch patients from the backend
+    const fetchPatients = async () => {
+      const doctorId = localStorage.getItem('doctor_id'); // Retrieve doctor_id from local storage
+      if (!doctorId) {
+        setError("Doctor ID not found. Please log in again.");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:8000/doctor-patients/${doctorId}`);
+        if (!response.ok) throw new Error("Failed to fetch patients");
+
+        const data = await response.json();
+        // Ensure data is an array before setting it in the state
+        if (Array.isArray(data)) {
+          setPatients(data);
+        } else {
+          setPatients([]); // Set to empty array if data is not an array
+        }
+      } catch (error) {
+        setError(error.message);
+        setPatients([]); // Set to empty array on error
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPatients();
+  }, []);
+
+  // Fetch doctor profile data
+  useEffect(() => {
+    const fetchDoctorProfile = async () => {
+      const doctorId = localStorage.getItem('doctor_id');
+      if (!doctorId) return;
+
+      try {
+        const response = await axios.get(`http://localhost:8000/doctor/${doctorId}`);
+        setDoctor({
+          full_name: response.data.name,
+          specialization: response.data.specialty
+        });
+      } catch (error) {
+        console.error("Error fetching doctor profile:", error);
+      }
+    };
+
+    fetchDoctorProfile();
+  }, []);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-  
+
+  if (isLoading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading patients...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <p className="error-message">{error}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
@@ -74,8 +114,8 @@ const Patients = () => {
             <img src="/api/placeholder/100/100" alt="Doctor profile" />
           </div>
           <div className="profile-info">
-            <h3>Dr. Jane Smith</h3>
-            <p>Cardiologist</p>
+            <h3>{doctor.full_name || "Loading..."}</h3>
+            <p>{doctor.specialization || "Loading..."}</p>
           </div>
         </div>
         
@@ -142,55 +182,71 @@ const Patients = () => {
           </div>
           
           <div className="patients-table-container">
-            <table className="patients-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Age</th>
-                  <th>Gender</th>
-                  <th>Contact</th>
-                  <th>Condition</th>
-                  <th>Last Visit</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {patients.map(patient => (
-                  <tr key={patient.id}>
-                    <td className="patient-name">
-                      <div className="patient-avatar">
-                        <img src={`/api/placeholder/40/40`} alt={patient.name} />
-                      </div>
-                      <span>{patient.name}</span>
-                    </td>
-                    <td>{patient.age}</td>
-                    <td>{patient.gender}</td>
-                    <td className="patient-contact">
-                      <div className="contact-item">
-                        <Phone size={14} />
-                        <span>{patient.phone}</span>
-                      </div>
-                      <div className="contact-item">
-                        <Mail size={14} />
-                        <span>{patient.email}</span>
-                      </div>
-                    </td>
-                    <td>{patient.condition}</td>
-                    <td>{new Date(patient.lastVisit).toLocaleDateString()}</td>
-                    <td>
-                      <div className="table-actions">
-                        <button className="action-btn" title="View Records">
-                          <FileText size={16} />
-                        </button>
-                        <button className="action-btn" title="Send Message">
-                          <MessageSquare size={16} />
-                        </button>
-                      </div>
-                    </td>
+            {patients.length === 0 ? (
+              <p className="no-patients-message">No patients found.</p>
+            ) : (
+              <table className="patients-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>Contact</th>
+                    <th>Condition</th>
+                    <th>Last Visit</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {patients.map(patient => (
+                    <tr key={patient.id}>
+                      <td className="patient-name">
+                        <div className="patient-avatar">
+                          <img src={`/api/placeholder/40/40`} alt={patient.full_name} />
+                        </div>
+                        <span>{patient.full_name}</span>
+                      </td>
+                      <td>{patient.age}</td>
+                      <td>{patient.gender}</td>
+                      <td className="patient-contact">
+                        <div className="contact-item">
+                          <Phone size={14} />
+                          <span>{patient.phone}</span>
+                        </div>
+                        <div className="contact-item">
+                          <Mail size={14} />
+                          <span>{patient.email}</span>
+                        </div>
+                      </td>
+                      <td>
+                        {patient.medical_history.map((history, index) => (
+                          <div key={index}>
+                            {history.medications}
+                          </div>
+                        ))}
+                      </td>
+                      <td>
+                        {patient.medical_history.map((history, index) => (
+                          <div key={index}>
+                            {new Date(history.visit_date).toLocaleDateString()}
+                          </div>
+                        ))}
+                      </td>
+                      <td>
+                        <div className="table-actions">
+                          <button className="action-btn" title="View Records">
+                            <FileText size={16} />
+                          </button>
+                          <button className="action-btn" title="Send Message">
+                            <MessageSquare size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </main>

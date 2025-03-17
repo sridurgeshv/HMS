@@ -18,6 +18,7 @@ class User(Base):
     role = Column(String, nullable=False, default="patient")  # Default role to "patient"
     status = Column(String, nullable=False, default="pending")  # Add status field
     gender = Column(String, nullable=True)  # Add gender field
+    age = Column(Integer, nullable=True)  # Add age field
 
 
      # Doctor-specific fields

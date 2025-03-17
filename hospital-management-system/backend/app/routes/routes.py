@@ -19,6 +19,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from app.services.schemas import AIRequest
 from app.models.models import Medication
 from app.services.schemas import MedicationCreate
+from typing import List
 
 router = APIRouter()
 
@@ -63,6 +64,8 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
         date_of_birth=user.date_of_birth,
         phone=user.phone,
         address=user.address,
+        age=user.age,  # Ensure this is correctly assigned
+        gender=user.gender,  # Ensure this is correctly assigned
         role="patient",  # Fixed role
         status="approved"  ,# Patients are approved by default
         patient_id=str(uuid.uuid4())[:8]  # Generate unique patient ID
@@ -117,7 +120,8 @@ def create_doctor(doctor: DoctorCreate, db: Session = Depends(get_db)):
         role="doctor",
         status="pending",
         doctor_id=str(uuid.uuid4())[:8] ,
-        gender=doctor.gender
+        age=doctor.age,  # Ensure this is correctly assigned
+        gender=doctor.gender,  # Ensure this is correctly assigned
     )
 
     db.add(new_doctor)
@@ -428,3 +432,128 @@ def get_medications(patient_id: str, db: Session = Depends(get_db)):  # Changed 
     medical_records = db.query(Medication).filter(Medication.patient_id == patient_id).all()
     
     return medical_records if medical_records else []
+
+@router.get("/doctor-patients/{doctor_id}")
+def get_doctor_patients(doctor_id: str, db: Session = Depends(get_db)):
+    # Fetch the doctor's specialization
+    doctor = db.query(User).filter(User.doctor_id == doctor_id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+
+    specialization = doctor.specialization
+
+    # Fetch patients with appointments in the same department/specialization
+    patients = db.query(User).join(Appointment, User.patient_id == Appointment.patient_id).filter(
+        Appointment.department.ilike(specialization)
+    ).distinct().all()
+
+    if not patients:
+        raise HTTPException(status_code=404, detail="No patients found for this specialization")
+
+    # Fetch medical history for each patient
+    patient_details = []
+    for patient in patients:
+        medical_history = db.query(MedicalHistory).filter(
+            MedicalHistory.patient_id == patient.patient_id
+        ).all()
+
+        # Format medical history data
+        history_data = [{
+            "visit_date": history.visit_date,
+            "medications": history.medications
+        } for history in medical_history]
+
+        patient_details.append({
+            "id": patient.id,
+            "full_name": patient.full_name,
+            "age": patient.age,
+            "gender": patient.gender,
+            "phone": patient.phone,
+            "email": patient.email,
+            "medical_history": history_data
+        })
+
+    return patient_details
+
+@router.get("/doctor-appointments/{doctor_id}")
+def get_doctor_appointments(doctor_id: str, db: Session = Depends(get_db)):
+    # Fetch the doctor's details
+    doctor = db.query(User).filter(User.doctor_id == doctor_id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+
+    # Normalize specialization for consistent matching
+    specialization = doctor.specialization.strip().lower()
+
+    # Debug: Log the doctor's specialization
+    print(f"Doctor Specialization (normalized): {specialization}")
+
+    # Fetch appointments for the doctor's department using case-insensitive matching
+    appointments = db.query(Appointment).filter(
+        Appointment.department.ilike(specialization),
+        Appointment.doctor_name == doctor.full_name  # Ensures doctor is assigned
+    ).order_by(Appointment.date.desc()).all()
+
+    # Debug: Log the number of appointments found
+    print(f"Found {len(appointments)} appointments")
+
+    # Return an empty list if no appointments are found
+    if not appointments:
+        return []
+
+    # Format the appointments data
+    formatted_appointments = [
+        {
+            "id": appointment.id,
+            "patient": appointment.patient_id,  # Replace with patient name if needed
+            "time": appointment.time,
+            "date": appointment.date,
+             "status": "Confirmed",
+            "type": appointment.reason  # Use reason as the appointment type
+        }
+        for appointment in appointments
+    ]
+
+    return formatted_appointments
+
+@router.get("/doctor-medications/{doctor_id}")
+def get_doctor_patient_medications(
+    doctor_id: str,
+    db: Session = Depends(get_db)
+):
+    # Fetch the doctor's specialization
+    doctor = db.query(User).filter(User.doctor_id == doctor_id).first()
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+
+    specialization = doctor.specialization
+
+    # Fetch patients in the same department
+    patients = db.query(User).join(Appointment, User.patient_id == Appointment.patient_id).filter(
+        Appointment.department.ilike(specialization)
+    ).distinct().all()
+
+    if not patients:
+        raise HTTPException(status_code=404, detail="No patients found for this specialization")
+
+    # Fetch medications for each patient
+    patient_medications = []
+    for patient in patients:
+        medications = db.query(Medication).filter(
+            Medication.patient_id == patient.patient_id
+        ).all()
+
+        patient_medications.append({
+            "patient_id": patient.patient_id,
+            "full_name": patient.full_name,
+            "medications": [
+                {
+                    "name": med.name,
+                    "dosage": med.dosage,
+                    "frequency": med.frequency
+                }
+                for med in medications
+            ]
+        })
+
+    return patient_medications

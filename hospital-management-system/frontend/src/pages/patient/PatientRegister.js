@@ -15,6 +15,8 @@ const PatientRegister = () => {
     confirmPassword: '',
     fullName: '',
     dateOfBirth: '',
+    gender: '',  // Add gender field
+    age:'',
     phone: '',
     address: '',
     role: 'patient'
@@ -40,6 +42,8 @@ const PatientRegister = () => {
       password: formData.password,
       full_name: formData.fullName,
       date_of_birth: formData.dateOfBirth,
+      gender: formData.gender, 
+      age:formData.age, 
       phone: formData.phone,
       address: formData.address,
       role: "patient" 
@@ -125,6 +129,32 @@ const PatientRegister = () => {
                 className="curasphere-input"
               />
             </div>
+
+             <div className="curasphere-input-group">
+              <User className="curasphere-input-icon" />
+              <input
+                type="text"
+                name="gender"
+                placeholder="Gender"
+                value={formData.gender}
+                onChange={handleChange}
+                required
+                className="curasphere-input"
+              />
+            </div>
+
+             <div className="curasphere-input-group">
+              <User className="curasphere-input-icon" />
+                          <input 
+                            type="text" 
+                            name="age"
+                            placeholder="Age"
+                            value={formData.age}
+                            onChange={handleChange}
+                            required 
+                            className="curasphere-input"
+                          />
+                        </div>
 
             <div className="curasphere-input-group">
               <Phone className="curasphere-input-icon" />
