@@ -2,11 +2,78 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Calendar, Clock, User, Clipboard, FileText, Bell, Package, Settings } from 'lucide-react';
 import './Dashboard.css';
+import axios from 'axios';
 
 const PatientNotes = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [notifications, setNotifications] = useState(3);
   const location = useLocation();
+  const [nurseInfo, setNurseInfo] = useState({ name: "", department: "", title: "" });
+  const [loading, setLoading] = useState(true);
+  const [patientNotes, setPatientNotes] = useState([]);
+  const [followUpTaskCount, setFollowUpTaskCount] = useState(0); // State for follow-up task count
+  const [appointmentCount, setAppointmentCount] = useState(0); // State for appointment count
+
+  // Fetch nurse details
+  useEffect(() => {
+    const fetchNurseDetails = async () => {
+      const nurseId = localStorage.getItem('nurse_id');
+      if (!nurseId) {
+        console.error("Nurse ID not found in local storage");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:8000/nurse/${nurseId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch nurse details");
+        }
+        const data = await response.json();
+        setNurseInfo(data);
+      } catch (error) {
+        console.error("Error fetching nurse details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNurseDetails();
+  }, []);
+
+  // Fetch follow-up notes
+  useEffect(() => {
+    const fetchFollowUpNotes = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/follow-up-notes');
+        if (Array.isArray(response.data)) {
+          setPatientNotes(response.data);
+          setFollowUpTaskCount(response.data.length); // Set follow-up task count
+        }
+      } catch (error) {
+        console.error("Error fetching follow-up notes:", error);
+      }
+    };
+
+    fetchFollowUpNotes();
+  }, []);
+
+  // Fetch appointment count using doctors-with-patient-counts route
+  useEffect(() => {
+    const fetchAppointmentCount = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/doctors-with-patient-counts');
+        if (Array.isArray(response.data)) {
+          const totalAppointments = response.data.reduce((acc, doctor) => acc + doctor.patient_count, 0);
+          setAppointmentCount(totalAppointments); // Set appointment count
+        }
+      } catch (error) {
+        console.error("Error fetching appointment count:", error);
+      }
+    };
+
+    fetchAppointmentCount();
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -16,20 +83,14 @@ const PatientNotes = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const patientNotes = [
-    { id: 1, patient: 'Emma Johnson', date: '10:15 AM', note: 'Patient reports feeling better after medication change. Vitals stable.' },
-    { id: 2, patient: 'Robert Chen', date: 'Yesterday', note: 'Post-op care for knee replacement. Pain managed with prescribed medication.' },
-    { id: 3, patient: 'Maria Garcia', date: 'Yesterday', note: 'Blood glucose levels stabilizing. Continue monitoring before meals.' },
-  ];
-
   return (
     <div className="app-container">
       <div className="sidebar">
         <div className="sidebar-header">
           <div className="avatar">JS</div>
           <div className="user-info">
-            <h3>Jane Smith, RN</h3>
-            <p>Medical-Surgical</p>
+            <h2>{nurseInfo.name}, {nurseInfo.title}</h2>
+            <p>{nurseInfo.department} | {nurseInfo.floor}</p>
           </div>
         </div>
         <nav className="sidebar-nav">
@@ -78,8 +139,8 @@ const PatientNotes = () => {
               {patientNotes.map(note => (
                 <div key={note.id} className="note-card">
                   <div className="note-header">
-                    <h3>{note.patient}</h3>
-                    <span className="note-date">{note.date}</span>
+                    <h3>{note.appointment_id}</h3>
+                    <span className="note-date">{note.doctor_id}</span>
                   </div>
                   <p className="note-content">{note.note}</p>
                   <div className="note-actions">
@@ -98,8 +159,8 @@ const PatientNotes = () => {
               </div>
               <div className="summary-content">
                 <h3>Tasks</h3>
-                <p className="summary-number">5</p>
-                <p className="summary-text">3 remaining</p>
+                <p className="summary-number">{followUpTaskCount}</p>
+                <p className="summary-text">Follow-Up Notes</p>
               </div>
             </div>
             <div className="summary-card">
@@ -108,7 +169,7 @@ const PatientNotes = () => {
               </div>
               <div className="summary-content">
                 <h3>Appointments</h3>
-                <p className="summary-number">3</p>
+                <p className="summary-number">{appointmentCount}</p>
                 <p className="summary-text">Today</p>
               </div>
             </div>

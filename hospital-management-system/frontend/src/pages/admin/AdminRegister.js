@@ -61,6 +61,9 @@ const AdminRegister = () => {
   
       // Generate a new admin code for the next admin
       setFormData((prev) => ({ ...prev, adminCode: generateAdminCode() }));
+
+      localStorage.setItem('admin_id', response.data.admin_id);
+
     } catch (error) {
       alert(error.response?.data?.detail || "Error signing up");
     }

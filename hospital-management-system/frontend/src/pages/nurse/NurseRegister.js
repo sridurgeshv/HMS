@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { User, Mail, Lock, Eye, EyeOff, Calendar, Phone, MapPin, Award, Building } from 'lucide-react';
-import { Link , useNavigate } from 'react-router-dom';
+import { User, Mail, Lock, Eye, EyeOff, Calendar, Phone, MapPin, Award, Building, BookOpen, Briefcase, Tag, Globe, GraduationCap, Shield, Clock, Hash, Smile} from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import '../../styles/Register.css';
 
 const NurseRegister = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [skills, setSkills] = useState([]);
+  const [languages, setLanguages] = useState([]);
+  const [education, setEducation] = useState([]);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -22,23 +25,42 @@ const NurseRegister = () => {
     hospital: '',
     experience: '',
     role: 'nurse',
-    status: 'pending' // Default status
+    status: 'pending',
+    age: '',
+    gender: '',
+    licenseExpiry: '',
+    certification: '',
+    startDate: '',
+    employeeId: '',
+    title: ''
   });
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleSkillChange = (e) => {
+    setSkills(e.target.value.split(','));
+  };
+
+  const handleLanguageChange = (e) => {
+    setLanguages(e.target.value.split(','));
+  };
+
+  const handleEducationChange = (e) => {
+    setEducation(e.target.value.split(','));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match");
       return;
     }
-  
+
     const payload = {
       username: formData.username,
       email: formData.email,
@@ -52,11 +74,24 @@ const NurseRegister = () => {
       hospital: formData.hospital,
       experience: formData.experience,
       role: "nurse",
-      status: "pending" // Include status in payload
+      status: "pending",
+      age: formData.age,
+      gender: formData.gender,
+      license_expiry: formData.licenseExpiry,
+      certification: formData.certification,
+      start_date: formData.startDate,
+      employee_id: formData.employeeId,
+      title: formData.title,
+      skills: skills,
+      languages: languages,
+      education: education
     };
-  
+
     try {
-      const response = await axios.post(`http://localhost:8000/nursesignup/`, payload);
+      const response = await axios.post('http://localhost:8000/nursesignup/', payload);
+
+      localStorage.setItem('nurse_id', response.data.nurse_id);
+
       alert(response.data.message);
       navigate('/pending-approval'); // Redirect to pending approval page
     } catch (error) {
@@ -202,6 +237,136 @@ const NurseRegister = () => {
                 placeholder="Date of Birth"
                 value={formData.dateOfBirth}
                 onChange={handleChange}
+                required 
+                className="curasphere-input"
+              />
+            </div>
+
+            <div className="curasphere-input-group">
+  <Smile className="curasphere-input-icon" />
+  <select 
+    name="gender"
+    value={formData.gender}
+    onChange={handleChange}
+    required 
+    className="curasphere-input"
+  >
+    <option value="">Select Gender</option>
+    <option value="male">Male</option>
+    <option value="female">Female</option>
+    <option value="other">Other</option>
+  </select>
+</div>
+
+            <div className="curasphere-input-group">
+              <Hash className="curasphere-input-icon" />
+              <input 
+                type="number" 
+                name="age"
+                placeholder="Age"
+                value={formData.age}
+                onChange={handleChange}
+                required 
+                className="curasphere-input"
+              />
+            </div>
+
+            <div className="curasphere-input-group">
+              <Shield className="curasphere-input-icon" />
+              <input 
+                type="date" 
+                name="licenseExpiry"
+                placeholder="License Expiry Date"
+                value={formData.licenseExpiry}
+                onChange={handleChange}
+                required 
+                className="curasphere-input"
+              />
+            </div>
+
+            <div className="curasphere-input-group">
+              <Award className="curasphere-input-icon" />
+              <input 
+                type="text" 
+                name="certification"
+                placeholder="Certification"
+                value={formData.certification}
+                onChange={handleChange}
+                required 
+                className="curasphere-input"
+              />
+            </div>
+
+            <div className="curasphere-input-group">
+              <Clock className="curasphere-input-icon" />
+              <input 
+                type="date" 
+                name="startDate"
+                placeholder="Start Date"
+                value={formData.startDate}
+                onChange={handleChange}
+                required 
+                className="curasphere-input"
+              />
+            </div>
+
+            <div className="curasphere-input-group">
+              <Tag className="curasphere-input-icon" />
+              <input 
+                type="text" 
+                name="employeeId"
+                placeholder="Employee ID"
+                value={formData.employeeId}
+                onChange={handleChange}
+                required 
+                className="curasphere-input"
+              />
+            </div>
+
+            <div className="curasphere-input-group">
+              <Briefcase className="curasphere-input-icon" />
+              <input 
+                type="text" 
+                name="title"
+                placeholder="Title"
+                value={formData.title}
+                onChange={handleChange}
+                required 
+                className="curasphere-input"
+              />
+            </div>
+
+            <div className="curasphere-input-group">
+              <BookOpen className="curasphere-input-icon" />
+              <input 
+                type="text" 
+                name="skills"
+                placeholder="Skills (comma separated)"
+                onChange={handleSkillChange}
+                required 
+                className="curasphere-input"
+              />
+            </div>
+
+            <div className="curasphere-input-group">
+              <Globe className="curasphere-input-icon" />
+              <input 
+                type="text" 
+                name="languages"
+                placeholder="Languages (comma separated)"
+                onChange={handleLanguageChange}
+                required 
+                className="curasphere-input"
+              />
+            </div>
+
+            <div className="curasphere-input-group">
+              <GraduationCap className="curasphere-input-icon" />
+              <input 
+                type="text" 
+                name="education"
+                placeholder="Education (comma separated)"
+                onChange={handleEducationChange}
                 required 
                 className="curasphere-input"
               />

@@ -19,15 +19,18 @@ import axios from 'axios';
 const Appointments = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedView, setSelectedView] = useState('all');
-  const [appointments, setAppointments] = useState([]); // Initialize as an empty array
+  const [appointments, setAppointments] = useState([]);
   const [doctor, setDoctor] = useState({ full_name: "", specialization: "" });
-  const [isLoading, setIsLoading] = useState(true); // Add loading state
-  const [error, setError] = useState(null); // Add error state
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showFollowUpForm, setShowFollowUpForm] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [followUpNote, setFollowUpNote] = useState('');
 
   // Fetch appointments data
   useEffect(() => {
     const fetchAppointments = async () => {
-      const doctorId = localStorage.getItem('doctor_id'); // Retrieve doctor_id from local storage
+      const doctorId = localStorage.getItem('doctor_id');
       if (!doctorId) {
         setError("Doctor ID not found. Please log in again.");
         setIsLoading(false);
@@ -36,15 +39,14 @@ const Appointments = () => {
 
       try {
         const response = await axios.get(`http://localhost:8000/doctor-appointments/${doctorId}`);
-        // Ensure data is an array before setting it in the state
         if (Array.isArray(response.data)) {
           setAppointments(response.data);
         } else {
-          setAppointments([]); // Set to empty array if data is not an array
+          setAppointments([]);
         }
       } catch (error) {
         setError("Failed to fetch appointments. Please try again.");
-        setAppointments([]); // Set to empty array on error
+        setAppointments([]);
       } finally {
         setIsLoading(false);
       }
@@ -77,6 +79,34 @@ const Appointments = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const handleEditClick = (appointment) => {
+    setSelectedAppointment(appointment);
+    setShowFollowUpForm(true);
+  };
+
+  const handleFollowUpSubmit = async (e) => {
+    e.preventDefault();
+  
+    if (!selectedAppointment || !followUpNote) return;
+  
+    try {
+      const response = await axios.post('http://localhost:8000/follow-up-notes', {
+        appointment_id: parseInt(selectedAppointment.id, 10),  // Ensure integer
+        note: String(followUpNote),                          // Ensure string
+        doctor_id: localStorage.getItem('doctor_id') || "default_doctor_id",  // Ensure string
+      });
+  
+      if (response.status === 200) {
+        alert('Follow-up note saved successfully!');
+        setShowFollowUpForm(false);
+        setFollowUpNote('');
+      }
+    } catch (error) {
+      console.error("Error saving follow-up note:", error);
+      alert('Failed to save follow-up note. Please try again.');
+    }
+  };
+  
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -228,7 +258,7 @@ const Appointments = () => {
                     <button className="action-btn">
                       <MessageSquare size={16} />
                     </button>
-                    <button className="action-btn edit">
+                    <button className="action-btn edit" onClick={() => handleEditClick(appointment)}>
                       Edit
                     </button>
                   </div>
@@ -238,6 +268,31 @@ const Appointments = () => {
           </div>
         </div>
       </main>
+
+      {/* Follow-up Form */}
+      {showFollowUpForm && (
+        <div className="follow-up-form-overlay">
+          <div className="follow-up-form">
+            <h3>Write Follow-up Note</h3>
+            <form onSubmit={handleFollowUpSubmit}>
+              <textarea
+                placeholder="Enter follow-up note..."
+                value={followUpNote}
+                onChange={(e) => setFollowUpNote(e.target.value)}
+                required
+              />
+              <div className="form-actions">
+                <button type="button" className="cancel-btn" onClick={() => setShowFollowUpForm(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="submit-btn">
+                  Submit
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -6,7 +6,12 @@ import './Dashboard.css';
 const DoctorAssignments = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [notifications, setNotifications] = useState(3);
+  const [doctors, setDoctors] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const location = useLocation();
+  const [nurseInfo, setNurseInfo] = useState({ name: "", department: "" , title:"" });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -16,11 +21,68 @@ const DoctorAssignments = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const doctorAssignments = [
-    { id: 1, doctor: 'Dr. Wilson', specialty: 'Cardiology', patients: 5, location: 'West Wing' },
-    { id: 2, doctor: 'Dr. Thompson', specialty: 'Orthopedics', patients: 3, location: 'East Wing' },
-    { id: 3, doctor: 'Dr. Roberts', specialty: 'Internal Medicine', patients: 7, location: 'West Wing' },
-  ];
+  // Fetch doctors and their patient counts
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/doctors-with-patient-counts');
+        if (!response.ok) throw new Error("Failed to fetch doctors");
+
+        const data = await response.json();
+        setDoctors(data);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
+
+  useEffect(() => {
+        const fetchNurseDetails = async () => {
+          const nurseId = localStorage.getItem('nurse_id');
+          if (!nurseId) {
+            console.error("Nurse ID not found in local storage");
+            setLoading(false);
+            return;
+          }
+    
+          try {
+            const response = await fetch(`http://localhost:8000/nurse/${nurseId}`);
+            if (!response.ok) {
+              throw new Error("Failed to fetch nurse details");
+            }
+            const data = await response.json();
+            setNurseInfo(data);
+          } catch (error) {
+            console.error("Error fetching nurse details:", error);
+          } finally {
+            setLoading(false);
+          }
+        };
+    
+        fetchNurseDetails();
+      }, []);
+    
+
+  if (isLoading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading doctor assignments...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <p className="error-message">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
@@ -28,8 +90,8 @@ const DoctorAssignments = () => {
         <div className="sidebar-header">
           <div className="avatar">JS</div>
           <div className="user-info">
-            <h3>Jane Smith, RN</h3>
-            <p>Medical-Surgical</p>
+          <h2>{nurseInfo.name}, {nurseInfo.title}</h2>
+          <p>{nurseInfo.department} | {nurseInfo.floor}</p>
           </div>
         </div>
         <nav className="sidebar-nav">
@@ -74,15 +136,18 @@ const DoctorAssignments = () => {
               <h2><User size={20} /> Doctor Assignments</h2>
             </div>
             <div className="doctors-list">
-              {doctorAssignments.map(doctor => (
-                <div key={doctor.id} className="doctor-card">
-                  <div className="doctor-avatar">{doctor.doctor.split(' ')[1][0]}</div>
+              {doctors.map((doctor, index) => (
+                <div key={index} className="doctor-card">
+                  <div className="doctor-avatar">
+                    {doctor.doctor_name && doctor.doctor_name.split(' ').length > 1
+                      ? doctor.doctor_name.split(' ')[1][0]
+                      : doctor.doctor_name?.[0] || 'D'}
+                  </div>
                   <div className="doctor-info">
-                    <h3>{doctor.doctor}</h3>
-                    <p>{doctor.specialty}</p>
+                    <h3>{doctor.doctor_name}</h3>
+                    <p>{doctor.department}</p>
                     <div className="doctor-meta">
-                      <span>{doctor.patients} Patients</span>
-                      <span>{doctor.location}</span>
+                      <span>{doctor.patient_count} Patients</span>
                     </div>
                   </div>
                 </div>
@@ -97,7 +162,7 @@ const DoctorAssignments = () => {
               </div>
               <div className="summary-content">
                 <h3>Doctors</h3>
-                <p className="summary-number">3</p>
+                <p className="summary-number">{doctors.length}</p>
                 <p className="summary-text">On duty</p>
               </div>
             </div>
@@ -107,7 +172,9 @@ const DoctorAssignments = () => {
               </div>
               <div className="summary-content">
                 <h3>Patients</h3>
-                <p className="summary-number">15</p>
+                <p className="summary-number">
+                  {doctors.reduce((total, doctor) => total + doctor.patient_count, 0)}
+                </p>
                 <p className="summary-text">Assigned</p>
               </div>
             </div>

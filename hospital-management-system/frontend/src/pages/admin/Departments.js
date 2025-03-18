@@ -6,127 +6,76 @@ import {
   Briefcase, 
   BarChart2, 
   Settings, 
-  Grid, 
   Bell, 
   Search, 
   LogOut, 
   Menu, 
   X,
-  PlusCircle,
-  Edit,
-  Trash2,
   User,
   Calendar,
-  Clock,
-  Filter,
-  ChevronDown
+  Clock
 } from 'lucide-react';
 import axios from 'axios';
 
 const Departments = () => {
   const location = useLocation();
   const [activeSidebar, setActiveSidebar] = useState(true);
-  const [departments, setDepartments] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [nurses, setNurses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [notificationCount, setNotificationCount] = useState(3);
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
-  const [showAddDepartment, setShowAddDepartment] = useState(false);
-  const [filterOption, setFilterOption] = useState('all');
+  const [adminData, setAdminData] = useState({
+    fullName: '',
+    role: ''
+  });
 
   // Toggle sidebar
   const toggleSidebar = () => {
     setActiveSidebar(!activeSidebar);
   };
 
-  // Fetch departments data
+  // Fetch doctors, nurses, and admin data
   useEffect(() => {
-    // Simulate API call for departments
-    setTimeout(() => {
-      setDepartments([
-        { 
-          id: 1, 
-          name: 'Emergency', 
-          head: 'Dr. Michael Torres', 
-          staffCount: 24, 
-          capacity: 92, 
-          status: 'Active',
-          rooms: 12,
-          description: 'Handles emergency cases requiring immediate medical attention.'
-        },
-        { 
-          id: 2, 
-          name: 'Cardiology', 
-          head: 'Dr. Sarah Johnson', 
-          staffCount: 18, 
-          capacity: 74, 
-          status: 'Active',
-          rooms: 8,
-          description: 'Specialized in diagnosing and treating heart conditions and diseases.'
-        },
-        { 
-          id: 3, 
-          name: 'Pediatrics', 
-          head: 'Dr. Emily Chen', 
-          staffCount: 15, 
-          capacity: 63, 
-          status: 'Active',
-          rooms: 10,
-          description: 'Provides medical care for infants, children, and adolescents.'
-        },
-        { 
-          id: 4, 
-          name: 'Neurology', 
-          head: 'Dr. James Wilson', 
-          staffCount: 12, 
-          capacity: 55, 
-          status: 'Active',
-          rooms: 6,
-          description: 'Treats disorders of the nervous system, including the brain and spinal cord.'
-        },
-        { 
-          id: 5, 
-          name: 'Oncology', 
-          head: 'Dr. Patricia Miller', 
-          staffCount: 16, 
-          capacity: 70, 
-          status: 'Active',
-          rooms: 9,
-          description: 'Specializes in the diagnosis and treatment of cancer.'
-        },
-        { 
-          id: 6, 
-          name: 'Radiology', 
-          head: 'Dr. Robert Brown', 
-          staffCount: 10, 
-          capacity: 60, 
-          status: 'Maintenance',
-          rooms: 7,
-          description: 'Uses imaging technologies to diagnose and treat diseases.'
-        },
-        { 
-          id: 7, 
-          name: 'Orthopedics', 
-          head: 'Dr. Susan Taylor', 
-          staffCount: 14, 
-          capacity: 65, 
-          status: 'Active',
-          rooms: 8,
-          description: 'Concerned with the musculoskeletal system, including bones, joints, and muscles.'
-        },
-        { 
-          id: 8, 
-          name: 'Psychiatry', 
-          head: 'Dr. David Lee', 
-          staffCount: 9, 
-          capacity: 50, 
-          status: 'Active',
-          rooms: 5,
-          description: 'Treats mental disorders and provides mental health services.'
-        }
-      ]);
-      setLoading(false);
-    }, 1000);
+    // Fetch doctors
+    axios.get('http://localhost:8000/doctors/')
+      .then(response => {
+        setDoctors(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching doctors:', error);
+      });
+
+    // Fetch nurses
+    axios.get('http://localhost:8000/nurses/')
+      .then(response => {
+        setNurses(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching nurses:', error);
+      });
+
+    // Fetch admin data
+    const fetchAdminData = async () => {
+      const adminId = localStorage.getItem('admin_id');
+      if (!adminId) {
+        console.error("Admin ID not found in local storage");
+        return;
+      }
+
+      try {
+        const response = await axios.get(`http://localhost:8000/admin/${adminId}`);
+        const data = response.data;
+        setAdminData({
+          fullName: data.full_name,
+          role: data.role
+        });
+      } catch (error) {
+        console.error("Error fetching admin data:", error);
+      }
+    };
+
+    fetchAdminData();
 
     // Set current time and date
     const updateTime = () => {
@@ -140,25 +89,6 @@ const Departments = () => {
     
     return () => clearInterval(interval);
   }, []);
-
-  // Handle department form toggle
-  const toggleAddDepartment = () => {
-    setShowAddDepartment(!showAddDepartment);
-  };
-
-  // Handle filter change
-  const handleFilterChange = (e) => {
-    setFilterOption(e.target.value);
-  };
-
-  // Filter departments based on selected option
-  const filteredDepartments = departments.filter(dept => {
-    if (filterOption === 'all') return true;
-    if (filterOption === 'high-capacity' && dept.capacity >= 70) return true;
-    if (filterOption === 'low-capacity' && dept.capacity < 70) return true;
-    if (filterOption === 'maintenance' && dept.status === 'Maintenance') return true;
-    return false;
-  });
 
   return (
     <div className={`departments-container ${activeSidebar ? 'sidebar-active' : 'sidebar-inactive'}`}>
@@ -215,12 +145,7 @@ const Departments = () => {
           <div className="nav-right">
             <div className="search-container">
               <Search size={18} />
-              <input type="text" placeholder="Search departments..." />
-            </div>
-            
-            <div className="notification-bell">
-              <Bell size={20} />
-              {notificationCount > 0 && <span className="notification-badge">{notificationCount}</span>}
+              <input type="text" placeholder="Search doctors or nurses..." />
             </div>
             
             <div className="admin-profile">
@@ -228,151 +153,44 @@ const Departments = () => {
                 <User size={20} />
               </div>
               <div className="admin-info">
-                <p className="admin-name">Admin User</p>
-                <p className="admin-role">Super Admin</p>
+                <p className="admin-name">{adminData.fullName}</p>
+                <p className="admin-role">{adminData.role}</p>
               </div>
             </div>
           </div>
         </nav>
         
-        {/* Departments Content */}
+        {/* Doctors and Nurses Content */}
         <div className="departments-content">
-          <div className="departments-header">
-            <div className="departments-header-left">
-              <h2 className="page-title">Hospital Departments</h2>
-              <div className="departments-filter">
-                <Filter size={16} />
-                <select value={filterOption} onChange={handleFilterChange}>
-                  <option value="all">All Departments</option>
-                  <option value="high-capacity">High Capacity (≥70%)</option>
-                  <option value="low-capacity">Low Capacity (≤70%)</option>
-                  <option value="maintenance">Under Maintenance</option>
-                </select>
-              </div>
+          {/* Doctors Section */}
+          <div className="staff-section">
+            <h2>Doctors</h2>
+            <div className="staff-grid">
+              {doctors.map(doctor => (
+                <div key={doctor.id} className="staff-card">
+                  <h3>{doctor.full_name}</h3>
+                  <p><strong>Specialization:</strong> {doctor.specialization}</p>
+                  <p><strong>Hospital:</strong> {doctor.hospital}</p>
+                  <p><strong>Experience:</strong> {doctor.experience} years</p>
+                  <p><strong>Doctor ID:</strong> {doctor.doctor_id}</p>
+                </div>
+              ))}
             </div>
-            <button className="add-department-btn" onClick={toggleAddDepartment}>
-              <PlusCircle size={18} />
-              <span>Add Department</span>
-            </button>
           </div>
-          
-          {showAddDepartment && (
-            <div className="add-department-form">
-              <h3>Add New Department</h3>
-              <form>
-                <div className="form-group">
-                  <label>Department Name</label>
-                  <input type="text" placeholder="Enter department name" />
-                </div>
-                <div className="form-group">
-                  <label>Department Head</label>
-                  <input type="text" placeholder="Enter department head name" />
-                </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Staff Count</label>
-                    <input type="number" placeholder="Enter staff count" min="0" />
-                  </div>
-                  <div className="form-group">
-                    <label>Room Count</label>
-                    <input type="number" placeholder="Enter room count" min="0" />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label>Description</label>
-                  <textarea placeholder="Enter department description"></textarea>
-                </div>
-                <div className="form-actions">
-                  <button type="button" className="cancel-btn" onClick={toggleAddDepartment}>Cancel</button>
-                  <button type="submit" className="submit-btn">Save Department</button>
-                </div>
-              </form>
-            </div>
-          )}
-          
-          {loading ? (
-            <div className="departments-grid">
-              {Array(6).fill().map((_, idx) => (
-                <div key={idx} className="department-card skeleton-loader">
-                  <div className="skeleton-text-lg"></div>
-                  <div className="skeleton-text-sm"></div>
-                  <div className="skeleton-progress"></div>
+
+          {/* Nurses Section */}
+          <div className="staff-section">
+            <h2>Nurses</h2>
+            <div className="staff-grid">
+              {nurses.map(nurse => (
+                <div key={nurse.id} className="staff-card">
+                  <h3>{nurse.full_name}</h3>
+                  <p><strong>Department:</strong> {nurse.department}</p>
+                  <p><strong>Hospital:</strong> {nurse.hospital}</p>
+                  <p><strong>Experience:</strong> {nurse.experience} years</p>
+                  <p><strong>Nurse ID:</strong> {nurse.nurse_id}</p>
                 </div>
               ))}
-            </div>
-          ) : (
-            <div className="departments-grid">
-              {filteredDepartments.map(dept => (
-                <div key={dept.id} className={`department-card ${dept.status === 'Maintenance' ? 'maintenance' : ''}`}>
-                  <div className="department-header">
-                    <h3>{dept.name}</h3>
-                    <div className="department-actions">
-                      <button className="edit-btn">
-                        <Edit size={16} />
-                      </button>
-                      <button className="delete-btn">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="department-info">
-                    <p><strong>Head:</strong> {dept.head}</p>
-                    <p><strong>Staff:</strong> {dept.staffCount}</p>
-                    <p><strong>Rooms:</strong> {dept.rooms}</p>
-                    <div className="capacity-container">
-                      <div className="capacity-label">
-                        <span>Capacity:</span>
-                        <span>{dept.capacity}%</span>
-                      </div>
-                      <div className="capacity-bar">
-                        <div 
-                          className={`capacity-fill ${dept.capacity > 85 ? 'high' : dept.capacity > 60 ? 'medium' : 'low'}`} 
-                          style={{width: `${dept.capacity}%`}}
-                        ></div>
-                      </div>
-                    </div>
-                    <p className="department-description">{dept.description}</p>
-                  </div>
-                  
-                  <div className="department-footer">
-                    <span className={`department-status ${dept.status.toLowerCase()}`}>
-                      {dept.status}
-                    </span>
-                    <button className="view-details-btn">
-                      <span>View Details</span>
-                      <ChevronDown size={16} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          
-          <div className="departments-summary">
-            <div className="summary-card">
-              <h3>Total Departments</h3>
-              <p className="summary-value">{departments.length}</p>
-            </div>
-            <div className="summary-card">
-              <h3>Total Staff</h3>
-              <p className="summary-value">
-                {departments.reduce((total, dept) => total + dept.staffCount, 0)}
-              </p>
-            </div>
-            <div className="summary-card">
-              <h3>Total Rooms</h3>
-              <p className="summary-value">
-                {departments.reduce((total, dept) => total + dept.rooms, 0)}
-              </p>
-            </div>
-            <div className="summary-card">
-              <h3>Avg Capacity</h3>
-              <p className="summary-value">
-                {departments.length > 0 
-                  ? Math.round(departments.reduce((total, dept) => total + dept.capacity, 0) / departments.length) 
-                  : 0}%
-              </p>
             </div>
           </div>
         </div>

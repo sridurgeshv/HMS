@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar, Clock, User, Clipboard, FileText, Activity, Bell, ChevronRight, Package, Settings } from 'lucide-react';
+import { Calendar, Clock, User, Clipboard, FileText, Bell, ChevronRight, Package, Settings } from 'lucide-react';
 import './Dashboard.css';
+import axios from 'axios';
 
 const NurseDashboard = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [notifications, setNotifications] = useState(3);
   const location = useLocation();
+  const [nurseInfo, setNurseInfo] = useState({ name: "", department: "", title: "" });
+  const [loading, setLoading] = useState(true);
+  const [upcomingAppointments, setUpcomingAppointments] = useState([]);
+  const [patientNotes, setPatientNotes] = useState([]); // State for follow-up notes
+  const [appointmentCount, setAppointmentCount] = useState(0); // State for appointment count
+  const [medicationCount, setMedicationCount] = useState(0); // State for medication count
+  const [patientCount, setPatientCount] = useState(0); // State for patient count
+  const [followUpTaskCount, setFollowUpTaskCount] = useState(0); // State for follow-up task count
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -16,21 +25,98 @@ const NurseDashboard = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const todayTasks = [
-    { id: 1, time: '08:00 AM', task: 'Check vitals - Room 302', priority: 'high', completed: false },
-    { id: 2, time: '09:30 AM', task: 'Medication - John Smith', priority: 'medium', completed: true },
-    { id: 3, time: '11:00 AM', task: 'Assist Dr. Thompson - Room 315', priority: 'high', completed: false },
-  ];
+  useEffect(() => {
+    const fetchNurseDetails = async () => {
+      const nurseId = localStorage.getItem('nurse_id');
+      if (!nurseId) {
+        console.error("Nurse ID not found in local storage");
+        setLoading(false);
+        return;
+      }
 
-  const upcomingAppointments = [
-    { id: 1, time: '10:00 AM', patient: 'Emma Johnson', room: '304', doctor: 'Dr. Wilson', type: 'Check-up' },
-    { id: 2, time: '11:30 AM', patient: 'Michael Brown', room: '310', doctor: 'Dr. Thompson', type: 'Post-surgery' },
-  ];
+      try {
+        const response = await fetch(`http://localhost:8000/nurse/${nurseId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch nurse details");
+        }
+        const data = await response.json();
+        setNurseInfo(data);
+      } catch (error) {
+        console.error("Error fetching nurse details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const toggleTaskStatus = (id) => {
-    // Update task status logic would go here
-    console.log(`Toggling task ${id}`);
-  };
+    fetchNurseDetails();
+  }, []);
+
+  // Fetch appointments count
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/appointments');
+        if (Array.isArray(response.data)) {
+          setUpcomingAppointments(response.data);
+          setAppointmentCount(response.data.length); // Set appointment count
+        }
+      } catch (error) {
+        console.error("Error fetching appointments:", error);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
+
+  // Fetch medications count
+  useEffect(() => {
+    const fetchMedications = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/medications');
+        if (Array.isArray(response.data)) {
+          setMedicationCount(response.data.length); // Set medication count
+        }
+      } catch (error) {
+        console.error("Error fetching medications:", error);
+      }
+    };
+
+    fetchMedications();
+  }, []);
+
+  // Fetch patient count from doctors-with-patient-counts
+  useEffect(() => {
+    const fetchPatientCount = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/doctors-with-patient-counts');
+        if (Array.isArray(response.data)) {
+          const totalPatients = response.data.reduce((acc, doctor) => acc + doctor.patient_count, 0);
+          setPatientCount(totalPatients); // Set patient count
+        }
+      } catch (error) {
+        console.error("Error fetching patient count:", error);
+      }
+    };
+
+    fetchPatientCount();
+  }, []);
+
+  // Fetch follow-up notes count
+  useEffect(() => {
+    const fetchFollowUpNotes = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/follow-up-notes');
+        if (Array.isArray(response.data)) {
+          setPatientNotes(response.data);
+          setFollowUpTaskCount(response.data.length); // Set follow-up task count
+        }
+      } catch (error) {
+        console.error("Error fetching follow-up notes:", error);
+      }
+    };
+
+    fetchFollowUpNotes();
+  }, []);
 
   return (
     <div className="app-container">
@@ -38,8 +124,8 @@ const NurseDashboard = () => {
         <div className="sidebar-header">
           <div className="avatar">JS</div>
           <div className="user-info">
-            <h3>Jane Smith, RN</h3>
-            <p>Medical-Surgical</p>
+            <h2>{nurseInfo.name}, {nurseInfo.title}</h2>
+            <p>{nurseInfo.department} | {nurseInfo.floor}</p>
           </div>
         </div>
         <nav className="sidebar-nav">
@@ -79,29 +165,29 @@ const NurseDashboard = () => {
         </header>
 
         <div className="content-area">
+          {/* Follow-Up Notes Section */}
           <div className="tasks-container">
             <div className="section-header">
-              <h2><Activity size={20} /> Today's Tasks</h2>
-              <Link to="/nurse/appointments" className="view-all-link">View All <ChevronRight size={16} /></Link>
+              <h2><FileText size={20} /> Follow-Up Notes</h2>
+              <Link to="/nurse/follow-up-notes" className="view-all-link">View All <ChevronRight size={16} /></Link>
             </div>
             <ul className="tasks">
-              {todayTasks.map(task => (
-                <li key={task.id} className={`task-item ${task.completed ? 'completed' : ''} priority-${task.priority}`}>
-                  <div className="task-checkbox" onClick={() => toggleTaskStatus(task.id)}>
-                    {task.completed ? '✓' : ''}
-                  </div>
+              {patientNotes.map(note => (
+                <li key={note.id} className="task-item">
                   <div className="task-content">
-                    <span className="task-time">{task.time}</span>
-                    <span className="task-description">{task.task}</span>
-                  </div>
-                  <div className="task-priority">
-                    <span className="priority-indicator"></span>
+                    <span className="task-description">
+                      <strong>Appointment ID:</strong> {note.appointment_id} | <strong>Note:</strong> {note.note}
+                    </span>
+                    <span className="task-time">
+                      <strong>Doctor ID:</strong> {note.doctor_id}
+                    </span>
                   </div>
                 </li>
               ))}
             </ul>
           </div>
 
+          {/* Upcoming Appointments Section */}
           <div className="appointments-list">
             <div className="section-header">
               <h2><Calendar size={20} /> Upcoming Appointments</h2>
@@ -115,7 +201,6 @@ const NurseDashboard = () => {
                     <h3>{appointment.patient}</h3>
                     <div className="appointment-meta">
                       <span><User size={14} /> {appointment.doctor}</span>
-                      <span>Room {appointment.room}</span>
                       <span>{appointment.type}</span>
                     </div>
                   </div>
@@ -123,7 +208,8 @@ const NurseDashboard = () => {
               ))}
             </ul>
           </div>
-          
+
+          {/* Dashboard Summary Section */}
           <div className="dashboard-summary">
             <div className="summary-card">
               <div className="summary-icon task-icon">
@@ -131,8 +217,8 @@ const NurseDashboard = () => {
               </div>
               <div className="summary-content">
                 <h3>Tasks</h3>
-                <p className="summary-number">5</p>
-                <p className="summary-text">3 remaining</p>
+                <p className="summary-number">{followUpTaskCount}</p>
+                <p className="summary-text">Follow-Up Notes</p>
               </div>
             </div>
             <div className="summary-card">
@@ -141,7 +227,7 @@ const NurseDashboard = () => {
               </div>
               <div className="summary-content">
                 <h3>Appointments</h3>
-                <p className="summary-number">3</p>
+                <p className="summary-number">{appointmentCount}</p>
                 <p className="summary-text">Today</p>
               </div>
             </div>
@@ -151,8 +237,8 @@ const NurseDashboard = () => {
               </div>
               <div className="summary-content">
                 <h3>Medications</h3>
-                <p className="summary-number">4</p>
-                <p className="summary-text">1 completed</p>
+                <p className="summary-number">{medicationCount}</p>
+                <p className="summary-text">Assigned</p>
               </div>
             </div>
             <div className="summary-card">
@@ -161,7 +247,7 @@ const NurseDashboard = () => {
               </div>
               <div className="summary-content">
                 <h3>Patients</h3>
-                <p className="summary-number">12</p>
+                <p className="summary-number">{patientCount}</p>
                 <p className="summary-text">Assigned</p>
               </div>
             </div>

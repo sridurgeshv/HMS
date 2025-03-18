@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String , ForeignKey, DateTime , Date, Text
+from sqlalchemy import Column, Integer, String , ForeignKey, DateTime , Date, Text, JSON 
 from app.utils.database import Base
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 
 class User(Base):
@@ -19,8 +20,15 @@ class User(Base):
     status = Column(String, nullable=False, default="pending")  # Add status field
     gender = Column(String, nullable=True)  # Add gender field
     age = Column(Integer, nullable=True)  # Add age field
-
-
+    license_expiry = Column(Date, nullable=True)
+    certification = Column(String, nullable=True)
+    start_date = Column(Date, nullable=True)
+    employee_id = Column(String, unique=True, index=True, nullable=True)
+    title = Column(String, nullable=True)
+    skills = Column(JSON, nullable=True)  # Store as JSON
+    languages = Column(JSON, nullable=True)  # Store as JSON
+    education = Column(JSON, nullable=True)  # Store as JSON
+    
      # Doctor-specific fields
     specialization = Column(String, nullable=True)
     license_number = Column(String, unique=True, index=True, nullable=True)
@@ -30,11 +38,16 @@ class User(Base):
 
        # Nurse-specific fields
     department = Column(String, nullable=True)
+    nurse_id = Column(String, unique=True, index=True, nullable=True)  # Unique doctor ID
+
 
 
     admin_code = Column(String, unique=True, nullable=True)  # Admin code field
 
     degrees = relationship("Degree", back_populates="user")
+
+    admin_id = Column(String, unique=True, index=True, nullable=True)  # Unique patient ID
+    
 
 
 class Degree(Base):
@@ -54,11 +67,13 @@ class Appointment(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     patient_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    doctor_id = Column(String, ForeignKey("users.doctor_id"), nullable=True)  # Add doctor_id
     doctor_name = Column(String, nullable=True)
     department = Column(String, nullable=False)
     date = Column(DateTime, nullable=False)
     time = Column(String, nullable=False)
     reason = Column(String, nullable=False)
+    
 
     
 class MedicalHistory(Base):
@@ -79,3 +94,14 @@ class Medication(Base):
     dosage = Column(String, nullable=False)
     frequency= Column(String, nullable=False)
     patient_id = Column(String, ForeignKey("users.patient_id"), nullable=False)
+    status = Column(String, nullable=False, default="Pending")  # Add status field
+
+
+class FollowUpNote(Base):
+    __tablename__ = "follow_up_notes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    appointment_id = Column(Integer, ForeignKey("appointments.id"), nullable=False)  # Link to the appointment
+    note = Column(Text, nullable=False)  # The follow-up note content
+    doctor_id = Column(String, ForeignKey("users.doctor_id"), nullable=False)  # Link to the doctor
+    created_at = Column(DateTime(timezone=True), server_default=func.now())  # Timestamp for when the note was created    

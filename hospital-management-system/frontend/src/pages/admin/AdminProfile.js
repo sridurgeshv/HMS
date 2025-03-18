@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './Dashboard.css';
-import { Users, Briefcase, BarChart2, Settings, Grid, Bell, Search, LogOut, Menu, X, User, Mail, Phone, Calendar, Shield, Edit, Save, Clock, Key, Eye, EyeOff } from 'lucide-react';
-import axios from 'axios';
+import { Users, Briefcase, BarChart2, Settings, Bell, Search, LogOut, Menu, X, User, Mail, Phone, Calendar, Shield, Edit, Save, Clock, Key, Eye, EyeOff } from 'lucide-react';
 
 const AdminProfile = () => {
   const location = useLocation();
@@ -14,14 +13,13 @@ const AdminProfile = () => {
   const [currentDate, setCurrentDate] = useState('');
   const [notificationCount, setNotificationCount] = useState(3);
   const [adminData, setAdminData] = useState({
-    fullName: 'Admin User',
-    email: 'admin@curashpere.com',
-    phone: '+1 (555) 123-4567',
-    role: 'Super Admin',
-    joinDate: 'Jan 15, 2023',
-    lastLogin: 'Today at 8:45 AM',
-    department: 'Administration',
-    password: '••••••••••'
+    fullName: '',
+    email: '',
+    phone: '',
+    role: '',
+    department: '',
+    password: '••••••••••',
+    adminCode: ''
   });
 
   const [formData, setFormData] = useState({...adminData});
@@ -52,8 +50,6 @@ const AdminProfile = () => {
         alert('Profile updated successfully!');
       }, 800);
       
-      // In a real application, you would make an API call here
-      // await axios.put('http://localhost:8000/admin/profile/', formData);
     } catch (error) {
       console.error('Error updating profile:', error);
     }
@@ -74,10 +70,43 @@ const AdminProfile = () => {
 
   // Fetch admin data
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
+    const fetchAdminData = async () => {
+      const adminId = localStorage.getItem('admin_id');
+      if (!adminId) {
+        console.error("Admin ID not found in local storage");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:8000/admin/${adminId}`);
+        if (!response.ok) throw new Error("Failed to fetch admin data");
+
+        const data = await response.json();
+        setAdminData({
+          fullName: data.full_name,
+          email: data.email,
+          phone: data.phone,
+          role: data.role,
+          department: data.department,
+          password: '••••••••••',
+          adminCode: data.admin_code
+        });
+        setFormData({
+          fullName: data.full_name,
+          email: data.email,
+          phone: data.phone,
+          department: data.department,
+          password: '••••••••••'
+        });
+      } catch (error) {
+        console.error("Error fetching admin data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAdminData();
 
     // Set current time and date
     const updateTime = () => {
@@ -231,17 +260,6 @@ const AdminProfile = () => {
                     <h3 className="profile-name">{adminData.fullName}</h3>
                     <p className="profile-role">{adminData.role}</p>
                     <p className="profile-department">{adminData.department}</p>
-                  </div>
-                </div>
-                
-                <div className="profile-stats">
-                  <div className="profile-stat">
-                    <span className="stat-label">Member Since</span>
-                    <span className="stat-value">{adminData.joinDate}</span>
-                  </div>
-                  <div className="profile-stat">
-                    <span className="stat-label">Last Login</span>
-                    <span className="stat-value">{adminData.lastLogin}</span>
                   </div>
                 </div>
               </div>

@@ -6,6 +6,8 @@ import './Dashboard.css';
 const Profile = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [notifications, setNotifications] = useState(3);
+  const [nurseInfo, setNurseInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
 
   useEffect(() => {
@@ -16,22 +18,39 @@ const Profile = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const nurseInfo = {
-    name: "Jane Smith",
-    title: "RN, BSN",
-    department: "Medical-Surgical",
-    floor: "Floor 3",
-    employeeId: "NS-7842",
-    email: "jane.smith@hospital.org",
-    phone: "(555) 123-4567",
-    startDate: "June 15, 2022",
-    certification: "Critical Care Certified (CCRN)",
-    licenseNumber: "RN-723645",
-    licenseExpiry: "December 31, 2025",
-    education: "Bachelor of Science in Nursing, State University, 2020",
-    skills: ["IV Administration", "Wound Care", "Critical Care", "Patient Education", "Electronic Medical Records"],
-    languages: ["English (Native)", "Spanish (Conversational)"]
-  };
+  useEffect(() => {
+    const fetchNurseDetails = async () => {
+      const nurseId = localStorage.getItem('nurse_id');
+      if (!nurseId) {
+        console.error("Nurse ID not found in local storage");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:8000/nurse/${nurseId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch nurse details");
+        }
+        const data = await response.json();
+        setNurseInfo(data);
+      } catch (error) {
+        console.error("Error fetching nurse details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNurseDetails();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!nurseInfo) {
+    return <div>No nurse data found.</div>;
+  }
 
   return (
     <div className="app-container">
@@ -39,8 +58,8 @@ const Profile = () => {
         <div className="sidebar-header">
           <div className="avatar">JS</div>
           <div className="user-info">
-            <h3>Jane Smith, RN</h3>
-            <p>Medical-Surgical</p>
+            <h3>{nurseInfo.name}, RN</h3>
+            <p>{nurseInfo.department}</p>
           </div>
         </div>
         <nav className="sidebar-nav">

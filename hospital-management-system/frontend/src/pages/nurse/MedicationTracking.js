@@ -6,7 +6,11 @@ import './Dashboard.css';
 const MedicationTracking = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [notifications, setNotifications] = useState(3);
+  const [medications, setMedications] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState({}); // Track selected status for each medication
   const location = useLocation();
+  const [nurseInfo, setNurseInfo] = useState({ name: "", department: "" , title:"" });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -16,12 +20,81 @@ const MedicationTracking = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const medicationSchedule = [
-    { id: 1, time: '09:30 AM', patient: 'John Smith', medication: 'Lisinopril 10mg', room: '302', status: 'Completed' },
-    { id: 2, time: '10:00 AM', patient: 'Emma Johnson', medication: 'Metformin 500mg', room: '304', status: 'Pending' },
-    { id: 3, time: '11:00 AM', patient: 'Michael Brown', medication: 'Hydrocodone 5mg', room: '310', status: 'Pending' },
-    { id: 4, time: '02:30 PM', patient: 'Sarah Davis', medication: 'Atorvastatin 20mg', room: '305', status: 'Pending' },
-  ];
+  // Fetch all medications from the backend
+  useEffect(() => {
+    const fetchMedications = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/medications');
+        if (!response.ok) {
+          throw new Error('Failed to fetch medications');
+        }
+        const data = await response.json();
+        setMedications(data);
+      } catch (error) {
+        console.error('Error fetching medications:', error);
+      }
+    };
+
+    fetchMedications();
+  }, []);
+
+  useEffect(() => {
+      const fetchNurseDetails = async () => {
+        const nurseId = localStorage.getItem('nurse_id');
+        if (!nurseId) {
+          console.error("Nurse ID not found in local storage");
+          setLoading(false);
+          return;
+        }
+  
+        try {
+          const response = await fetch(`http://localhost:8000/nurse/${nurseId}`);
+          if (!response.ok) {
+            throw new Error("Failed to fetch nurse details");
+          }
+          const data = await response.json();
+          setNurseInfo(data);
+        } catch (error) {
+          console.error("Error fetching nurse details:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchNurseDetails();
+    }, []);
+  
+
+  // Update medication status
+  const handleStatusChange = async (medicationId, newStatus) => {
+    try {
+      const response = await fetch(`http://localhost:8000/medications/${medicationId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),  // Send the status in the correct format
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to update medication status');
+      }
+  
+      const updatedMedication = await response.json();
+      setMedications((prevMedications) =>
+        prevMedications.map((med) =>
+          med.id === updatedMedication.medication.id ? updatedMedication.medication : med
+        )
+      );
+    } catch (error) {
+      console.error('Error updating medication status:', error);
+    }
+  };
+
+  // Calculate summary data
+  const totalMedications = medications.length;
+  const completedMedications = medications.filter((med) => med.status === 'Completed').length;
+  const uniquePatients = new Set(medications.map((med) => med.patient_id)).size;
 
   return (
     <div className="app-container">
@@ -29,8 +102,8 @@ const MedicationTracking = () => {
         <div className="sidebar-header">
           <div className="avatar">JS</div>
           <div className="user-info">
-            <h3>Jane Smith, RN</h3>
-            <p>Medical-Surgical</p>
+          <h2>{nurseInfo.name}, {nurseInfo.title}</h2>
+          <p>{nurseInfo.department} | {nurseInfo.floor}</p>
           </div>
         </div>
         <nav className="sidebar-nav">
@@ -77,38 +150,50 @@ const MedicationTracking = () => {
             <table className="medications-table">
               <thead>
                 <tr>
-                  <th>Time</th>
-                  <th>Patient</th>
+                  <th>Patient ID</th>
                   <th>Medication</th>
-                  <th>Room</th>
+                  <th>Dosage</th>
+                  <th>Frequency</th>
                   <th>Status</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {medicationSchedule.map(med => (
+                {medications.map((med) => (
                   <tr key={med.id} className={`med-row ${med.status.toLowerCase()}`}>
-                    <td>{med.time}</td>
-                    <td>{med.patient}</td>
-                    <td>{med.medication}</td>
-                    <td>{med.room}</td>
+                    <td>{med.patient_id}</td>
+                    <td>{med.name}</td>
+                    <td>{med.dosage}</td>
+                    <td>{med.frequency}</td>
                     <td>
-                      <span className="status-pill">{med.status}</span>
+                      <select
+                        value={selectedStatus[med.id] || med.status}
+                        onChange={(e) => {
+                          setSelectedStatus({ ...selectedStatus, [med.id]: e.target.value });
+                          handleStatusChange(med.id, e.target.value);
+                        }}
+                        className="status-dropdown"
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Completed">Completed</option>
+                      </select>
                     </td>
                     <td>
-                      {med.status === 'Pending' && (
-                        <button className="administer-btn">Administer</button>
-                      )}
-                      {med.status === 'Completed' && (
-                        <button className="view-details-btn">Details</button>
-                      )}
+                      <button
+                        className="view-details-btn"
+                        onClick={() => {
+                          // Add functionality to view details if needed
+                        }}
+                      >
+                        Details
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          
+
           <div className="dashboard-summary">
             <div className="summary-card">
               <div className="summary-icon medication-icon">
@@ -116,8 +201,8 @@ const MedicationTracking = () => {
               </div>
               <div className="summary-content">
                 <h3>Medications</h3>
-                <p className="summary-number">4</p>
-                <p className="summary-text">1 completed</p>
+                <p className="summary-number">{totalMedications}</p>
+                <p className="summary-text">{completedMedications} completed</p>
               </div>
             </div>
             <div className="summary-card">
@@ -126,7 +211,7 @@ const MedicationTracking = () => {
               </div>
               <div className="summary-content">
                 <h3>Patients</h3>
-                <p className="summary-number">4</p>
+                <p className="summary-number">{uniquePatients}</p>
                 <p className="summary-text">With medications</p>
               </div>
             </div>

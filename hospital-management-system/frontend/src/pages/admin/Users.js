@@ -6,7 +6,6 @@ import {
   Briefcase, 
   BarChart2, 
   Settings, 
-  Grid, 
   Bell, 
   Search, 
   LogOut, 
@@ -33,26 +32,60 @@ const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [selectedRole, setSelectedRole] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [adminData, setAdminData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    role: '',
+    department: '',
+    password: '••••••••••',
+    adminCode: ''
+  });
 
   // Toggle sidebar
   const toggleSidebar = () => {
     setActiveSidebar(!activeSidebar);
   };
 
-  // Fetch users and set time
+  // Fetch users and admin data
   useEffect(() => {
-    // Simulate API call for users
-    setTimeout(() => {
-      setUsers([
-        { id: 1, name: 'Dr. Sarah Smith', email: 'sarah.smith@example.com', role: 'Doctor', department: 'Cardiology', status: 'Active', lastActive: '10 minutes ago' },
-        { id: 2, name: 'Nurse Johnson', email: 'johnson@example.com', role: 'Nurse', department: 'Emergency', status: 'Active', lastActive: '1 hour ago' },
-        { id: 3, name: 'Admin Williams', email: 'williams@example.com', role: 'Admin', department: 'IT', status: 'Inactive', lastActive: '3 days ago' },
-        { id: 4, name: 'Dr. Michael Chen', email: 'michael.chen@example.com', role: 'Doctor', department: 'Neurology', status: 'Active', lastActive: '4 hours ago' },
-        { id: 5, name: 'Technician Davis', email: 'davis@example.com', role: 'Technician', department: 'Radiology', status: 'Active', lastActive: '2 days ago' },
-        { id: 6, name: 'Nurse Rodriguez', email: 'rodriguez@example.com', role: 'Nurse', department: 'Pediatrics', status: 'Active', lastActive: '5 hours ago' }
-      ]);
-      setLoading(false);
-    }, 1000);
+    // Fetch users from the backend
+    axios.get('http://localhost:8000/users/')
+      .then(response => {
+        setUsers(response.data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching users:', error);
+        setLoading(false);
+      });
+
+    // Fetch admin data
+    const fetchAdminData = async () => {
+      const adminId = localStorage.getItem('admin_id');
+      if (!adminId) {
+        console.error("Admin ID not found in local storage");
+        return;
+      }
+
+      try {
+        const response = await axios.get(`http://localhost:8000/admin/${adminId}`);
+        const data = response.data;
+        setAdminData({
+          fullName: data.full_name,
+          email: data.email,
+          phone: data.phone,
+          role: data.role,
+          department: data.department,
+          password: '••••••••••',
+          adminCode: data.admin_code
+        });
+      } catch (error) {
+        console.error("Error fetching admin data:", error);
+      }
+    };
+
+    fetchAdminData();
 
     // Set current time and date
     const updateTime = () => {
@@ -70,9 +103,9 @@ const UserManagement = () => {
   // Filter users based on role and search query
   const filteredUsers = users.filter(user => {
     const matchesRole = selectedRole === 'All' || user.role === selectedRole;
-    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const matchesSearch = user.full_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          user.department.toLowerCase().includes(searchQuery.toLowerCase());
+                          (user.department && user.department.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesRole && matchesSearch;
   });
 
@@ -84,6 +117,14 @@ const UserManagement = () => {
   // Handle role filter
   const handleRoleFilter = (role) => {
     setSelectedRole(role);
+  };
+
+  // Get user ID based on role
+  const getUserId = (user) => {
+    if (user.role === 'patient') return user.patient_id;
+    if (user.role === 'doctor') return user.doctor_id;
+    if (user.role === 'nurse') return user.nurse_id;
+    return 'N/A';
   };
 
   return (
@@ -159,8 +200,8 @@ const UserManagement = () => {
                 <User size={20} />
               </div>
               <div className="admin-info">
-                <p className="admin-name">Admin User</p>
-                <p className="admin-role">Super Admin</p>
+                <p className="admin-name">{adminData.fullName}</p>
+                <p className="admin-role">{adminData.role}</p>
               </div>
             </div>
           </div>
@@ -180,10 +221,6 @@ const UserManagement = () => {
                   </button>
                   <div className="dropdown-content">
                     <div className="dropdown-item" onClick={() => handleRoleFilter('All')}>All</div>
-                    <div className="dropdown-item" onClick={() => handleRoleFilter('Doctor')}>Doctor</div>
-                    <div className="dropdown-item" onClick={() => handleRoleFilter('Nurse')}>Nurse</div>
-                    <div className="dropdown-item" onClick={() => handleRoleFilter('Admin')}>Admin</div>
-                    <div className="dropdown-item" onClick={() => handleRoleFilter('Technician')}>Technician</div>
                   </div>
                 </div>
                 <button className="btn-primary">
@@ -202,7 +239,7 @@ const UserManagement = () => {
                     <th>Role</th>
                     <th>Department</th>
                     <th>Status</th>
-                    <th>Last Active</th>
+                    <th>ID</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -227,7 +264,7 @@ const UserManagement = () => {
                             <div className="user-avatar">
                               <User size={16} />
                             </div>
-                            <span>{user.name}</span>
+                            <span>{user.full_name}</span>
                           </div>
                         </td>
                         <td>{user.email}</td>
@@ -236,13 +273,13 @@ const UserManagement = () => {
                             {user.role}
                           </span>
                         </td>
-                        <td>{user.department}</td>
+                        <td>{user.department || 'N/A'}</td>
                         <td>
                           <span className={`status-indicator ${user.status.toLowerCase()}`}>
                             {user.status}
                           </span>
                         </td>
-                        <td>{user.lastActive}</td>
+                        <td>{getUserId(user)}</td>
                         <td>
                           <div className="action-buttons">
                             <button className="btn-icon btn-edit" title="Edit User">
@@ -269,64 +306,6 @@ const UserManagement = () => {
               <button className="pagination-btn">2</button>
               <button className="pagination-btn">3</button>
               <button className="pagination-btn">Next</button>
-            </div>
-          </section>
-          
-          <section className="user-stats-section">
-            <div className="stats-summary">
-              <div className="stats-card">
-                <div className="stats-card-header">
-                  <h3>User Statistics</h3>
-                </div>
-                <div className="stats-card-body">
-                  <div className="stats-item">
-                    <span className="stats-label">Total Users</span>
-                    <span className="stats-value">245</span>
-                  </div>
-                  <div className="stats-item">
-                    <span className="stats-label">Active Users</span>
-                    <span className="stats-value">189</span>
-                  </div>
-                  <div className="stats-item">
-                    <span className="stats-label">New This Month</span>
-                    <span className="stats-value">24</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="stats-card">
-                <div className="stats-card-header">
-                  <h3>Role Distribution</h3>
-                </div>
-                <div className="stats-card-body">
-                  <div className="role-distribution">
-                    <div className="role-bar">
-                      <div className="role-fill doctor" style={{width: "40%"}} title="Doctors: 40%"></div>
-                      <div className="role-fill nurse" style={{width: "35%"}} title="Nurses: 35%"></div>
-                      <div className="role-fill admin" style={{width: "15%"}} title="Admins: 15%"></div>
-                      <div className="role-fill technician" style={{width: "10%"}} title="Technicians: 10%"></div>
-                    </div>
-                    <div className="role-legend">
-                      <div className="legend-item">
-                        <span className="legend-color doctor"></span>
-                        <span>Doctors</span>
-                      </div>
-                      <div className="legend-item">
-                        <span className="legend-color nurse"></span>
-                        <span>Nurses</span>
-                      </div>
-                      <div className="legend-item">
-                        <span className="legend-color admin"></span>
-                        <span>Admins</span>
-                      </div>
-                      <div className="legend-item">
-                        <span className="legend-color technician"></span>
-                        <span>Technicians</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </section>
         </div>

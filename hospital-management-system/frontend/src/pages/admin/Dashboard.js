@@ -29,7 +29,12 @@ const AdminDashboard = () => {
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
   const [pendingRegistrations, setPendingRegistrations] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [nurses, setNurses] = useState([]);
+  const [adminData, setAdminData] = useState({ fullName: '', role: '' });
 
+  // Fetch pending registrations
   useEffect(() => {
     const fetchPendingRegistrations = async () => {
       try {
@@ -43,6 +48,63 @@ const AdminDashboard = () => {
     fetchPendingRegistrations();
   }, []);
 
+  // Fetch users, doctors, and nurses
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [usersResponse, doctorsResponse, nursesResponse] = await Promise.all([
+          axios.get('http://localhost:8000/users/'),
+          axios.get('http://localhost:8000/doctors/'),
+          axios.get('http://localhost:8000/nurses/')
+        ]);
+
+        setUsers(usersResponse.data);
+        setDoctors(doctorsResponse.data);
+        setNurses(nursesResponse.data);
+
+        // Update stats data
+        setStatsData([
+          { id: 1, title: 'Total Users', count: usersResponse.data.length, growth: '+12%', icon: <Users className="stats-card-icon" /> },
+          { id: 2, title: 'Departments', count: 8, growth: '+2', icon: <Briefcase className="stats-card-icon" /> },
+          { id: 3, title: 'Doctors', count: doctorsResponse.data.length, growth: '+5%', icon: <Activity className="stats-card-icon" /> },
+          { id: 4, title: 'Nurses', count: nursesResponse.data.length, growth: '+18', icon: <Grid className="stats-card-icon" /> }
+        ]);
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Fetch admin profile data
+  useEffect(() => {
+    const fetchAdminData = async () => {
+      const adminId = localStorage.getItem('admin_id');
+      if (!adminId) {
+        console.error("Admin ID not found in local storage");
+        return;
+      }
+
+      try {
+        const response = await axios.get(`http://localhost:8000/admin/${adminId}`);
+        const data = response.data;
+        setAdminData({
+          fullName: data.full_name,
+          role: data.role
+        });
+      } catch (error) {
+        console.error("Error fetching admin data:", error);
+      }
+    };
+
+    fetchAdminData();
+  }, []);
+
+  // Handle approve/reject registration
   const handleApprove = async (id) => {
     try {
       await axios.post(`http://localhost:8000/approve-registration/${id}/`);
@@ -68,20 +130,8 @@ const AdminDashboard = () => {
     setActiveSidebar(!activeSidebar);
   };
 
-  // Fetch mock data
+  // Set current time and date
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setStatsData([
-        { id: 1, title: 'Total Users', count: 1250, growth: '+12%', icon: <Users className="stats-card-icon" /> },
-        { id: 2, title: 'Departments', count: 8, growth: '+2', icon: <Briefcase className="stats-card-icon" /> },
-        { id: 3, title: 'Active Sessions', count: 42, growth: '+5%', icon: <Activity className="stats-card-icon" /> },
-        { id: 4, title: 'Resources', count: 320, growth: '+18', icon: <Grid className="stats-card-icon" /> }
-      ]);
-      setLoading(false);
-    }, 1200);
-
-    // Set current time and date
     const updateTime = () => {
       const now = new Date();
       setCurrentTime(now.toLocaleTimeString());
@@ -107,12 +157,16 @@ const AdminDashboard = () => {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
     datasets: [
       {
-        label: 'Patients',
+        label: 'Users',
         data: [120, 150, 180, 220, 250, 280]
       },
       {
-        label: 'Staff',
+        label: 'Doctors',
         data: [30, 40, 45, 50, 55, 60]
+      },
+      {
+        label: 'Nurses',
+        data: [20, 25, 30, 35, 40, 45]
       }
     ]
   };
@@ -185,8 +239,8 @@ const AdminDashboard = () => {
                 <User size={20} />
               </div>
               <div className="admin-info">
-                <p className="admin-name">Admin User</p>
-                <p className="admin-role">Super Admin</p>
+                <p className="admin-name">{adminData.fullName}</p>
+                <p className="admin-role">{adminData.role}</p>
               </div>
             </div>
           </div>
@@ -250,26 +304,35 @@ const AdminDashboard = () => {
                         <div key={idx} className="chart-bar-group">
                           <div className="chart-label">{month}</div>
                           <div 
-                            className="chart-bar chart-bar-patients" 
+                            className="chart-bar chart-bar-users" 
                             style={{height: `${analyticsData.datasets[0].data[idx]/3}px`}}
-                            title={`Patients: ${analyticsData.datasets[0].data[idx]}`}
+                            title={`Users: ${analyticsData.datasets[0].data[idx]}`}
                           ></div>
                           <div 
-                            className="chart-bar chart-bar-staff" 
+                            className="chart-bar chart-bar-doctors" 
                             style={{height: `${analyticsData.datasets[1].data[idx]}px`}}
-                            title={`Staff: ${analyticsData.datasets[1].data[idx]}`}
+                            title={`Doctors: ${analyticsData.datasets[1].data[idx]}`}
+                          ></div>
+                          <div 
+                            className="chart-bar chart-bar-nurses" 
+                            style={{height: `${analyticsData.datasets[2].data[idx]}px`}}
+                            title={`Nurses: ${analyticsData.datasets[2].data[idx]}`}
                           ></div>
                         </div>
                       ))}
                     </div>
                     <div className="chart-legend">
                       <div className="legend-item">
-                        <span className="legend-color legend-patients"></span>
-                        <span>Patients</span>
+                        <span className="legend-color legend-users"></span>
+                        <span>Users</span>
                       </div>
                       <div className="legend-item">
-                        <span className="legend-color legend-staff"></span>
-                        <span>Staff</span>
+                        <span className="legend-color legend-doctors"></span>
+                        <span>Doctors</span>
+                      </div>
+                      <div className="legend-item">
+                        <span className="legend-color legend-nurses"></span>
+                        <span>Nurses</span>
                       </div>
                     </div>
                   </div>
@@ -320,28 +383,27 @@ const AdminDashboard = () => {
               <Link to="/admin/departments" className="btn-primary">Manage Departments</Link>
             </div>
 
-          <section className="pending-registrations-section">
-          <h2 className="section-title">Pending Registrations</h2>
-          <div className="pending-registrations-list">
-            {pendingRegistrations.map(reg => (
-              <div key={reg.id} className="pending-registration-item">
-                <div className="registration-details">
-                  <p><strong>Name:</strong> {reg.full_name}</p>
-                  <p><strong>Email:</strong> {reg.email}</p>
-                  <p><strong>Role:</strong> {reg.role}</p>
-                  <p><strong>Department:</strong> {reg.department}</p>
-                  <p><strong>Specialization:</strong> {reg.specialization}</p>
-                  <p><strong>License Number:</strong> {reg.license_number}</p>
-                  
-                </div>
-                <div className="registration-actions">
-                  <button onClick={() => handleApprove(reg.id)} className="btn-approve">Approve</button>
-                  <button onClick={() => handleReject(reg.id)} className="btn-reject">Reject</button>
-                </div>
+            <section className="pending-registrations-section">
+              <h2 className="section-title">Pending Registrations</h2>
+              <div className="pending-registrations-list">
+                {pendingRegistrations.map(reg => (
+                  <div key={reg.id} className="pending-registration-item">
+                    <div className="registration-details">
+                      <p><strong>Name:</strong> {reg.full_name}</p>
+                      <p><strong>Email:</strong> {reg.email}</p>
+                      <p><strong>Role:</strong> {reg.role}</p>
+                      <p><strong>Department:</strong> {reg.department}</p>
+                      <p><strong>Specialization:</strong> {reg.specialization}</p>
+                      <p><strong>License Number:</strong> {reg.license_number}</p>
+                    </div>
+                    <div className="registration-actions">
+                      <button onClick={() => handleApprove(reg.id)} className="btn-approve">Approve</button>
+                      <button onClick={() => handleReject(reg.id)} className="btn-reject">Reject</button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
+            </section>
             
             <div className="departments-grid">
               {loading ? (

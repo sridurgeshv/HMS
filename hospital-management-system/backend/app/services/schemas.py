@@ -14,6 +14,7 @@ class UserCreate(BaseModel):
     status: str = "pending"  # Default status
     age: int  # Ensure this is an integer
     gender: str
+    
 
 class DegreeCreate(BaseModel):
     degree: str
@@ -27,6 +28,7 @@ class DoctorCreate(UserCreate):
     experience: int
     role: str = "doctor"  # Fixed role for doctors
     degrees: List[DegreeCreate]
+
     
 
 class NurseCreate(UserCreate):
@@ -35,6 +37,14 @@ class NurseCreate(UserCreate):
     license_number: str
     hospital: str
     experience: int
+    license_expiry: Optional[date] = None
+    certification: Optional[str] = None
+    start_date: Optional[date] = None
+    employee_id: Optional[str] = None
+    title: Optional[str] = None
+    skills: Optional[List[str]] = None  # List of strings
+    languages: Optional[List[str]] = None  # List of strings
+    education: Optional[List[str]] = None  # List of strings
 
 class AdminCreate(BaseModel):
     role: str = "admin"
@@ -75,3 +85,23 @@ class MedicationCreate(BaseModel):
     name: str
     dosage: str
     frequency: str
+    status: str = "Pending"  # Default status
+
+# Define a Pydantic model for the request body
+class MedicationStatusUpdate(BaseModel):
+    status: str   
+
+class FollowUpNoteCreate(BaseModel):
+    appointment_id: int
+    note: str
+    doctor_id: str
+
+class FollowUpNoteResponse(BaseModel):
+    id: int
+    appointment_id: int
+    note: str
+    doctor_id: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True    
