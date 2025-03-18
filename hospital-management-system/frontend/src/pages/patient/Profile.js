@@ -107,7 +107,7 @@ const Profile = () => {
             </Link>
             <Link 
               onClick={handleLogout} 
-              className="patient-nav-item patient-logout-button"
+              className="patient-nav-item"
             >
               <LogOut size={20} />
               <span>Logout</span>
