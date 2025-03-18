@@ -35,10 +35,15 @@ npm install
 npm start
 ```
 
+### Backend Code
+- To get the database
+```py
+python -c "from app.utils.database import Base, engine; Base.metadata.create_all(bind=engine)"
+```
+
 ## ⚙️ Technologies Used
 Frontend: React.js, Redux
 Backend: FastAPI, Python
-Database: MongoDB
 Authentication: JWT
 AI Integration: Machine Learning for patient record analysis and inventory tracking
 
@@ -177,10 +182,7 @@ hospital-management-system/
 5. [snippets->auth-next->email->auth_signup_password.js](https://github.com/firebase/snippets-web/blob/467eaa165dcbd9b3ab15711e76fa52237ba37f8b/snippets/auth-next/email/auth_signup_password.js#L8-L21)
 
 
-### Backend Code
-```py
-python -c "from app.utils.database import Base, engine; Base.metadata.create_all(bind=engine)"
-```
+
 
 ```bash
 uvicorn app.run:app --reload
