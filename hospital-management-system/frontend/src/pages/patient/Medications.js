@@ -17,6 +17,7 @@ const Medications = () => {
   const [doctorResponse, setDoctorResponse] = useState("");
   const [profile, setProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedMedication, setSelectedMedication] = useState(null); // Track selected medication
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -49,6 +50,25 @@ const Medications = () => {
     }
   };
 
+  // Fetch doctor's response for a medication
+  const fetchDoctorResponse = async (medicationId) => {
+    try {
+      const res = await fetch(`http://localhost:8000/medication-responses/${medicationId}`);
+      const data = await res.json();
+
+      if (data.length > 0) {
+        // If there are responses, display the latest one
+        setDoctorResponse(data[data.length - 1].response);
+      } else {
+        // If no responses, display a message
+        setDoctorResponse("No response from doctor yet.");
+      }
+    } catch (error) {
+      console.error("Error fetching doctor's response:", error);
+      setDoctorResponse("Failed to fetch doctor's response.");
+    }
+  };
+
   // Fetch medications and profile when component mounts
   useEffect(() => {
     fetchMedications();
@@ -58,6 +78,13 @@ const Medications = () => {
       setIsLoading(false);
     }
   }, [patientId, username]);
+
+  // Clear doctor's response when no medication is selected
+  useEffect(() => {
+    if (!selectedMedication) {
+      setDoctorResponse(""); // Clear the response when no medication is selected
+    }
+  }, [selectedMedication]);
 
   // Function to add a new medication
   const addMedication = async () => {
@@ -251,7 +278,14 @@ const Medications = () => {
             {/* Medications List */}
             <div className="patient-medications-list">
               {medications.length > 0 ? medications.map(med => (
-                <div key={med.id} className="patient-medication-item">
+                <div 
+                  key={med.id} 
+                  className="patient-medication-item"
+                  onClick={() => {
+                    setSelectedMedication(med); // Set the selected medication
+                    fetchDoctorResponse(med.id); // Fetch the doctor's response
+                  }}
+                >
                   <div className="patient-medication-icon">
                     <Pill size={24} />
                   </div>

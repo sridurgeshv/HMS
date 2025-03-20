@@ -62,7 +62,6 @@ class UserLogin(BaseModel):
 
 
 class AppointmentCreate(BaseModel):
-    patient_id: str
     doctor_name: Optional[str] = None  # ✅ Now allows None
     department: str
     date: datetime
@@ -92,16 +91,38 @@ class MedicationStatusUpdate(BaseModel):
     status: str   
 
 class FollowUpNoteCreate(BaseModel):
-    appointment_id: int
+    appointment_id: str
     note: str
     doctor_id: str
 
 class FollowUpNoteResponse(BaseModel):
     id: int
-    appointment_id: int
+    appointment_id: str
     note: str
     doctor_id: str
     created_at: datetime
 
     class Config:
         from_attributes = True    
+
+# Define a schema for vitals input
+class VitalsInput(BaseModel):
+    heart_rate: int
+    blood_pressure: str
+    blood_sugar: int        
+
+
+class MedicationResponseCreate(BaseModel):
+    medication_id: str
+    doctor_id: str
+    response: str
+
+class MedicationResponseResponse(BaseModel):
+    id: int
+    medication_id: str
+    doctor_id: str
+    response: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

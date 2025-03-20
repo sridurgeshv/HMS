@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, FastAPI
+from fastapi import APIRouter, Depends, HTTPException, FastAPI , UploadFile, File ,  Form
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from app.utils.database import get_db
-from app.models.models import User, Degree
+from app.models.models import User, Degree ,MedicationResponse
 from app.services.schemas import UserCreate
 from app.services.services import get_password_hash
 from app.services.schemas import DoctorCreate
@@ -10,7 +10,7 @@ from app.services.schemas import NurseCreate
 from app.services.schemas import AdminCreate
 from app.services.schemas import UserLogin
 from app.models.models import Appointment
-from app.services.schemas import AppointmentCreate
+from app.services.schemas import AppointmentCreate , VitalsInput , MedicationResponseResponse , MedicationResponseCreate
 from app.services.services import verify_password
 from app.models.models import MedicalHistory
 from app.services.schemas import MedicalHistoryCreate
@@ -22,6 +22,7 @@ from app.services.schemas import MedicationCreate , FollowUpNoteCreate , FollowU
 from typing import List
 import json
 from app.services.schemas import MedicationStatusUpdate
+
 
 router = APIRouter()
 
@@ -344,40 +345,61 @@ def get_doctors_by_department(department: str, db: Session = Depends(get_db)):
     ).all()
     return doctors
 
-@router.post("/book-appointment/")
-def book_appointment(appointment: AppointmentCreate, db: Session = Depends(get_db)):
+@router.post("/book-appointment/{patient_id}")
+def book_appointment(
+    patient_id: str,  # Patient ID is now part of the URL path
+    appointment: AppointmentCreate,  # Appointment data from the request body
+    db: Session = Depends(get_db)
+):
+    # Validate that the patient exists
+    patient = db.query(User).filter(User.patient_id == patient_id, User.role == "patient").first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
 
+    # Normalize the department name
     appointment.department = appointment.department.strip().lower()
 
-    if appointment.doctor_name and appointment.doctor_name != "no-doctor":  
+    # Assign a doctor if specified, otherwise find an available doctor
+    if appointment.doctor_name and appointment.doctor_name != "no-doctor":
         assigned_doctor = appointment.doctor_name
+        doctor = db.query(User).filter(
+            User.full_name == assigned_doctor,
+            User.role == "doctor",
+            User.status == "approved"
+        ).first()
+        assigned_doctor_id = doctor.doctor_id if doctor else None
     else:
-        # Query for an available doctor
+        # Query for an available doctor in the specified department
         doctor = db.query(User).filter(
             User.role == "doctor",
             User.specialization.ilike(appointment.department),  # Case-insensitive match
             User.status == "approved"
         ).first()
 
-        assigned_doctor = doctor.full_name if doctor else None  # Ensure `None` is stored properly
+        assigned_doctor = doctor.full_name if doctor else None  # Assign `None` if no doctor is found
+        assigned_doctor_id = doctor.doctor_id if doctor else None
 
     # Create a new appointment record
     new_appointment = Appointment(
-        patient_id=appointment.patient_id,
-        doctor_name=assigned_doctor ,
+        id=str(uuid.uuid4()),  # Unique ID for each history entry
+        patient_id=patient_id,  # Use the validated patient_id
+        doctor_name=assigned_doctor,
+        doctor_id=assigned_doctor_id,  # Assign doctor_id
         department=appointment.department,
         date=appointment.date,
         time=appointment.time,
         reason=appointment.reason
     )
 
+    # Save the appointment to the database
     db.add(new_appointment)
     db.commit()
     db.refresh(new_appointment)
 
     return {
         "message": "Appointment booked successfully",
-        "doctor": new_appointment.doctor_name if new_appointment.doctor_name else "Doctor will be assigned when available"
+        "doctor": new_appointment.doctor_name if new_appointment.doctor_name else "Doctor will be assigned when available",
+        "doctor_id": new_appointment.doctor_id  # Include doctor_id in the response
     }
 
 @router.get("/appointments/{patient_id}")
@@ -752,3 +774,62 @@ def get_all_appointments(db: Session = Depends(get_db)):
     ]
     
     return formatted_appointments
+
+
+@router.post("/analyze-vitals")
+async def analyze_vitals(vitals: VitalsInput):
+    try:
+        # Prepare the input for the model
+        input_text = (
+            f"Patient vitals: Heart Rate = {vitals.heart_rate} bpm, "
+            f"Blood Pressure = {vitals.blood_pressure} mmHg, "
+            f"Blood Sugar = {vitals.blood_sugar} mg/dL. "
+            "Provide a health assessment in 2 to 4 words."
+        )
+
+        # Tokenize the input
+        inputs = tokenizer(input_text, return_tensors="pt")
+
+        # Generate the response
+        outputs = model.generate(**inputs, max_new_tokens=10)
+        response_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+        # Extract only the response part
+        # Look for keywords like "Response:" or "Answer:" to split the text
+        if "Response:" in response_text:
+            answer = response_text.split("Response:")[1].strip()
+        elif "Answer:" in response_text:
+            answer = response_text.split("Answer:")[1].strip()
+        else:
+            # If no keyword is found, assume the last sentence is the response
+            answer = response_text.strip().split(". ")[-1].replace(".", "").strip()
+
+        # Return the response
+        return {"response": answer}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error analyzing vitals: {str(e)}")
+
+@router.post("/medication-responses", response_model=MedicationResponseResponse)
+def create_medication_response(
+    response: MedicationResponseCreate,
+    db: Session = Depends(get_db)
+):
+    db_response = MedicationResponse(
+        medication_id=response.medication_id,
+        doctor_id=response.doctor_id,
+        response=response.response
+    )
+    db.add(db_response)
+    db.commit()
+    db.refresh(db_response)
+    return db_response
+
+@router.get("/medication-responses/{medication_id}", response_model=list[MedicationResponseResponse])
+def get_medication_responses(
+    medication_id: str,
+    db: Session = Depends(get_db)
+):
+    responses = db.query(MedicationResponse).filter(
+        MedicationResponse.medication_id == medication_id
+    ).all()
+    return responses

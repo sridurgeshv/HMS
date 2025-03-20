@@ -11,8 +11,6 @@ import {
   X,
   User,
   Filter,
-  Download,
-  Eye,
   Pill
 } from 'lucide-react';
 import axios from 'axios';
@@ -23,6 +21,9 @@ const MedicalRecords = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [doctor, setDoctor] = useState({ full_name: "", specialization: "" });
+  const [showMedicationModal, setShowMedicationModal] = useState(false);
+  const [selectedMedication, setSelectedMedication] = useState(null);
+  const [response, setResponse] = useState("");
 
   // Fetch patient medications when the component mounts
   useEffect(() => {
@@ -70,6 +71,60 @@ const MedicalRecords = () => {
     fetchDoctorProfile();
   }, []);
 
+  // Handle opening the medication modal
+  const handleOpenMedicationModal = (medication) => {
+    console.log("Selected medication:", medication); // Log the medication
+    if (!medication || !medication.id) {
+      alert("Invalid medication selected.");
+      return;
+    }
+    setSelectedMedication(medication);
+    setShowMedicationModal(true);
+  };
+
+  // Handle saving the doctor's response
+  const handleSaveResponse = async (e) => {
+    e.preventDefault();
+  
+    // Validate selectedMedication
+    if (!selectedMedication || !selectedMedication.id) {
+      alert("No medication selected. Please select a medication first.");
+      return;
+    }
+  
+    // Validate response
+    if (!response) {
+      alert("Please enter a response.");
+      return;
+    }
+  
+    try {
+      const doctorId = localStorage.getItem('doctor_id');
+      if (!doctorId) {
+        alert("Doctor ID not found. Please log in again.");
+        return;
+      }
+  
+      const payload = {
+        medication_id: selectedMedication.id, // Ensure it's a string
+        doctor_id: doctorId, // Ensure it's a string
+        response: response, // Ensure it's a string
+      };
+  
+      console.log("Sending payload:", payload); // Log the payload
+  
+      const apiResponse = await axios.post('http://localhost:8000/medication-responses', payload);
+      
+      if (apiResponse.status === 200) {
+        alert('Response saved successfully!');
+        setShowMedicationModal(false);
+        setResponse("");
+      }
+    } catch (error) {
+      console.error("Error saving response:", error);
+      alert('Failed to save response. Please try again.');
+    }
+  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -108,8 +163,8 @@ const MedicalRecords = () => {
             <img src="/api/placeholder/100/100" alt="Doctor profile" />
           </div>
           <div className="profile-info">
-          <h3>{doctor.full_name || "Loading..."}</h3>
-          <p>{doctor.specialization || "Loading..."}</p>
+            <h3>{doctor.full_name || "Loading..."}</h3>
+            <p>{doctor.specialization || "Loading..."}</p>
           </div>
         </div>
         
@@ -183,6 +238,12 @@ const MedicalRecords = () => {
                         patient.medications.map((med, index) => (
                           <div key={index} className="medication-item">
                             <p><strong>{med.name}</strong> - {med.dosage} ({med.frequency})</p>
+                            <button 
+                              className="respond-button"
+                              onClick={() => handleOpenMedicationModal(med)}
+                            >
+                              Respond
+                            </button>
                           </div>
                         ))
                       ) : (
@@ -196,7 +257,7 @@ const MedicalRecords = () => {
               )}
             </div>
           </section>
-          
+
           {/* Records Table (Optional) */}
           <div className="records-table-container">
             <table className="records-table">
@@ -224,6 +285,38 @@ const MedicalRecords = () => {
           </div>
         </div>
       </main>
+
+      {/* Medication Modal */}
+      {showMedicationModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h3>Respond to Medication</h3>
+              <button className="close-modal" onClick={() => setShowMedicationModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label>Response</label>
+                <textarea
+                  value={response}
+                  onChange={(e) => setResponse(e.target.value)}
+                  placeholder="Enter your response..."
+                />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="cancel-button" onClick={() => setShowMedicationModal(false)}>
+                Cancel
+              </button>
+              <button className="save-button" onClick={handleSaveResponse}>
+                Save Response
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

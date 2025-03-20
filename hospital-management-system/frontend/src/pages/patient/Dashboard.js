@@ -6,18 +6,73 @@ import { PatientContext } from "../../PatientContext";
 import { UserContext } from "../../UserContext";
 import './Dashboard.css';
 
+const VitalsInput = ({ onAnalyze, isAnalyzing }) => {
+  const [heartRate, setHeartRate] = useState(72);
+  const [bloodPressure, setBloodPressure] = useState("120/80");
+  const [bloodSugar, setBloodSugar] = useState(110);
+
+  const handleAnalyze = () => {
+    onAnalyze({ heartRate, bloodPressure, bloodSugar });
+  };
+
+  return (
+    <div className="patient-vitals-input">
+      <h3>Input Your Vitals</h3>
+      <div className="vitals-input-group">
+        <label>Heart Rate (bpm)</label>
+        <input
+          type="range"
+          min="40"
+          max="120"
+          value={heartRate}
+          onChange={(e) => setHeartRate(parseInt(e.target.value))}
+        />
+        <span>{heartRate} bpm</span>
+      </div>
+      <div className="vitals-input-group">
+        <label>Blood Pressure (mmHg)</label>
+        <input
+          type="text"
+          value={bloodPressure}
+          onChange={(e) => setBloodPressure(e.target.value)}
+          placeholder="e.g., 120/80"
+        />
+      </div>
+      <div className="vitals-input-group">
+        <label>Blood Sugar (mg/dL)</label>
+        <input
+          type="range"
+          min="70"
+          max="200"
+          value={bloodSugar}
+          onChange={(e) => setBloodSugar(parseInt(e.target.value))}
+        />
+        <span>{bloodSugar} mg/dL</span>
+      </div>
+      <button onClick={handleAnalyze} disabled={isAnalyzing}>
+        {isAnalyzing ? "Analyzing..." : "Analyze Vitals"}
+      </button>
+      {isAnalyzing && <div className="loading-spinner"></div>}
+    </div>
+  );
+};
+
 const Dashboard = () => {
   const userContext = useContext(UserContext);
   const { username } = userContext || {};
   const [isLoading, setIsLoading] = useState(true);
   const [appointments, setAppointments] = useState([]);
   const [profile, setProfile] = useState(null);
+  const [medications, setMedications] = useState([]);
+  const [history, setHistory] = useState([]);
   const context = useContext(PatientContext);
   const patientId = context?.patientId || null;
   const location = useLocation();
   const navigate = useNavigate();
+  const [vitalsResponse, setVitalsResponse] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Move the function declarations before useCallback
+  // Fetch appointments
   const fetchAppointments = async () => {
     try {
       const response = await axios.get(`http://localhost:8000/appointments/${patientId}`);
@@ -32,6 +87,7 @@ const Dashboard = () => {
     }
   };
 
+  // Fetch profile
   const fetchProfile = async () => {
     try {
       const response = await axios.get(`http://localhost:8000/user-profile/${username}`);
@@ -41,18 +97,51 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
-      // Don't set profile to null here, keep the previous value
     } finally {
-      // Make sure we're not stuck in loading state
       setIsLoading(false);
     }
   };
 
+  // Fetch medications
+  const fetchMedications = async () => {
+    if (!patientId) return;
+    try {
+      const response = await axios.get(`http://localhost:8000/medications/${patientId}`);
+      if (Array.isArray(response.data)) {
+        setMedications(response.data);
+      } else {
+        setMedications([]);
+      }
+    } catch (error) {
+      console.error("Error fetching medications:", error);
+      setMedications([]);
+    }
+  };
+
+  // Fetch medical history
+  const fetchMedicalHistory = async () => {
+    if (!patientId) return;
+    try {
+      const response = await axios.get(`http://localhost:8000/medical-history/${patientId}`);
+      if (Array.isArray(response.data)) {
+        setHistory(response.data);
+      } else {
+        setHistory([]);
+      }
+    } catch (error) {
+      console.error("Error fetching medical history:", error);
+      setHistory([]);
+    }
+  };
+
+  // Memoize fetch functions
   const memoizedFetchAppointments = useCallback(fetchAppointments, [patientId]);
   const memoizedFetchProfile = useCallback(fetchProfile, [username]);
+  const memoizedFetchMedications = useCallback(fetchMedications, [patientId]);
+  const memoizedFetchMedicalHistory = useCallback(fetchMedicalHistory, [patientId]);
 
+  // Load data on component mount
   useEffect(() => {
-    // Fetch the patient's data
     const loadData = async () => {
       console.log("Loading data with patientId:", patientId, "and username:", username);
       
@@ -60,6 +149,10 @@ const Dashboard = () => {
         if (patientId) {
           console.log("Fetching appointments for patient:", patientId);
           await memoizedFetchAppointments();
+          console.log("Fetching medications for patient:", patientId);
+          await memoizedFetchMedications();
+          console.log("Fetching medical history for patient:", patientId);
+          await memoizedFetchMedicalHistory();
         }
         
         if (username) {
@@ -69,14 +162,32 @@ const Dashboard = () => {
       } catch (err) {
         console.error("Error loading data:", err);
       } finally {
-        // Always set loading to false, even if there are errors
         setIsLoading(false);
       }
     };
     
     loadData();
-  }, [patientId, username, memoizedFetchAppointments, memoizedFetchProfile]);
+  }, [patientId, username, memoizedFetchAppointments, memoizedFetchProfile, memoizedFetchMedications, memoizedFetchMedicalHistory]);
 
+  // Handle vitals analysis
+  const handleAnalyzeVitals = async (vitals) => {
+    setIsAnalyzing(true); // Start loading
+    try {
+      const response = await axios.post("http://localhost:8000/analyze-vitals", {
+        heart_rate: parseInt(vitals.heartRate), // Ensure it's an integer
+        blood_pressure: vitals.bloodPressure,   // Ensure it's a string
+        blood_sugar: parseInt(vitals.bloodSugar), // Ensure it's an integer
+      });
+      setVitalsResponse(response.data.response);
+    } catch (error) {
+      console.error("Error analyzing vitals:", error);
+      alert("Failed to analyze vitals. Please try again.");
+    } finally {
+      setIsAnalyzing(false); // Stop loading
+    }
+  };
+
+  // Get active tab
   const getActiveTab = () => {
     const path = location.pathname;
     if (path.includes('/appointments')) return 'appointments';
@@ -88,16 +199,23 @@ const Dashboard = () => {
 
   const activeTab = getActiveTab();
 
-  // Get stats based on fetched data
+  // Get stats
   const getStats = () => {
     return [
       { title: "Upcoming Appointments", value: appointments.length.toString(), icon: <Calendar size={24} /> },
-      { title: "Medications", value: "3", icon: <Pill size={24} /> },
-      { title: "Recent Reports", value: "1", icon: <FileText size={24} /> }
+      { title: "Medications", value: medications.length.toString(), icon: <Pill size={24} /> },
+      { title: "Recent Reports", value: history.length.toString(), icon: <FileText size={24} /> }
     ];
   };
 
   const stats = getStats();
+
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('username');
+    localStorage.removeItem('patient_id');
+    navigate('/');
+  };
 
   if (isLoading) {
     return (
@@ -107,15 +225,6 @@ const Dashboard = () => {
       </div>
     );
   }
-
-  const handleLogout = () => {
-    // Clear all local storage items
-    localStorage.removeItem('username');
-    localStorage.removeItem('patient_id');
-    
-    // Redirect to welcome page
-    navigate('/');
-  };
 
   return (
     <div className="patient-layout">
@@ -164,7 +273,7 @@ const Dashboard = () => {
               to="/patient/profile" 
               className={`patient-nav-item ${activeTab === 'profile' ? 'patient-nav-active' : ''}`}
             >
-               <User size={20} />
+              <User size={20} />
               <span>Profile</span>
             </Link>
             <Link 
@@ -187,7 +296,7 @@ const Dashboard = () => {
               <Bell size={24} />
             </div>
           </div>
-        </header> 
+        </header>
 
         <div className="patient-page-content">
           <div className="patient-dashboard-view patient-fade-in">
@@ -212,7 +321,7 @@ const Dashboard = () => {
               <div className="patient-appointments-container">
                 <h3>Upcoming Appointments</h3>
                 <div className="patient-appointments-grid">
-                  {appointments.slice(0, 2).map(appointment => (
+                  {appointments.slice(0, 3).map(appointment => (
                     <div className="patient-appointment-tile" key={appointment.id}>
                       <div className="patient-appointment-date">
                         <div className="patient-appointment-month">{new Date(appointment.date).toLocaleString('default', { month: 'short' })}</div>
@@ -232,29 +341,16 @@ const Dashboard = () => {
               </div>
             )}
 
-            <div className="patient-vitals-container">
-              <h3>Health Vitals</h3>
-              <div className="patient-vitals-grid">
-                <div className="patient-vital-tile">
-                  <Activity size={20} />
-                  <h4>Heart Rate</h4>
-                  <div className="patient-vital-measurement">72 <span>bpm</span></div>
-                  <div className="patient-vital-graph"></div>
-                </div>
-                <div className="patient-vital-tile">
-                  <Activity size={20} />
-                  <h4>Blood Pressure</h4>
-                  <div className="patient-vital-measurement">120/80 <span>mmHg</span></div>
-                  <div className="patient-vital-graph"></div>
-                </div>
-                <div className="patient-vital-tile">
-                  <Activity size={20} />
-                  <h4>Blood Sugar</h4>
-                  <div className="patient-vital-measurement">110 <span>mg/dL</span></div>
-                  <div className="patient-vital-graph"></div>
-                </div>
+            {/* Vitals Input Section */}
+            <VitalsInput onAnalyze={handleAnalyzeVitals} isAnalyzing={isAnalyzing} />
+
+            {/* Vitals Response Section */}
+            {vitalsResponse && (
+              <div className="patient-vitals-response">
+                <h3>Health Assessment</h3>
+                <p>{vitalsResponse}</p>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </main>

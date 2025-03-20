@@ -65,8 +65,8 @@ class Degree(Base):
 class Appointment(Base):
     __tablename__ = "appointments"
 
-    id = Column(Integer, primary_key=True, index=True)
-    patient_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    id = Column(String, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("users.patient_id"), nullable=False)
     doctor_id = Column(String, ForeignKey("users.doctor_id"), nullable=True)  # Add doctor_id
     doctor_name = Column(String, nullable=True)
     department = Column(String, nullable=False)
@@ -74,7 +74,6 @@ class Appointment(Base):
     time = Column(String, nullable=False)
     reason = Column(String, nullable=False)
     
-
     
 class MedicalHistory(Base):
     __tablename__ = "medical_history"
@@ -101,7 +100,16 @@ class FollowUpNote(Base):
     __tablename__ = "follow_up_notes"
 
     id = Column(Integer, primary_key=True, index=True)
-    appointment_id = Column(Integer, ForeignKey("appointments.id"), nullable=False)  # Link to the appointment
+    appointment_id = Column(String, ForeignKey("appointments.id"), nullable=False)  # Link to the appointment
     note = Column(Text, nullable=False)  # The follow-up note content
     doctor_id = Column(String, ForeignKey("users.doctor_id"), nullable=False)  # Link to the doctor
     created_at = Column(DateTime(timezone=True), server_default=func.now())  # Timestamp for when the note was created    
+
+class MedicationResponse(Base):
+    __tablename__ = "medication_responses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    medication_id = Column(String, ForeignKey("medications.id"), nullable=False)  # Link to the medication
+    doctor_id = Column(String, ForeignKey("users.doctor_id"), nullable=False)  # Link to the doctor
+    response = Column(Text, nullable=False)  # Doctor's response (e.g., notes, approval, etc.)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())  # Timestamp for when the response was created    

@@ -91,8 +91,8 @@ const Appointments = () => {
   
     try {
       const response = await axios.post('http://localhost:8000/follow-up-notes', {
-        appointment_id: parseInt(selectedAppointment.id, 10),  // Ensure integer
-        note: String(followUpNote),                          // Ensure string
+        appointment_id: selectedAppointment.id,  
+        note: String(followUpNote),                          
         doctor_id: localStorage.getItem('doctor_id') || "default_doctor_id",  // Ensure string
       });
   
