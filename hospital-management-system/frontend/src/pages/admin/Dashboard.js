@@ -24,7 +24,7 @@ const AdminDashboard = () => {
   const location = useLocation();
   const [activeSidebar, setActiveSidebar] = useState(true);
   const [statsData, setStatsData] = useState([]);
-  const [notificationCount, setNotificationCount] = useState(3);
+  const [notificationCount, setNotificationCount] = useState(0); // Initialize to 0
   const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
@@ -32,7 +32,11 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [nurses, setNurses] = useState([]);
+  const [patients, setPatients] = useState([]);
   const [adminData, setAdminData] = useState({ fullName: '', role: '' });
+
+  // Track IDs of users that have already triggered a notification
+  const [notifiedUsers, setNotifiedUsers] = useState(new Set());
 
   // Fetch pending registrations
   useEffect(() => {
@@ -48,26 +52,28 @@ const AdminDashboard = () => {
     fetchPendingRegistrations();
   }, []);
 
-  // Fetch users, doctors, and nurses
+  // Fetch users, doctors, nurses, and patients
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [usersResponse, doctorsResponse, nursesResponse] = await Promise.all([
+        const [usersResponse, doctorsResponse, nursesResponse, patientsResponse] = await Promise.all([
           axios.get('http://localhost:8000/users/'),
           axios.get('http://localhost:8000/doctors/'),
-          axios.get('http://localhost:8000/nurses/')
+          axios.get('http://localhost:8000/nurses/'),
+          axios.get('http://localhost:8000/patients/')
         ]);
 
         setUsers(usersResponse.data);
         setDoctors(doctorsResponse.data);
         setNurses(nursesResponse.data);
+        setPatients(patientsResponse.data);
 
         // Update stats data
         setStatsData([
           { id: 1, title: 'Total Users', count: usersResponse.data.length, growth: '+12%', icon: <Users className="stats-card-icon" /> },
-          { id: 2, title: 'Departments', count: 8, growth: '+2', icon: <Briefcase className="stats-card-icon" /> },
+          { id: 2, title: 'Patients', count: patientsResponse.data.length, growth: '+8%', icon: <User className="stats-card-icon" /> },
           { id: 3, title: 'Doctors', count: doctorsResponse.data.length, growth: '+5%', icon: <Activity className="stats-card-icon" /> },
-          { id: 4, title: 'Nurses', count: nursesResponse.data.length, growth: '+18', icon: <Grid className="stats-card-icon" /> }
+          { id: 4, title: 'Nurses', count: nursesResponse.data.length, growth: '+18%', icon: <Grid className="stats-card-icon" /> }
         ]);
 
         setLoading(false);
@@ -103,6 +109,18 @@ const AdminDashboard = () => {
 
     fetchAdminData();
   }, []);
+
+  // Detect new users and update notification count
+  useEffect(() => {
+    if (users.length > 0) {
+      users.forEach(user => {
+        if (!notifiedUsers.has(user.id)) {
+          setNotificationCount(prevCount => prevCount + 1);
+          setNotifiedUsers(prev => new Set(prev).add(user.id));
+        }
+      });
+    }
+  }, [users, notifiedUsers]);
 
   // Handle approve/reject registration
   const handleApprove = async (id) => {
@@ -144,21 +162,31 @@ const AdminDashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Recent user activity mock data
-  const recentActivity = [
-    { id: 1, user: 'Dr. Smith', action: 'Updated profile information', time: '10 min ago' },
-    { id: 2, user: 'Admin Jane', action: 'Created new department', time: '1 hour ago' },
-    { id: 3, user: 'Nurse Johnson', action: 'Requested resource allocation', time: '3 hours ago' },
-    { id: 4, user: 'Dr. Williams', action: 'Changed department', time: '5 hours ago' }
-  ];
+  // Filter recent users (e.g., users who joined in the last 7 days)
+  const getRecentUsers = () => {
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.setDate(now.getDate() - 7)).toISOString();
+
+    return users
+      .filter(user => new Date(user.created_at) >= new Date(sevenDaysAgo))
+      .map(user => ({
+        id: user.id,
+        user: user.full_name,
+        action: `Joined as ${user.role}`,
+        time: `Joined on ${new Date(user.created_at).toLocaleDateString()}`
+      }));
+  };
+
+  // Recent activity data (recently joined users)
+  const recentActivity = getRecentUsers();
 
   // Analytics data for the chart 
   const analyticsData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
     datasets: [
       {
-        label: 'Users',
-        data: [120, 150, 180, 220, 250, 280]
+        label: 'Patients',
+        data: [100, 120, 150, 180, 200, 220]
       },
       {
         label: 'Doctors',
@@ -298,15 +326,14 @@ const AdminDashboard = () => {
                   <div className="chart-skeleton"></div>
                 ) : (
                   <div className="analytics-chart">
-                    {/* Placeholder for actual chart - in real app you'd use Chart.js or similar */}
                     <div className="chart-bars">
                       {analyticsData.labels.map((month, idx) => (
                         <div key={idx} className="chart-bar-group">
                           <div className="chart-label">{month}</div>
                           <div 
-                            className="chart-bar chart-bar-users" 
+                            className="chart-bar chart-bar-patients" 
                             style={{height: `${analyticsData.datasets[0].data[idx]/3}px`}}
-                            title={`Users: ${analyticsData.datasets[0].data[idx]}`}
+                            title={`Patients: ${analyticsData.datasets[0].data[idx]}`}
                           ></div>
                           <div 
                             className="chart-bar chart-bar-doctors" 
@@ -323,8 +350,8 @@ const AdminDashboard = () => {
                     </div>
                     <div className="chart-legend">
                       <div className="legend-item">
-                        <span className="legend-color legend-users"></span>
-                        <span>Users</span>
+                        <span className="legend-color legend-patients"></span>
+                        <span>Patients</span>
                       </div>
                       <div className="legend-item">
                         <span className="legend-color legend-doctors"></span>
@@ -358,7 +385,7 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   ))
-                ) : (
+                ) : recentActivity.length > 0 ? (
                   recentActivity.map(activity => (
                     <div key={activity.id} className="activity-item">
                       <div className="activity-avatar">
@@ -371,6 +398,10 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   ))
+                ) : (
+                  <div className="no-recent-activity">
+                    No recent activity found.
+                  </div>
                 )}
               </div>
             </section>
