@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Calendar, Clock, PlusCircle, Activity, FileText, User, Pill, Bell, LogOut } from 'lucide-react';
+import { Calendar, Clock, Activity, FileText, User, Pill, Bell, LogOut } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { PatientContext } from "../../PatientContext";
@@ -250,7 +250,6 @@ const Appointments = () => {
           <div className="patient-appointments-view patient-fade-in">
             <div className="patient-section-header">
               <h2><Calendar size={20} /> Upcoming Appointments</h2>
-              <button className="patient-action-button"><PlusCircle size={16} /> Book Appointment</button>
             </div>
 
             <div className="patient-appointments-list">
@@ -282,7 +281,7 @@ const Appointments = () => {
               <h3>Book New Appointment</h3>
               <form className="patient-booking-form" onSubmit={handleSubmit}>
                 {/* Voice Appointment Section */}
-  <VoiceAppointment patientId={patientId} />
+                <VoiceAppointment patientId={patientId} />
                 <div className="patient-form-row">
                   <div className="patient-form-group">
                     <label>Department</label>
