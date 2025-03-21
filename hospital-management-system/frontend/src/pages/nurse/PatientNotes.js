@@ -133,7 +133,6 @@ const PatientNotes = () => {
           <div className="notes-container">
             <div className="section-header">
               <h2><FileText size={20} /> Patient Care Notes</h2>
-              <button className="add-note-btn">+ Add Note</button>
             </div>
             <div className="notes-list">
               {patientNotes.map(note => (
