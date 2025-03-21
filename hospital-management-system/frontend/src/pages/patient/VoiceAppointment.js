@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
-//import "./VoiceAppointment.css";
+import "./VoiceAppointment.css";
 
 const VoiceAppointment = ({ patientId }) => {
   const [recording, setRecording] = useState(false);
