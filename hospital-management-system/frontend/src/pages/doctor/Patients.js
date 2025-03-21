@@ -11,12 +11,11 @@ import {
   Menu,
   X,
   User,
-  Plus,
-  Filter,
   Phone,
   Mail
 } from 'lucide-react';
 import axios from 'axios';
+import './Dashboard.css';
 
 const Patients = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -111,7 +110,7 @@ const Patients = () => {
         
         <div className="doctor-profile">
           <div className="profile-image">
-            <img src="/api/placeholder/100/100" alt="Doctor profile" />
+            <img src="/download (1).png" alt="Doctor profile" />
           </div>
           <div className="profile-info">
             <h3>{doctor.full_name || "Loading..."}</h3>
@@ -168,19 +167,8 @@ const Patients = () => {
         <div className="dashboard-content">
           <div className="content-header">
             <h1>Patients</h1>
-            <button className="primary-button">
-              <Plus size={18} />
-              <span>Add Patient</span>
-            </button>
           </div>
-          
-          <div className="filter-section">
-            <button className="filter-button">
-              <Filter size={16} />
-              <span>Filter</span>
-            </button>
-          </div>
-          
+                  
           <div className="patients-table-container">
             {patients.length === 0 ? (
               <p className="no-patients-message">No patients found.</p>
@@ -202,7 +190,7 @@ const Patients = () => {
                     <tr key={patient.id}>
                       <td className="patient-name">
                         <div className="patient-avatar">
-                          <img src={`/api/placeholder/40/40`} alt={patient.full_name} />
+                          <img src={`/download.jpg`} alt={patient.full_name} />
                         </div>
                         <span>{patient.full_name}</span>
                       </td>
