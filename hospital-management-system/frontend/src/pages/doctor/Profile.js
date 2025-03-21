@@ -63,7 +63,7 @@ const Profile = () => {
         
         <div className="doctor-profile">
           <div className="profile-image">
-            <img src="/api/placeholder/100/100" alt="Doctor profile" />
+            <img src="/download (1).png" alt="Doctor profile" />
           </div>
           <div className="profile-info">
             <h3>{doctorProfile.name}</h3>
@@ -122,7 +122,7 @@ const Profile = () => {
             <div className="profile-card">
               <div className="profile-card-header">
                 <div className="profile-pic">
-                  <img src="/api/placeholder/150/150" alt="Doctor profile" />
+                  <img src="/download (1).png" alt="Doctor profile" />
                 </div>
                 <h2 className="profile-name">{doctorProfile.name}</h2>
                 <p className="profile-title">{doctorProfile.specialty}</p>
@@ -185,9 +185,6 @@ const Profile = () => {
                 <div className="profile-section">
                   <div className="profile-section-header">
                     <h3 className="profile-section-title">Personal Details</h3>
-                    <button className="profile-edit-button">
-                      <Edit size={16} /> Edit
-                    </button>
                   </div>
                   
                   <div className="profile-card">
@@ -228,9 +225,6 @@ const Profile = () => {
                 <div className="profile-section">
                   <div className="profile-section-header">
                     <h3 className="profile-section-title">Education</h3>
-                    <button className="profile-edit-button">
-                      <Edit size={16} /> Edit
-                    </button>
                   </div>
                   
                   <div className="profile-card">
@@ -254,9 +248,6 @@ const Profile = () => {
                 <div className="profile-section">
                   <div className="profile-section-header">
                     <h3 className="profile-section-title">Working Hours</h3>
-                    <button className="profile-edit-button">
-                      <Edit size={16} /> Edit
-                    </button>
                   </div>
                   
                   <div className="profile-card">
