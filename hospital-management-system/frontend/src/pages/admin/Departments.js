@@ -5,9 +5,7 @@ import {
   Users, 
   Briefcase, 
   BarChart2, 
-  Settings, 
-  Bell, 
-  Search, 
+  Settings,  
   LogOut, 
   Menu, 
   X,
@@ -22,7 +20,6 @@ const Departments = () => {
   const [activeSidebar, setActiveSidebar] = useState(true);
   const [doctors, setDoctors] = useState([]);
   const [nurses, setNurses] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
   const [adminData, setAdminData] = useState({
@@ -144,8 +141,6 @@ const Departments = () => {
           
           <div className="nav-right">
             <div className="search-container">
-              <Search size={18} />
-              <input type="text" placeholder="Search doctors or nurses..." />
             </div>
             
             <div className="admin-profile">
