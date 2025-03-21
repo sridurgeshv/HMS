@@ -5,6 +5,7 @@ import axios from 'axios';
 import { PatientContext } from "../../PatientContext";
 import { UserContext } from "../../UserContext";
 import './Dashboard.css';
+import VoiceAppointment from './VoiceAppointment';
 
 const Appointments = () => {
   const context = useContext(PatientContext);
@@ -25,20 +26,20 @@ const Appointments = () => {
   });
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     const loadData = async () => {
       if (patientId) {
         await fetchAppointments();
       }
-      
+
       if (username) {
         await fetchProfile();
       }
-      
+
       setIsLoading(false);
     };
-    
+
     loadData();
   }, [patientId, username]);
 
@@ -46,7 +47,7 @@ const Appointments = () => {
     try {
       const response = await fetch(`http://localhost:8000/user-profile/${username}`);
       if (!response.ok) throw new Error("Failed to fetch profile data");
-      
+
       const data = await response.json();
       setProfile(data);
     } catch (error) {
@@ -57,7 +58,7 @@ const Appointments = () => {
   const fetchAppointments = async () => {
     try {
       const response = await axios.get(`http://localhost:8000/appointments/${patientId}`);
-  
+
       // Ensure appointments is always an array
       if (Array.isArray(response.data)) {
         setAppointments(response.data);
@@ -104,26 +105,36 @@ const Appointments = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
+
+    const appointmentDate = new Date(formData.date).toISOString();
+
+    // Prepare the request data
     const requestData = {
-      patient_id: patientId,
       department: formData.department,
       doctor_name: formData.doctor && formData.doctor !== "no-doctor" ? formData.doctor : null,
-      date: formData.date,
+      date: appointmentDate,
       time: formData.time,
       reason: formData.reason
     };
-  
+
     try {
-      const response = await axios.post('http://localhost:8000/book-appointment/', requestData);
+      // Call the backend endpoint with patient_id in the URL
+      const response = await axios.post(
+        `http://localhost:8000/book-appointment/${patientId}`, // Include patient_id in the URL
+        requestData // Send appointment data in the request body
+);
+
+      // Show success message
       alert(response.data.message);
-      // Redirect to dashboard to see the newly booked appointment
+
+      // Redirect to the dashboard to see the newly booked appointment
       window.location.href = '/patient/dashboard';
     } catch (error) {
       console.error('Error booking appointment:', error);
+      alert('Failed to book appointment. Please try again.');
     }
   };
-  
+
   const handleCancelAppointment = async (appointmentId) => {
     try {
       await axios.delete(`http://localhost:8000/cancel-appointment/${appointmentId}`);
@@ -149,7 +160,7 @@ const Appointments = () => {
     // Clear all local storage items
     localStorage.removeItem('username');
     localStorage.removeItem('patient_id');
-    
+
     // Redirect to welcome page
     navigate('/');
   };
@@ -178,43 +189,43 @@ const Appointments = () => {
             </div>
           </div>
           <nav className="patient-nav">
-            <Link 
-              to="/patient/dashboard" 
+            <Link
+              to="/patient/dashboard"
               className={`patient-nav-item ${activeTab === 'dashboard' ? 'patient-nav-active' : ''}`}
             >
               <Activity size={20} />
               <span>Dashboard</span>
             </Link>
-            <Link 
-              to="/patient/appointments" 
+            <Link
+              to="/patient/appointments"
               className={`patient-nav-item ${activeTab === 'appointments' ? 'patient-nav-active' : ''}`}
             >
               <Calendar size={20} />
               <span>Appointments</span>
             </Link>
-            <Link 
-              to="/patient/medical-history" 
+            <Link
+              to="/patient/medical-history"
               className={`patient-nav-item ${activeTab === 'medical-history' ? 'patient-nav-active' : ''}`}
             >
               <FileText size={20} />
               <span>Medical History</span>
             </Link>
-            <Link 
-              to="/patient/medications" 
+            <Link
+              to="/patient/medications"
               className={`patient-nav-item ${activeTab === 'medications' ? 'patient-nav-active' : ''}`}
             >
               <Pill size={20} />
               <span>Medications</span>
             </Link>
-            <Link 
-              to="/patient/profile" 
+            <Link
+              to="/patient/profile"
               className={`patient-nav-item ${activeTab === 'profile' ? 'patient-nav-active' : ''}`}
             >
               <User size={20} />
               <span>Profile</span>
             </Link>
-            <Link 
-              onClick={handleLogout} 
+            <Link
+              onClick={handleLogout}
               className="patient-nav-item"
             >
               <LogOut size={20} />
@@ -241,7 +252,7 @@ const Appointments = () => {
               <h2><Calendar size={20} /> Upcoming Appointments</h2>
               <button className="patient-action-button"><PlusCircle size={16} /> Book Appointment</button>
             </div>
-            
+
             <div className="patient-appointments-list">
               {Array.isArray(appointments) && appointments.length > 0 ? (
                 appointments.map(appointment => (
@@ -270,6 +281,8 @@ const Appointments = () => {
             <div className="patient-booking-section">
               <h3>Book New Appointment</h3>
               <form className="patient-booking-form" onSubmit={handleSubmit}>
+                {/* Voice Appointment Section */}
+  <VoiceAppointment patientId={patientId} />
                 <div className="patient-form-row">
                   <div className="patient-form-group">
                     <label>Department</label>
