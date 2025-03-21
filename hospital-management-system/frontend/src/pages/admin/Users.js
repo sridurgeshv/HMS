@@ -28,7 +28,7 @@ const UserManagement = () => {
   const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
-  const [notificationCount, setNotificationCount] = useState(3);
+  const [notificationCount, setNotificationCount] = useState(0); // Initialize to 0
   const [users, setUsers] = useState([]);
   const [selectedRole, setSelectedRole] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,6 +41,9 @@ const UserManagement = () => {
     password: '••••••••••',
     adminCode: ''
   });
+
+  // Track IDs of users that have already triggered a notification
+  const [notifiedUsers, setNotifiedUsers] = useState(new Set());
 
   // Toggle sidebar
   const toggleSidebar = () => {
@@ -99,6 +102,22 @@ const UserManagement = () => {
     
     return () => clearInterval(interval);
   }, []);
+
+  // Detect new users and update notification count
+  useEffect(() => {
+    if (users.length > 0) {
+      users.forEach(user => {
+        // Check if the user has already been notified
+        if (!notifiedUsers.has(user.id)) {
+          // Increment notification count
+          setNotificationCount(prevCount => prevCount + 1);
+
+          // Add the user ID to the notified set
+          setNotifiedUsers(prev => new Set(prev).add(user.id));
+        }
+      });
+    }
+  }, [users, notifiedUsers]);
 
   // Filter users based on role and search query
   const filteredUsers = users.filter(user => {
