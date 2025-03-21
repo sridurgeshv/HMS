@@ -11,7 +11,6 @@ import {
   Menu,
   X,
   User,
-  Plus,
   Filter
 } from 'lucide-react';
 import axios from 'axios';
@@ -137,7 +136,7 @@ const Appointments = () => {
         
         <div className="doctor-profile">
           <div className="profile-image">
-            <img src="/api/placeholder/100/100" alt="Doctor profile" />
+            <img src="/download (1).png" alt="Doctor profile" />
           </div>
           <div className="profile-info">
             <h3>{doctor.full_name || "Loading..."}</h3>
@@ -194,10 +193,6 @@ const Appointments = () => {
         <div className="dashboard-content">
           <div className="content-header">
             <h1>Appointments</h1>
-            <button className="primary-button">
-              <Plus size={18} />
-              <span>New Appointment</span>
-            </button>
           </div>
           
           <div className="filter-section">
@@ -259,7 +254,7 @@ const Appointments = () => {
                       <MessageSquare size={16} />
                     </button>
                     <button className="action-btn edit" onClick={() => handleEditClick(appointment)}>
-                      Edit
+                      Forward
                     </button>
                   </div>
                 </div>
