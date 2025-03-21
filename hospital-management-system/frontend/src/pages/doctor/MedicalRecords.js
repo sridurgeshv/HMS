@@ -14,6 +14,8 @@ import {
   Pill
 } from 'lucide-react';
 import axios from 'axios';
+import './Dashboard.css';
+
 
 const MedicalRecords = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -160,7 +162,7 @@ const MedicalRecords = () => {
         
         <div className="doctor-profile">
           <div className="profile-image">
-            <img src="/api/placeholder/100/100" alt="Doctor profile" />
+            <img src="/download (1).png" alt="Doctor profile" />
           </div>
           <div className="profile-info">
             <h3>{doctor.full_name || "Loading..."}</h3>
