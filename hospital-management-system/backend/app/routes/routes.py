@@ -15,28 +15,30 @@ from app.services.services import verify_password
 from app.models.models import MedicalHistory
 from app.services.schemas import MedicalHistoryCreate
 import uuid
-from transformers import AutoModelForCausalLM, AutoTokenizer
 from app.services.schemas import AIRequest
 from app.models.models import Medication , FollowUpNote
 from app.services.schemas import MedicationCreate , FollowUpNoteCreate , FollowUpNoteResponse
 from typing import List
 import json
 from app.services.schemas import MedicationStatusUpdate
+import os
+from groq import Groq
+import torch
+from datetime import datetime, timedelta  # Import timedelta
+from google import genai
+import os  # Import the os module
+from pydub import AudioSegment
+from typing import Optional
+import spacy
+import re
+from dateutil.parser import parse
 
 
 router = APIRouter()
 
-# Load the Microsoft Phi-4-mini-instruct model
-model_name = "microsoft/Phi-4-mini-instruct"
-model = AutoModelForCausalLM.from_pretrained(
-    model_name,
-    torch_dtype="auto",
-    device_map="auto",
-    trust_remote_code=True
-)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+nlp = spacy.load('en_core_web_sm')
 
-
+client = Groq(api_key="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")
 
 # Initialize FastAPI App
 app = FastAPI()
@@ -411,7 +413,7 @@ def get_all_appointments(patient_id: str, db: Session = Depends(get_db)):
     return appointments if appointments else []  # Ensure empty list if no data
 
 @router.delete("/cancel-appointment/{appointment_id}")
-def cancel_appointment(appointment_id: int, db: Session = Depends(get_db)):
+def cancel_appointment(appointment_id: str, db: Session = Depends(get_db)):
     appointment = db.query(Appointment).filter(Appointment.id == appointment_id).first()
     
     if not appointment:
@@ -462,22 +464,26 @@ def add_medical_history(patient_id: str, history: MedicalHistoryCreate, db: Sess
 
 @router.post("/ai")
 async def ask_ai(request: AIRequest):
-    messages = [{"role": "user", "content": request.prompt}]
-    text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
+    try:
+        # Use Groq API to generate a response
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": request.prompt,
+                }
+            ],
+            model="llama-3.3-70b-versatile",  # Use the desired Groq model
+            max_tokens=100,
+            temperature=0.7,
+        )
 
-    generated_ids = model.generate(
-        **model_inputs,
-        max_new_tokens=100,
-        temperature=0.7,
-        do_sample=True
-    )
+        # Extract the response
+        response = chat_completion.choices[0].message.content
+        return {"response": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating AI response: {str(e)}")
 
-    generated_ids = [output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)]
-    response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
-
-    return {"response": response}
-  
 
 # Add Medication Route
 @router.post("/medications/{patient_id}")
@@ -629,6 +635,7 @@ def get_doctor_patient_medications(
             "full_name": patient.full_name,
             "medications": [
                 {
+                    "id": med.id,
                     "name": med.name,
                     "dosage": med.dosage,
                     "frequency": med.frequency
@@ -787,25 +794,23 @@ async def analyze_vitals(vitals: VitalsInput):
             "Provide a health assessment in 2 to 4 words."
         )
 
-        # Tokenize the input
-        inputs = tokenizer(input_text, return_tensors="pt")
+        # Use Groq API to generate a response
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": input_text,
+                }
+            ],
+            model="llama-3.3-70b-versatile",  # Use the desired Groq model
+            max_tokens=10,  # Limit the response length
+        )
 
-        # Generate the response
-        outputs = model.generate(**inputs, max_new_tokens=10)
-        response_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-
-        # Extract only the response part
-        # Look for keywords like "Response:" or "Answer:" to split the text
-        if "Response:" in response_text:
-            answer = response_text.split("Response:")[1].strip()
-        elif "Answer:" in response_text:
-            answer = response_text.split("Answer:")[1].strip()
-        else:
-            # If no keyword is found, assume the last sentence is the response
-            answer = response_text.strip().split(". ")[-1].replace(".", "").strip()
+        # Extract the response
+        response = chat_completion.choices[0].message.content
 
         # Return the response
-        return {"response": answer}
+        return {"response": response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error analyzing vitals: {str(e)}")
 
@@ -833,3 +838,303 @@ def get_medication_responses(
         MedicationResponse.medication_id == medication_id
     ).all()
     return responses
+
+
+def extract_appointment_details(text: str) -> dict:
+    details = {}
+    doc = nlp(text)
+
+    department = None
+    doctor_name = None
+    time = None
+    date_str = None
+    reason = None
+
+    # Extract department 
+    department_options = ["cardiology", "dermatology", "neurology", "orthopedics"]
+    for ent in doc.ents:
+        if ent.label_ == "ORG":
+            for dept in department_options:
+                if dept.lower() in ent.text.lower():
+                    department = dept
+                    break  # Stop after finding the first match
+            if department:  # If a department is found, no need to continue
+                break
+
+    if department is None:
+        for token in doc:
+            if token.text.lower() in department_options:
+                department = token.text
+                break
+
+   # Extract Time
+    for ent in doc.ents:
+        if ent.label_ == "TIME":
+            time = ent.text.replace("around", "").strip()
+            break
+
+    if time is None:
+        time_pattern = re.compile(r"(\d{1,2}(:\d{2})?\s?(AM|PM|am|pm))", re.IGNORECASE)
+        match = time_pattern.search(text)
+        if match:
+            time = match.group(0).strip()
+
+    # Extract Date and reason
+    for ent in doc.ents:
+        if ent.label_ == "DATE":
+            date_str = ent.text
+        if ent.label_ == "WORK_OF_ART":  # try a different entity label for better reason extraction
+            reason = ent.text
+
+    days_of_week = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+    next_week_phrases = ["next " + day for day in days_of_week]
+    this_week_phrases = ["this " + day for day in days_of_week]
+
+    today = datetime.now().date()
+    for day in days_of_week:
+        if day in text.lower():
+            date_str = day
+
+    # Attempt to extract the reason based on keywords.  More sophisticated NLP is better.
+    reason_keywords = ["to discuss", "for", "because of", "regarding", "about"]
+    if not reason:  # Only try keyword extraction if reason not already found
+        for keyword in reason_keywords:
+            if keyword in text.lower():
+                reason = text.lower().split(keyword, 1)[1].strip()
+                break
+    if reason is None:  # If nothing found, default to the entire text
+        reason = "General Checkup"
+
+
+    if date_str is None:
+        date_str = today.strftime("%Y-%m-%d") # Default to today if no date found
+    else:
+        for i, day_name in enumerate(days_of_week):  # Check for day of the week
+            if day_name in date_str.lower():
+                days_ahead = (i - today.weekday() + 7) % 7
+                if "next" in date_str.lower() and days_ahead == 0:
+                    days_ahead = 7
+                date_obj = today + timedelta(days=days_ahead)
+                date_str = date_obj.strftime("%Y-%m-%d")
+                break
+        else:
+            # Try to parse with dateutil
+            try:
+                date_obj = parse(date_str)
+                date_str = date_obj.strftime("%Y-%m-%d")
+            except ValueError:
+                pass  # Keep original date_str if parsing fails
+
+    if time is None:
+        time = datetime.now().time().strftime("%H:%M")  # Fallback to current time
+
+    details["department"] = department
+    details["doctor_name"] = doctor_name
+    details["time"] = time  # Preserve the exact time format
+    details["date"] = date_str  # Ensure date is a string
+    details["reason"] = reason.capitalize()
+
+    return details
+
+
+@router.post("/book-appointment-voice/{patient_id}")
+async def book_appointment_voice(
+    patient_id: str,
+    audio_file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+
+    print(f"Received request for patient ID: {patient_id}") 
+
+    """
+    Books an appointment based on voice input.
+    """
+    try:
+        print("Starting appointment booking process...")
+        # 1. Validate that the patient exists
+        print("Validating patient...")
+        patient = db.query(User).filter(User.patient_id == patient_id, User.role == "patient").first()
+        if not patient:
+            print("Patient not found.")
+            raise HTTPException(status_code=404, detail="Patient not found")
+        print(f"Patient found: {patient.full_name}")
+
+        # 2. Save the uploaded audio file temporarily
+        print("Saving audio file...")
+        file_path = f"temp_audio_{uuid.uuid4()}.{audio_file.filename.split('.')[-1]}"  # Secure temp file name
+        print(f"Temporary file path: {file_path}")
+
+        with open(file_path, "wb") as f:
+            f.write(await audio_file.read())
+        print("Audio file saved successfully.")
+
+        # 3. Transcribe the audio to text using Google AI
+        try:
+            print("Transcribing audio...")
+            # Load audio file using pydub
+            print("Loading audio with pydub...")
+            audio = AudioSegment.from_file(file_path)
+            print("Audio loaded.")
+
+            # Export to WAV with appropriate parameters
+            print("Exporting to WAV...")
+            wav_path = "temp_audio.wav"
+            audio.export(wav_path, format="wav", parameters=["-ac", "1", "-ar", "16000"])
+            print(f"Audio exported to WAV: {wav_path}")
+
+            client = genai.Client(api_key="AIzaSyCTFySXTK4ehTXQrpZQDPngFT51cq7Rgks")
+            myfile = client.files.upload(file=wav_path)
+
+            response = client.models.generate_content(
+              model='gemini-1.5-pro',
+              contents=['Transcribe this audio into text', myfile]
+            )
+
+            transcription = response.text
+            print(f"Transcription: {transcription}")
+
+            os.remove(file_path) # Remove temporary file
+            os.remove(wav_path)
+            print("Temporary files removed.")
+
+        except Exception as transcription_error:
+            print(f"Transcription failed: {transcription_error}")
+            os.remove(file_path)  # Clean up even on transcription error
+            raise HTTPException(status_code=500, detail=f"Transcription failed: {str(transcription_error)}")
+
+
+        try:
+            print("Extracting appointment details...")
+            appointment_data = extract_appointment_details(transcription)
+            print(f"Extracted appointment data: {appointment_data}")
+
+            # Raise exception if appointment_data comes back empty
+            if not appointment_data:
+              print("Could not extract appointment details from audio.")
+              raise HTTPException(status_code=400, detail="Could not extract appointment details from audio.")
+
+            department = appointment_data.get("department")
+            date_str = appointment_data.get("date")  # Date string
+            time_str = appointment_data.get("time")  # Time string
+            reason = appointment_data.get("reason")
+            doctor_name = appointment_data.get("doctor_name")
+
+            print(f"Department: {department}, Date: {date_str}, Time: {time_str}, Reason: {reason}, Doctor: {doctor_name}")
+
+            #  Only department is really required
+            if not department:
+                print("Missing appointment details in audio.")
+                raise HTTPException(status_code=400, detail="Missing appointment details in audio.")
+
+            # Convert date and time strings to datetime objects
+            try:
+                print("Converting date and time...")
+                date = datetime.strptime(date_str, "%Y-%m-%d").date()  # Convert string to date object
+
+                if time_str:  # Correct variable name here
+                    time_obj = parse(time_str)
+                    time = time_obj.strftime("%H:%M")
+                else:
+                    time = datetime.now().time().strftime("%H:%M")  # Fallback
+
+                print(f"Date: {date}, Time: {time}")
+            except ValueError as e:  # Catch only ValueError here
+                print(f"Error extracting date/time: {e}")
+                date = datetime.now().date()
+                time = datetime.now().time().strftime("%H:%M")  # Use current time if extraction fails
+                print(f"Using fallback Date: {date}, Time: {time}")
+            except Exception as e:  # Handle other potential errors if necessary
+                print(f"Unexpected error occurred during date/time conversion: {e}")
+                raise  # Or handle it differently
+
+            # Normalize the department name
+            print("Normalizing department name...")
+            if (department is not None):
+                department = department.strip().lower()
+                print(f"Normalized department: {department}")
+            else:
+                department="General"
+
+            # Create an AppointmentCreate object
+            print("Creating AppointmentCreate object...")
+            appointment = AppointmentCreate(
+                department=department,
+                date=date,
+                time=time,
+                reason=reason,
+                doctor_name = doctor_name
+            )
+            print(f"AppointmentCreate object created: {appointment}")
+
+        except Exception as extraction_error:
+            print(f"Failed to extract appointment details: {extraction_error}")
+            print(f"Error processing request: {extraction_error}")
+            raise HTTPException(status_code=400, detail=f"Failed to extract appointment details: {str(extraction_error)}")
+
+
+        # 5. Assign a doctor if specified, otherwise find an available doctor
+        print("Assigning doctor...")
+        if appointment.doctor_name and appointment.doctor_name != "no-doctor":
+            print(f"Doctor name provided: {appointment.doctor_name}")
+            assigned_doctor = appointment.doctor_name
+            doctor = db.query(User).filter(
+                User.full_name == assigned_doctor,
+                User.role == "doctor",
+                User.status == "approved"
+            ).first()
+            assigned_doctor_id = doctor.doctor_id if doctor else None
+            if doctor:
+                print(f"Doctor found: {doctor.full_name}, ID: {doctor.doctor_id}")
+            else:
+                print("Doctor not found.")
+                assigned_doctor_id = None
+        else:
+            print("No doctor name provided. Finding available doctor...")
+            # Query for an available doctor in the specified department
+            doctor = db.query(User).filter(
+                User.role == "doctor",
+                User.specialization.ilike(appointment.department),  # Case-insensitive match
+                User.status == "approved"
+            ).first()
+
+            assigned_doctor = doctor.full_name if doctor else None  # Assign `None` if no doctor is found
+            assigned_doctor_id = doctor.doctor_id if doctor else None
+            if doctor:
+                print(f"Available doctor found: {doctor.full_name}, ID: {doctor.doctor_id}")
+            else:
+                print("No available doctor found.")
+
+        # 6. Create a new appointment record
+        print("Creating new appointment record...")
+        new_appointment = Appointment(
+            id=str(uuid.uuid4()),  # Unique ID for each history entry
+            patient_id=patient_id,  # Use the validated patient_id
+            doctor_name=assigned_doctor,
+            doctor_id=assigned_doctor_id,  # Assign doctor_id
+            department=appointment.department,
+            date=appointment.date,
+            time=appointment.time,
+            reason=appointment.reason
+        )
+        print(f"New appointment record created: {new_appointment}")
+
+        # Save the appointment to the database
+        print("Saving appointment to database...")
+        db.add(new_appointment)
+        db.commit()
+        db.refresh(new_appointment)
+        print("Appointment saved to database.")
+
+        return {
+            "message": "Appointment booked successfully",
+            "doctor": new_appointment.doctor_name if new_appointment.doctor_name else "Doctor will be assigned when available",
+            "doctor_id": new_appointment.doctor_id  # Include doctor_id in the response
+        }
+
+
+    except HTTPException as e:
+        print(f"HTTPException: {e}")
+        raise e  # Re-raise HTTPExceptions to preserve status codes
+    except Exception as e:
+        print(f"Internal Server Error: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
