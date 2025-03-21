@@ -24,6 +24,9 @@ const DoctorDashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [doctor, setDoctor] = useState({ full_name: "", specialization: "" });
 
+  // Track IDs of appointments and patients that have already been notified
+  const [notifiedAppointments, setNotifiedAppointments] = useState(new Set());
+  const [notifiedPatients, setNotifiedPatients] = useState(new Set());
 
   // Fetch doctor profile data
   useEffect(() => {
@@ -44,7 +47,6 @@ const DoctorDashboard = () => {
 
     fetchDoctorProfile();
   }, []);
-
 
   // Fetch appointments and patients data
   useEffect(() => {
@@ -81,6 +83,50 @@ const DoctorDashboard = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // Add notifications when appointments change
+  useEffect(() => {
+    if (appointments.length > 0) {
+      const newAppointment = appointments[appointments.length - 1];
+
+      // Check if the appointment has already been notified
+      if (!notifiedAppointments.has(newAppointment.id)) {
+        setNotifications(prevNotifications => [
+          ...prevNotifications,
+          {
+            id: prevNotifications.length + 1,
+            message: `New appointment with ${newAppointment.patient}`,
+            time: new Date().toLocaleTimeString()
+          }
+        ]);
+
+        // Add the appointment ID to the notified set
+        setNotifiedAppointments(prev => new Set(prev).add(newAppointment.id));
+      }
+    }
+  }, [appointments, notifiedAppointments]);
+
+  // Add notifications when patients change
+  useEffect(() => {
+    if (recentPatients.length > 0) {
+      const newPatient = recentPatients[recentPatients.length - 1];
+
+      // Check if the patient has already been notified
+      if (!notifiedPatients.has(newPatient.id)) {
+        setNotifications(prevNotifications => [
+          ...prevNotifications,
+          {
+            id: prevNotifications.length + 1,
+            message: `New patient added: ${newPatient.full_name}`,
+            time: new Date().toLocaleTimeString()
+          }
+        ]);
+
+        // Add the patient ID to the notified set
+        setNotifiedPatients(prev => new Set(prev).add(newPatient.id));
+      }
+    }
+  }, [recentPatients, notifiedPatients]);
+
   const formatDate = (date) => {
     return date.toLocaleDateString('en-US', { 
       weekday: 'long', 
@@ -107,7 +153,7 @@ const DoctorDashboard = () => {
         
         <div className="doctor-profile">
           <div className="profile-image">
-            <img src="/api/placeholder/100/100" alt="Doctor profile" />
+            <img src="/download (1).png" alt="Doctor profile" />
           </div>
           <div className="profile-info">
           <h3>{doctor.full_name || "Loading..."}</h3>
@@ -253,7 +299,7 @@ const DoctorDashboard = () => {
         recentPatients.map(patient => (  // ✅ Remove extra {}
           <div className="patient-card" key={patient.id}>
             <div className="patient-avatar">
-              <img src={`/api/placeholder/40/40`} alt={patient.full_name} />
+              <img src={`/download.jpg`} alt={patient.full_name} />
             </div>
 
             <div className="patient-info">
