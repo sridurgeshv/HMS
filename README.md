@@ -25,6 +25,7 @@ cd hospital-management-system
 ```bash
 cd backend
 pip install -r requirements.txt
+python -m spacy download en_core_web_sm
 uvicorn app.run:app --reload
 ```
 
