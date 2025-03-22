@@ -23,7 +23,6 @@ import json
 from app.services.schemas import MedicationStatusUpdate
 import os
 from groq import Groq
-import torch
 from datetime import datetime, timedelta  # Import timedelta
 from google import genai
 import os  # Import the os module
@@ -802,8 +801,8 @@ async def analyze_vitals(vitals: VitalsInput):
                     "content": input_text,
                 }
             ],
-            model="llama-3.3-70b-versatile",  # Use the desired Groq model
-            max_tokens=10,  # Limit the response length
+            model="llama-3.3-70b-versatile", 
+            max_tokens=10, 
         )
 
         # Extract the response
@@ -883,7 +882,7 @@ def extract_appointment_details(text: str) -> dict:
     for ent in doc.ents:
         if ent.label_ == "DATE":
             date_str = ent.text
-        if ent.label_ == "WORK_OF_ART":  # try a different entity label for better reason extraction
+        if ent.label_ == "WORK_OF_ART": 
             reason = ent.text
 
     days_of_week = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
@@ -895,14 +894,14 @@ def extract_appointment_details(text: str) -> dict:
         if day in text.lower():
             date_str = day
 
-    # Attempt to extract the reason based on keywords.  More sophisticated NLP is better.
+    
     reason_keywords = ["to discuss", "for", "because of", "regarding", "about"]
-    if not reason:  # Only try keyword extraction if reason not already found
+    if not reason:  
         for keyword in reason_keywords:
             if keyword in text.lower():
                 reason = text.lower().split(keyword, 1)[1].strip()
                 break
-    if reason is None:  # If nothing found, default to the entire text
+    if reason is None: 
         reason = "General Checkup"
 
 
@@ -1072,7 +1071,6 @@ async def book_appointment_voice(
             raise HTTPException(status_code=400, detail=f"Failed to extract appointment details: {str(extraction_error)}")
 
 
-        # 5. Assign a doctor if specified, otherwise find an available doctor
         print("Assigning doctor...")
         if appointment.doctor_name and appointment.doctor_name != "no-doctor":
             print(f"Doctor name provided: {appointment.doctor_name}")
@@ -1138,3 +1136,48 @@ async def book_appointment_voice(
     except Exception as e:
         print(f"Internal Server Error: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.get("/patient-summary/{patient_id}")
+async def get_patient_summary(patient_id: str, db: Session = Depends(get_db)):
+    patient = db.query(User).filter(User.patient_id == patient_id, User.role == "patient").first()
+
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    medical_history = db.query(MedicalHistory).filter(MedicalHistory.patient_id == patient_id).all()
+    medications = db.query(Medication).filter(Medication.patient_id == patient_id).all()
+
+    prompt = f"""
+    Patient Summary:
+
+    Patient ID: {patient_id}
+    Name: {patient.full_name}
+    Age: {patient.age}
+    Gender: {patient.gender}
+
+    Medical History:
+    {", ".join([record.diagnosis for record in medical_history]) or "No medical history recorded."}
+
+    Medications:
+    {", ".join([f"{med.name} ({med.dosage}, {med.frequency})" for med in medications]) or "No medications recorded."}
+    """
+
+    gemini_response = get_gemini_response(prompt)  
+    summary = process_gemini_response(gemini_response) 
+
+    return {"patient": patient, "medical_history": medical_history, "medications": medications, "summary": summary }
+
+def get_gemini_response(prompt):
+    """Makes an API call to Gemini and returns the raw response."""
+    client = genai.Client(api_key="AIzaSyCTFySXTK4ehTXQrpZQDPngFT51cq7Rgks")
+    response = client.models.generate_content(
+        model="gemini-1.5-pro",  
+        contents=[prompt]
+    )
+    return response
+
+
+def process_gemini_response(response):
+    """Processes the raw Gemini response into a usable summary."""
+    return response.text        
