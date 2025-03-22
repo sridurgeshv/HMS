@@ -162,10 +162,22 @@ frontend API will be available at `http://localhost:3000`.
 #### Backend Setup
 ```bash
 cd backend
+
 pip install -r requirements.txt
+
 python -m spacy download en_core_web_sm
+
+Put groq and gemini key in backend/app/routes/routes.py file
+
+1. In line 42 replace groq-api-key with your own groq api key.
+
+2. In line 986 , 1178 and 1247 replace gemini-api-key with your own gemnini api key
+
+then do
+
 uvicorn app.run:app --reload
 ```
+
 
 Backend API will be available at `http://localhost:8000`.
 
