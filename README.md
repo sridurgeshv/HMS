@@ -108,7 +108,7 @@ Sri Durgesh
 
 #### Video Demo
 
-For a comprehensive overview of the application's features and functionality, please watch our [video demonstration](https://youtu.be/pIqggYLFee0). This walkthrough provides detailed guidance on effectively using and navigating Curasphere.
+For a comprehensive overview of the application's features and functionality, please watch our [video demonstration](https://youtu.be/0yQ9vURTq6Y). This walkthrough provides detailed guidance on effectively using and navigating Curasphere.
 
 #### Contributing
 
