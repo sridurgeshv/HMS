@@ -1184,3 +1184,40 @@ def get_gemini_response(prompt):
 def process_gemini_response(response):
     """Processes the raw Gemini response into a usable summary."""
     return response.text        
+
+
+@router.post("/generate-bill/{patient_id}")
+async def generate_bill(patient_id: str, db: Session = Depends(get_db)):
+    patient = db.query(User).filter(User.patient_id == patient_id, User.role == "patient").first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    medical_history = db.query(MedicalHistory).filter(MedicalHistory.patient_id == patient_id).all()
+    medications =  db.query(Medication).filter(Medication.patient_id == patient_id).all()
+
+    # 1. Create the prompt for Gemini
+    prompt = f"""
+    Generate a  medical bill for the following patient in not more than 200 words:
+
+    Patient ID: {patient_id}
+    Name: {patient.full_name}
+
+    Medical History (Diagnoses):
+    {", ".join([f"Visit on {record.visit_date} by Dr. {record.doctor_name}: {record.notes}. Medications: {record.medications}" for record in medical_history]) or "No medical history recorded."}
+
+    Medications:
+    {", ".join([med.name for med in medications]) if medications else "No medications recorded."}
+
+    The bill should include realistic itemized charges for consultations, procedures (if any based on the history), and medications.  Do not include any real personally identifiable information (PII) or actual pricing but the price should be shown in number form like random billing.  The bill should be formatted clearly.
+    """
+
+    # 2. Call Gemini API
+    gemini_response = get_gemini_response(prompt) #Your existing function
+
+
+    # 3. Process Gemini's response
+    bill = process_gemini_response(gemini_response) # Your existing function
+
+
+
+    return {"bill": bill}  # Return the generated bill
