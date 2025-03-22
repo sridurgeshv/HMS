@@ -13,58 +13,58 @@ This system streamlines the entire hospital workflow from patient registration t
 
 ### 👨‍⚕️ Doctor Portal
 
-- Appointment management: View daily, weekly, and monthly schedules
-- Patient records access: Quick access to patient medical history and test results
-- Prescription management: Digital prescription creation and medication history tracking
-- AI-assisted diagnosis: Recommendation system based on patient symptoms and history
+- **Appointment management**: View daily, weekly, and monthly schedules
+- **Patient records access**: Quick access to patient medical history and test results
+- **Prescription management**: Digital prescription creation and medication history tracking
+- **AI-assisted diagnosis**: Recommendation system based on patient symptoms and history
 
 ### 🏥 Patient Portal
 
-- Self-registration: Simple onboarding process for new patients
-- Appointment booking: Schedule, reschedule, or cancel appointments
-- Medical history: Access to personal health records and test results
-- Billing & payments: View and pay medical bills online
+- **Self-registration**: Simple onboarding process for new patients
+- **Appointment booking**: Schedule, reschedule, or cancel appointments
+- **Medical history**: Access to personal health records and test results
+- **Billing & payments**: View and pay medical bills online
 
 ### 👩‍⚕️ Staff Management
 
-- Nurse task assignment: Digital task allocation and completion tracking
-- Staff scheduling: Manage doctor and nurse availability and shifts
-- Performance analytics: Track key performance indicators for healthcare providers
+- **Nurse task assignment**: Digital task allocation and completion tracking
+- **Staff scheduling**: Manage doctor and nurse availability and shifts
+- **Performance analytics**: Track key performance indicators for healthcare providers
 
 ### 💼 Administrative Features
 
-- Billing system: Generate invoices and manage payment processing
-- Inventory management: Track medical supplies with AI-powered alerts for low stock
-- Reports generation: Analytics dashboard with custom report options
-- Department management: Organize hospital resources by department
+- **Billing system**: Generate invoices and manage payment processing
+- **Inventory management**: Track medical supplies with AI-powered alerts for low stock
+- **Reports generation**: Analytics dashboard with custom report options
+- **Department management**: Organize hospital resources by department
 
 ### 🤖 AI Integration
 
-- Intelligent appointment scheduling: Optimized time allocation based on priority and availability
-- Voice-based appointment booking: Natural language processing for appointment requests
-- Predictive inventory management: Automatic stock alerts based on usage patterns
-- Patient record analysis: Pattern recognition for improved care recommendations
+- **Intelligent appointment scheduling**: Optimized time allocation based on priority and availability
+- **Voice-based appointment booking**: Natural language processing for appointment requests
+- **Predictive inventory management**: Automatic stock alerts based on usage patterns
+- **Patient record analysis**: Pattern recognition for improved care recommendations
 
 ### 🛠️ Technical Stack
 #### Frontend
 
-- React.js: Component-based UI development
-- Redux: State management
-- Material UI: Modern, responsive design components
-- Chart.js: Data visualization for analytics
+- **React.js**: Component-based UI development
+- **Redux**: State management
+- **Material UI**: Modern, responsive design components
+- **Chart.js**: Data visualization for analytics
 
 #### Backend
 
-- FastAPI: High-performance Python framework for APIs
-- MongoDB: NoSQL database for flexible data storage
-- JWT: Secure authentication implementation
-- Spacy: NLP for text processing capabilities
+- **FastAPI**: High-performance Python framework for APIs
+- **MongoDB**: NoSQL database for flexible data storage
+- **JWT**: Secure authentication implementation
+- **Spacy**: NLP for text processing capabilities
 
 #### AI & Machine Learning
 
-- NLP models: For voice appointment booking and text analysis
-- Predictive analytics: For inventory management and resource allocation
-- Recommendation systems: For treatment suggestions based on patient history
+- **NLP models**: For voice appointment booking and text analysis
+- **Predictive analytics**: For inventory management and resource allocation
+- **Recommendation systems**: For treatment suggestions based on patient history
 
 ### 📦 Installation & Setup
 **Prerequisites**
