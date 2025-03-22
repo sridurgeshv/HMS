@@ -13,10 +13,33 @@ This system streamlines the entire hospital workflow from patient registration t
 
 ### 👨‍⚕️ Doctor Portal
 
-- **Appointment management**: View daily, weekly, and monthly schedules
-- **Patient records access**: Quick access to patient medical history and test results
-- **Prescription management**: Digital prescription creation and medication history tracking
-- **AI-assisted diagnosis**: Recommendation system based on patient symptoms and history
+- **Appointment Management**:
+
+View daily, weekly, and monthly schedules.
+
+Manage appointments with options to add follow-up notes.
+
+- **Patient Records Access**:
+
+Quick access to patient medical history and test results.
+
+View and respond to patient medications.
+
+- **Prescription Management**:
+
+ Manage digital prescriptions.
+
+Track medication history for patients.
+
+- **AI-Assisted Diagnosis**:
+
+AI-powered recommendation system based on patient symptoms and history.
+
+X-Ray Analyzer for image-based diagnosis.
+
+- **Chatbot Integration**:
+
+Query patient summaries using a chatbot interface.
 
 ### 🏥 Patient Portal
 
