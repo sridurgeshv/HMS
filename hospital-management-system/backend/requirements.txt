@@ -10,3 +10,4 @@
  groq
  google-genai
  spacy
+ Pillow
