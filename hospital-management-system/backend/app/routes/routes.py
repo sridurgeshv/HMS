@@ -39,7 +39,7 @@ router = APIRouter()
 
 nlp = spacy.load('en_core_web_sm')
 
-client = Groq(api_key="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")
+client = Groq(api_key="groq-api-key")
 
 # Initialize FastAPI App
 app = FastAPI()
@@ -983,7 +983,7 @@ async def book_appointment_voice(
             audio.export(wav_path, format="wav", parameters=["-ac", "1", "-ar", "16000"])
             print(f"Audio exported to WAV: {wav_path}")
 
-            client = genai.Client(api_key="AIzaSyCTFySXTK4ehTXQrpZQDPngFT51cq7Rgks")
+            client = genai.Client(api_key="gemini-api-key")
             myfile = client.files.upload(file=wav_path)
 
             response = client.models.generate_content(
@@ -1175,7 +1175,7 @@ async def get_patient_summary(patient_id: str, db: Session = Depends(get_db)):
 
 def get_gemini_response(prompt):
     """Makes an API call to Gemini and returns the raw response."""
-    client = genai.Client(api_key="AIzaSyCTFySXTK4ehTXQrpZQDPngFT51cq7Rgks")
+    client = genai.Client(api_key="gemini-api-key")
     response = client.models.generate_content(
         model="gemini-1.5-pro",  
         contents=[prompt]
@@ -1244,7 +1244,7 @@ async def analyze_xray(xray_image: UploadFile = File(...)):
         """
 
         # 3. Call the Gemini API
-        client = genai.Client(api_key="AIzaSyCTFySXTK4ehTXQrpZQDPngFT51cq7Rgks")
+        client = genai.Client(api_key="gemini-api-key")
         response = client.models.generate_content(
             model="gemini-1.5-pro",  # Or the appropriate Gemini multimodal model
             contents=[image, prompt]
