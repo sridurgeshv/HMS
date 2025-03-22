@@ -62,7 +62,7 @@ As we are using local storage to fetch details so it is possible that you have t
 
 ### Note : To use AI powered voice based appointment you should follow this format to book appointment
   
-  - Book a appointment in the (department name) department for (from monday to sunday any day) at (time in am or pm) to discuss (reason for visit).
+  - Book a appointment in the (Cardiology/Dermatology/Neurology/Orthopedics) department for (from monday to sunday any day) at (time in am or pm) to discuss (reason for visit).
 
    - Example
     
