@@ -67,18 +67,19 @@ This system streamlines the entire hospital workflow from patient registration t
 - **Recommendation systems**: For treatment suggestions based on patient history
 
 ### 📦 Installation & Setup
+
 **Prerequisites**
 
-Node.js (v14.x or higher)
-Python (v3.8 or higher)
+- Node.js (v14.x or higher) 
+- Python (v3.8 or higher)
 
-### Clone the Repository
+#### Clone the Repository
 ```bash
 git clone https://github.com/your-username/hospital-management-system.git
 cd hospital-management-system
 ```
 
-### Backend Setup
+#### Backend Setup
 ```bash
 cd backend
 pip install -r requirements.txt
@@ -86,20 +87,20 @@ python -m spacy download en_core_web_sm
 uvicorn app.run:app --reload
 ```
 
-### Initialize Database
+#### Initialize Database
 ```bash
 python -c "from app.utils.database import Base, engine; Base.metadata.create_all(bind=engine)"
 ```
 
-### Frontend Setup
+#### Frontend Setup
 ```bash
 cd frontend
 npm install
 npm start
 ```
 
-### 👥 Contributors
+#### 👥 Contributors
 
-Ritika Srivastava
+Ritika Srivastava /
 Sri Durgesh
 
