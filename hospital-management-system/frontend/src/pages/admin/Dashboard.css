@@ -200,10 +200,11 @@ a {
 /********** Main Content Styles ****************/
 .dashboard-main {
   flex: 1;
-  padding: 32px;
+  padding: 24px; /* Reduced from 32px */
+  padding-left: 0; /* Remove padding from the left */
   transition: margin-left var(--transition-speed) ease-in-out;
-  max-width: 1800px;
-  margin: 0 auto;
+  max-width: 100%; /* Changed from 1800px */
+  margin: 0; /* Changed from 0 auto */
 }
 
 /* Top Navigation */
@@ -1193,18 +1194,13 @@ a {
 /* User Mgmt */
 
 /* Main Content Styles */
-.dashboard-main {
-  flex-grow: 1;
-  padding: 20px;
-  background-color: #f9f9f9;
-}
 
 /* Top Navigation Styles */
 .dashboard-nav {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 10px 0;
+  align-items:left;
+  padding: 4px 0;
   border-bottom: 1px solid #e0e0e0;
 }
 
@@ -1548,19 +1544,7 @@ a {
 }
 
 /* Main Content Styles */
-.dashboard-main {
-  flex: 1;
-  transition: margin-left 0.3s ease;
-  overflow-x: hidden;
-}
 
-.sidebar-active .dashboard-main {
-  margin-left: 250px;
-}
-
-.sidebar-inactive .dashboard-main {
-  margin-left: 60px;
-}
 
 /* Dashboard Navigation */
 .dashboard-nav {
