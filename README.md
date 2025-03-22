@@ -89,3 +89,9 @@ This README is now **clean, structured, and professional**. Let me know if you n
 4. [Authenticate with Firebase using Password-Based Accounts using Javascript](https://firebase.google.com/docs/auth/web/password-auth)
 5. [snippets->auth-next->email->auth_signup_password.js](https://github.com/firebase/snippets-web/blob/467eaa165dcbd9b3ab15711e76fa52237ba37f8b/snippets/auth-next/email/auth_signup_password.js#L8-L21)
 
+
+
+----------------------------------------------------------------------
+
+## Appointments Voice 
+Book a voice appointment in the cardiology department for Thursday at 4 PM to discuss test results.

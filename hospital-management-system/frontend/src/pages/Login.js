@@ -77,7 +77,7 @@ const Login = () => {
           navigate('/nurse/dashboard');
           break;
         case 'admin':
-          navigate('/dashboard/admin');
+          navigate('/admin/dashboard');
           break;
         default:
           navigate('/'); // Default fallback
