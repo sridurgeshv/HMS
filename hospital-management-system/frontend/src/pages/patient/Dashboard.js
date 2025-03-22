@@ -276,13 +276,14 @@ const Dashboard = () => {
               <User size={20} />
               <span>Profile</span>
             </Link>
-            <Link 
+            <div 
               onClick={handleLogout} 
               className="patient-nav-item"
+              style={{ cursor: 'pointer' }}
             >
               <LogOut size={20} />
               <span>Logout</span>
-            </Link>
+            </div>
           </nav>
         </div>
       </div>

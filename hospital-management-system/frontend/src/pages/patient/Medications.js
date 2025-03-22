@@ -213,13 +213,14 @@ const Medications = () => {
               <User size={20} />
               <span>Profile</span>
             </Link>
-            <Link 
-              onClick={handleLogout} 
-              className="patient-nav-item"
+            <div 
+            onClick={handleLogout} 
+            className="patient-nav-item"
+            style={{ cursor: 'pointer' }}
             >
-              <LogOut size={20} />
-              <span>Logout</span>
-            </Link>
+            <LogOut size={20} />
+             <span>Logout</span>
+            </div>
           </nav>
         </div>
       </div>

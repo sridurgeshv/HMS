@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 import { 
   Users, 
@@ -24,6 +24,7 @@ import axios from 'axios';
 
 const UserManagement = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [activeSidebar, setActiveSidebar] = useState(true);
   const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState('');
@@ -146,6 +147,13 @@ const UserManagement = () => {
     return 'N/A';
   };
 
+  // Handle logout - Implemented from PatientDashboard
+  const handleLogout = () => {
+    localStorage.removeItem('username');
+    localStorage.removeItem('admin_id');
+    navigate('/');
+  };
+
   return (
     <div className={`dashboard-container ${activeSidebar ? 'sidebar-active' : 'sidebar-inactive'}`}>
       {/* Sidebar */}
@@ -177,10 +185,14 @@ const UserManagement = () => {
         </div>
         
         <div className="sidebar-footer">
-          <Link to="/logout" className="logout-button">
+          <div 
+            onClick={handleLogout} 
+            className="logout-button"
+            style={{ cursor: 'pointer' }}
+          >
             <LogOut size={20} />
             <span>Logout</span>
-          </Link>
+          </div>
         </div>
       </aside>
       

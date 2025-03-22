@@ -53,7 +53,6 @@ const ProtectedDoctorRoute = ({ children }) => {
   if (!username || !doctorId) {
     return <Navigate to="/login" replace />;
   }
-  
   return children;
 };
 
@@ -63,8 +62,7 @@ const ProtectedNurseRoute = ({ children }) => {
   
   if (!username || !role) {
     return <Navigate to="/login" replace />;
-  }
-  
+  }  
   return children;
 };
 
@@ -75,7 +73,6 @@ const ProtectedAdminRoute = ({ children }) => {
   if (!username || !role) {
     return <Navigate to="/login" replace />;
   }
-  
   return children;
 };
 
@@ -177,12 +174,12 @@ function App() {
                 </ProtectedNurseRoute>
               } />
 
- {/* Admin Routes */}          
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/users" element={<UserManagement />} />
-          <Route path="/admin/departments" element={<AdminDepartments />} />
-          <Route path="/admin/profile" element={<AdminProfile />} /> 
-        </Routes>
+  {/* Admin Routes */}          
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<UserManagement />} />
+            <Route path="/admin/departments" element={<AdminDepartments />} />
+            <Route path="/admin/profile" element={<AdminProfile />} /> 
+          </Routes>
        </div>
       </Router>
     </PatientProvider>
