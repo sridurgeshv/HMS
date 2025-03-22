@@ -61,13 +61,6 @@ Query patient summaries using a chatbot interface.
 - **Reports generation**: Analytics dashboard with custom report options
 - **Department management**: Organize hospital resources by department
 
-### 🤖 AI Integration
-
-- **Intelligent appointment scheduling**: Optimized time allocation based on priority and availability
-- **Voice-based appointment booking**: Natural language processing for appointment requests
-- **Predictive inventory management**: Automatic stock alerts based on usage patterns
-- **Patient record analysis**: Pattern recognition for improved care recommendations
-
 ### 🛠️ Technical Stack
 #### Frontend
 
