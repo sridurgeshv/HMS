@@ -101,6 +101,6 @@ npm start
 
 #### 👥 Contributors
 
-Ritika Srivastava /
+Ritika Srivastava \
 Sri Durgesh
 
