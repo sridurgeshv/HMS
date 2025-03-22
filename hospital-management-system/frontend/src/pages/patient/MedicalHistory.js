@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
-import { Calendar, FileText, User, Pill, Activity, Bell, LogOut } from 'lucide-react';
+import { Calendar, FileText, User, Pill, Activity, Bell, LogOut, CreditCard, X } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { PatientContext } from "../../PatientContext";
 import { UserContext } from "../../UserContext";
-
+import axios from 'axios';
 import './Dashboard.css';
 
 const MedicalHistory = () => {
@@ -21,6 +21,10 @@ const MedicalHistory = () => {
     notes: "",
     medications: "",
   });
+  const [bill, setBill] = useState(""); // State for generated bill
+  const [generatingBill, setGeneratingBill] = useState(false); // Loading state for bill generation
+  const [showBillPopup, setShowBillPopup] = useState(false); // State to control bill popup visibility
+  const [paymentStatus, setPaymentStatus] = useState("unpaid"); // State for payment status
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -63,6 +67,39 @@ const MedicalHistory = () => {
   useEffect(() => {
     fetchMedicalHistory();
   }, [fetchMedicalHistory]);
+
+  // Generate bill function
+  const generateBill = async () => {
+    if (!patientId) {
+      setError("Patient ID not found. Please select a patient.");
+      return;
+    }
+
+    setGeneratingBill(true);
+    setError(null);
+
+    try {
+      const response = await axios.post(`http://localhost:8000/generate-bill/${patientId}`);
+      setBill(response.data.bill);
+      setShowBillPopup(true); // Show the bill popup
+    } catch (error) {
+      console.error("Error generating bill:", error);
+      setError("Failed to generate bill. Please try again.");
+    } finally {
+      setGeneratingBill(false);
+    }
+  };
+
+  // Handle payment status change
+  const handlePaymentStatusChange = (status) => {
+    setPaymentStatus(status);
+  };
+
+  // Close bill popup
+  const closeBillPopup = () => {
+    setShowBillPopup(false);
+    setBill(""); // Clear the bill content
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -165,14 +202,13 @@ const MedicalHistory = () => {
                <User size={20} />
               <span>Profile</span>
             </Link>
-            <div 
-            onClick={handleLogout} 
-            className="patient-nav-item"
-            style={{ cursor: 'pointer' }}
-          >
-            <LogOut size={20} />
-            <span>Logout</span>
-          </div>
+            <Link 
+              onClick={handleLogout} 
+              className="patient-nav-item"
+            >
+              <LogOut size={20} />
+              <span>Logout</span>
+            </Link>
           </nav>
         </div>
       </div>
@@ -192,6 +228,14 @@ const MedicalHistory = () => {
           <div className="patient-medical-history-view patient-fade-in">
             <div className="patient-section-header">
               <h2><FileText size={20} /> Medical Records</h2>
+              <button
+                className="patient-billing-button"
+                onClick={generateBill}
+                disabled={generatingBill}
+              >
+                <CreditCard size={20} />
+                {generatingBill ? "Generating Bill..." : "Generate Bill"}
+              </button>
             </div>
 
             {error && <div className="patient-error-message">{error}</div>}
@@ -279,6 +323,32 @@ const MedicalHistory = () => {
           </div>
         </div>
       </main>
+
+      {/* Bill Popup */}
+      {showBillPopup && (
+        <div className="patient-bill-popup-overlay">
+          <div className="patient-bill-popup">
+            <div className="patient-bill-popup-header">
+              <h2>Generated Bill</h2>
+              <button onClick={closeBillPopup} className="patient-bill-popup-close">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="patient-bill-content">
+              <pre>{bill}</pre>
+              <div className="patient-bill-payment-status">
+                <strong>Payment Status:</strong>
+                <button
+                  className={`patient-payment-button ${paymentStatus === 'paid' ? 'paid' : 'unpaid'}`}
+                  onClick={() => handlePaymentStatusChange(paymentStatus === 'paid' ? 'unpaid' : 'paid')}
+                >
+                  {paymentStatus === 'paid' ? 'Paid' : 'Unpaid'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
