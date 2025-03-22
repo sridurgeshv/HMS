@@ -303,7 +303,7 @@ const Appointments = () => {
       {showFollowUpForm && (
         <div className="follow-up-form-overlay">
           <div className="follow-up-form">
-            <h3>Write Follow-up Note</h3>
+            <h3>Write Follow-up Note for Staff</h3>
             <form onSubmit={handleFollowUpSubmit}>
               <textarea
                 placeholder="Enter follow-up note..."
