@@ -1,86 +1,140 @@
-# 🏥 Hospital Management System (MERN Stack)
+# 🏥 Curasphere: AI Powered Hospital Management System
 
 ## 📋 Project Overview
-A comprehensive **Hospital Management System** built on the MERN stack (MongoDB, Express.js, React, Node.js) designed to modernize healthcare operations through integrated dashboards, AI-powered processes, and secure role-based access.
-This system streamlines the entire hospital workflow from patient registration to billing and inventory management, supporting both staff and patients with intuitive interfaces and intelligent automation.
+A comprehensive **AI Powered Hospital Management System**  designed to modernize healthcare operations through integrated dashboards, AI-powered processes, and secure role-based access.
+This system streamlines the entire hospital workflow from patient registration to AI integration to staff scheduling , supporting both staff and patients with intuitive interfaces and intelligent automation.
 
 ## ✨ Key Features
 ### 🧑‍⚕️ User Management & Authentication
 
 - **Multi-role access system**: Separate secure portals for patients, doctors, nurses, and administrators
-- **JWT-based authentication**: Secure login and registration with email verification
 - **Role-specific dashboards**: Tailored interfaces showing relevant information based on user role
 
-### 👨‍⚕️ Doctor Portal
+### Note
 
-- **Appointment Management**:
+As we are using local storage to fetch details so it is possible that you have to login twice to be redirected to patient dashboard.
 
-View daily, weekly, and monthly schedules.
+# 👨‍⚕️ Doctor Portal
 
-Manage appointments with options to add follow-up notes.
+### Appointment Management:
 
-- **Patient Records Access**:
+- View daily, weekly, and monthly schedules.
 
-Quick access to patient medical history and test results.
+- Manage appointments with options to add follow-up notes.
 
-View and respond to patient medications.
+## Patient Records Access:
 
-- **Prescription Management**:
+- Quick access to patient medical history and test results.
 
- Manage digital prescriptions.
+- View and respond to patient medications.
 
-Track medication history for patients.
+## Prescription Management:
 
-- **AI-Assisted Diagnosis**:
+ - Manage digital prescriptions.
 
-AI-powered recommendation system based on patient symptoms and history.
+- Track medication history for patients.
 
-X-Ray Analyzer for image-based diagnosis.
+## AI-Assisted Diagnosis:
 
-- **Chatbot Integration**:
+- AI-powered recommendation system based on patient symptoms and history.
 
-Query patient summaries using a chatbot interface.
+- X-Ray Analyzer for image-based diagnosis.
 
-### 🏥 Patient Portal
+  ## Chatbot Integration:
 
-- **Self-registration**: Simple onboarding process for new patients
-- **Appointment booking**: Schedule, reschedule, or cancel appointments
-- **Medical history**: Access to personal health records and test results
-- **Billing & payments**: View and pay medical bills online
+- Query patient summaries using a chatbot interface.
 
-### 👩‍⚕️ Staff Management
+# 🏥 Patient Portal
 
-- **Nurse task assignment**: Digital task allocation and completion tracking
-- **Staff scheduling**: Manage doctor and nurse availability and shifts
-- **Performance analytics**: Track key performance indicators for healthcare providers
+### Self-Registration:
 
-### 💼 Administrative Features
+- Simple onboarding process for new patients.
 
-- **Billing system**: Generate invoices and manage payment processing
-- **Inventory management**: Track medical supplies with AI-powered alerts for low stock
-- **Reports generation**: Analytics dashboard with custom report options
-- **Department management**: Organize hospital resources by department
+- Easy account creation with minimal steps.
 
-### 🛠️ Technical Stack
-#### Frontend
+### Appointment Booking:
 
-- **React.js**: Component-based UI development
-- **Redux**: State management
-- **Material UI**: Modern, responsive design components
-- **Chart.js**: Data visualization for analytics
+- Schedule or cancel appointments.
 
-#### Backend
+- AI powered Voice-based appointment booking for convenience.
 
-- **FastAPI**: High-performance Python framework for APIs
-- **MongoDB**: NoSQL database for flexible data storage
-- **JWT**: Secure authentication implementation
-- **Spacy**: NLP for text processing capabilities
+- View upcoming and past appointments.
 
-#### AI & Machine Learning
+### Note : To use AI powered voice based appointment you should follow this format to book appointment
+  
+  - Book a appointment in the (department name) department for (from monday to sunday any day) at (time in am or pm) to discuss (reason for visit).
 
-- **NLP models**: For voice appointment booking and text analysis
-- **Predictive analytics**: For inventory management and resource allocation
-- **Recommendation systems**: For treatment suggestions based on patient history
+   - Example
+    
+    Book a voice appointment in the cardiology department for Thursday at 4 PM to discuss test results.
+
+### Medical History:
+
+- Access personal health records and test results.
+
+- Add new medical records and view historical data.
+
+- Generate and view medical bills.
+
+### Medications Management:
+
+- Add and track current medications.
+
+- Get AI-powered advice on medication interactions and side effects.
+
+- View doctor's responses to medication queries.
+
+### Health Monitoring:
+
+- Input and analyze vitals (heart rate, blood pressure, blood sugar).
+
+- Receive health assessments based on vitals.
+
+# 👩‍⚕️ Staff Management
+
+### Nurse Task Assignment:
+
+- Digital task allocation and completion tracking.
+
+- Manage follow-up notes and patient care tasks.
+
+### Staff Scheduling:
+
+- View and manage doctor and nurse availability and shifts.
+
+- Track doctor assignments and patient counts.
+
+### Performance Analytics:
+
+-Track key performance indicators (KPIs) for healthcare providers.
+
+- Monitor medication tracking, patient notes, and appointment counts.
+
+### Patient Care Management:
+
+- Access and manage patient notes and follow-up tasks.
+
+- Track medication schedules and patient progress.
+
+### Medication Tracking:
+
+- Monitor and update medication status for patients.
+
+- View medication schedules and patient-specific details.
+
+# 💼 Administrative Features
+
+### User Management:
+
+- Manage all users (patients, doctors, nurses).
+
+- View and manage departments.
+
+  ### Pending Registrations:
+
+- Approve or reject new user registrations.
+
+- View details of pending registrations.
 
 ### 📦 Installation & Setup
 
@@ -88,6 +142,8 @@ Query patient summaries using a chatbot interface.
 
 - Node.js (v14.x or higher) 
 - Python (v3.8 or higher)
+
+### Note: You should have ffmpeg installed on your system to use the voice appointment feature.
 
 #### Clone the Repository
 ```bash
@@ -101,6 +157,7 @@ cd frontend
 npm install
 npm run start
 ```
+frontend API will be available at `http://localhost:3000`.
 
 #### Backend Setup
 ```bash
@@ -119,7 +176,7 @@ python -c "from app.utils.database import Base, engine; Base.metadata.create_all
 
 #### 👥 Contributors
 
-Ritika Srivastava \
+Ritika Srivastava 
 Sri Durgesh
 
 #### Video Demo
