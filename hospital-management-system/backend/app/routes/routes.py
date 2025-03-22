@@ -31,6 +31,8 @@ from typing import Optional
 import spacy
 import re
 from dateutil.parser import parse
+from PIL import Image
+from io import BytesIO
 
 
 router = APIRouter()
@@ -1221,3 +1223,42 @@ async def generate_bill(patient_id: str, db: Session = Depends(get_db)):
 
 
     return {"bill": bill}  # Return the generated bill
+
+
+@router.post("/analyze-xray/")
+async def analyze_xray(xray_image: UploadFile = File(...)):
+
+    try:
+        # 1. Open and validate the uploaded image
+        image = Image.open(BytesIO(await xray_image.read()))
+        # You might want to add more validation here (e.g., file type, size)
+
+
+        # 2. Construct the prompt for Gemini
+        prompt = f"""
+        Analyze the provided X-ray image and give diagnostic advice or clues.  Focus on potential findings, possible diagnoses, and areas that require further investigation in less than 200 words.
+
+        Image: (X-ray image provided below)
+
+        Important: This analysis is intended to assist medical professionals and should not be considered a definitive diagnosis. Further medical evaluation is always necessary.
+        """
+
+        # 3. Call the Gemini API
+        client = genai.Client(api_key="AIzaSyCTFySXTK4ehTXQrpZQDPngFT51cq7Rgks")
+        response = client.models.generate_content(
+            model="gemini-1.5-pro",  # Or the appropriate Gemini multimodal model
+            contents=[image, prompt]
+        )
+
+
+        # 4. Process the response and return the analysis
+        analysis = response.text #  Might need further processing depending on the model's output
+
+
+
+        return {"analysis": analysis}
+
+
+    except Exception as e:
+        print(f"Error: {e}")  # Log the error for debugging
+        raise HTTPException(status_code=500, detail="Error processing X-ray. Please try again.")
