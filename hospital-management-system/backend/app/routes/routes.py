@@ -1148,25 +1148,28 @@ async def get_patient_summary(patient_id: str, db: Session = Depends(get_db)):
     medical_history = db.query(MedicalHistory).filter(MedicalHistory.patient_id == patient_id).all()
     medications = db.query(Medication).filter(Medication.patient_id == patient_id).all()
 
+    # Prepare the prompt for Gemini
     prompt = f"""
-    Patient Summary:
+    Generate a concise patient summary in less than 200 words.
 
+    Patient Details:
     Patient ID: {patient_id}
     Name: {patient.full_name}
     Age: {patient.age}
     Gender: {patient.gender}
 
     Medical History:
-    {", ".join([record.diagnosis for record in medical_history]) or "No medical history recorded."}
+    {", ".join([f"Visit on {record.visit_date} by Dr. {record.doctor_name}: {record.notes}. Medications: {record.medications}" for record in medical_history]) or "No medical history recorded."}
 
     Medications:
     {", ".join([f"{med.name} ({med.dosage}, {med.frequency})" for med in medications]) or "No medications recorded."}
     """
 
-    gemini_response = get_gemini_response(prompt)  
-    summary = process_gemini_response(gemini_response) 
+    # Call Gemini API
+    gemini_response = get_gemini_response(prompt)
+    summary = process_gemini_response(gemini_response)
 
-    return {"patient": patient, "medical_history": medical_history, "medications": medications, "summary": summary }
+    return {"patient": patient, "medical_history": medical_history, "medications": medications, "summary": summary}
 
 def get_gemini_response(prompt):
     """Makes an API call to Gemini and returns the raw response."""
