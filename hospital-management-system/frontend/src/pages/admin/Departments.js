@@ -11,7 +11,10 @@ import {
   X,
   User,
   Calendar,
-  Clock
+  Clock,
+  Plus,
+  Filter,
+  Search
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -27,21 +30,40 @@ const Departments = () => {
     fullName: '',
     role: ''
   });
+  const [activeTab, setActiveTab] = useState('doctors');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   // Toggle sidebar
   const toggleSidebar = () => {
     setActiveSidebar(!activeSidebar);
   };
 
+  // Filter staff based on search term
+  const filteredDoctors = doctors.filter(doctor => 
+    doctor.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doctor.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doctor.hospital.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  const filteredNurses = nurses.filter(nurse => 
+    nurse.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    nurse.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    nurse.hospital.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   // Fetch doctors, nurses, and admin data
   useEffect(() => {
+    setIsLoading(true);
     // Fetch doctors
     axios.get('http://localhost:8000/doctors/')
       .then(response => {
         setDoctors(response.data);
+        setTimeout(() => setIsLoading(false), 800); // Simulate loading for demo
       })
       .catch(error => {
         console.error('Error fetching doctors:', error);
+        setIsLoading(false);
       });
 
     // Fetch nurses
@@ -88,15 +110,28 @@ const Departments = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Handle logout - Implemented from PatientDashboard
+  // Handle logout
   const handleLogout = () => {
     localStorage.removeItem('username');
     localStorage.removeItem('admin_id');
     navigate('/');
   };
 
+  // Render skeleton loaders
+  const renderSkeletons = (count) => {
+    return Array(count).fill(0).map((_, index) => (
+      <div key={index} className="staff-card skeleton-loader">
+        <div className="skeleton-text-lg"></div>
+        <div className="skeleton-text-sm"></div>
+        <div className="skeleton-text-sm"></div>
+        <div className="skeleton-text-sm"></div>
+        <div className="skeleton-text-sm"></div>
+      </div>
+    ));
+  };
+
   return (
-    <div className={`departments-container ${activeSidebar ? 'sidebar-active' : 'sidebar-inactive'}`}>
+    <div className={`dashboard-container ${activeSidebar ? 'sidebar-active' : 'sidebar-inactive'}`}>
       {/* Sidebar */}
       <aside className="dashboard-sidebar">
         <div className="sidebar-header">
@@ -138,9 +173,9 @@ const Departments = () => {
       </aside>
       
       {/* Main Content */}
-      <main className="departments-main">
+      <main className="dashboard-main">
         {/* Top Navigation */}
-        <nav className="departments-nav">
+        <nav className="dashboard-nav">
           <div className="nav-left">
             <h1>Departments Management</h1>
             <div className="date-time-display">
@@ -153,6 +188,13 @@ const Departments = () => {
           
           <div className="nav-right">
             <div className="search-container">
+              <Search size={16} />
+              <input 
+                type="text" 
+                placeholder="Search staff..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
             
             <div className="admin-profile">
@@ -167,37 +209,133 @@ const Departments = () => {
           </div>
         </nav>
         
-        {/* Doctors and Nurses Content */}
-        <div className="departments-content">
-          {/* Doctors Section */}
-          <div className="staff-section">
-            <h2>Doctors</h2>
+        {/* Departments Content */}
+        <div className="dashboard-content">
+          <div className="departments-header">
+            <div className="departments-header-left">
+              <h2 className="page-title">Staff Directory</h2>
+              <div className="departments-filter">
+                <Filter size={16} />
+                <select>
+                  <option value="all">All Hospitals</option>
+                  <option value="city">City Hospital</option>
+                  <option value="memorial">Memorial Hospital</option>
+                  <option value="general">General Hospital</option>
+                </select>
+              </div>
+            </div>
+            
+            <button className="add-department-btn">
+              <Plus size={16} />
+              <span>Add New Staff</span>
+            </button>
+          </div>
+          
+          {/* Department Tabs */}
+          <div className="departments-tabs">
+            <button 
+              className={`tab-button ${activeTab === 'doctors' ? 'active' : ''}`}
+              onClick={() => setActiveTab('doctors')}
+            >
+              Doctors ({doctors.length})
+            </button>
+            <button 
+              className={`tab-button ${activeTab === 'nurses' ? 'active' : ''}`}
+              onClick={() => setActiveTab('nurses')}
+            >
+              Nurses ({nurses.length})
+            </button>
+          </div>
+          
+          {/* Doctors Tab Content */}
+          <div className={`staff-section ${activeTab === 'doctors' ? 'active' : 'hidden'}`}>
+            <div className="department-stats">
+              <div className="stat-card">
+                <h3>Total Doctors</h3>
+                <p className="stat-value">{doctors.length}</p>
+              </div>
+              <div className="stat-card">
+                <h3>Specializations</h3>
+                <p className="stat-value">{new Set(doctors.map(d => d.specialization)).size}</p>
+              </div>
+              <div className="stat-card">
+                <h3>Average Experience</h3>
+                <p className="stat-value">
+                  {doctors.length > 0 
+                    ? (doctors.reduce((sum, d) => sum + d.experience, 0) / doctors.length).toFixed(1) 
+                    : 0} years
+                </p>
+              </div>
+            </div>
+            
             <div className="staff-grid">
-              {doctors.map(doctor => (
-                <div key={doctor.id} className="staff-card">
-                  <h3>{doctor.full_name}</h3>
-                  <p><strong>Specialization:</strong> {doctor.specialization}</p>
-                  <p><strong>Hospital:</strong> {doctor.hospital}</p>
-                  <p><strong>Experience:</strong> {doctor.experience} years</p>
-                  <p><strong>Doctor ID:</strong> {doctor.doctor_id}</p>
-                </div>
-              ))}
+              {isLoading ? (
+                renderSkeletons(6)
+              ) : filteredDoctors.length > 0 ? (
+                filteredDoctors.map(doctor => (
+                  <div key={doctor.id} className="staff-card">
+                    <div className="staff-avatar">
+                      <User size={32} />
+                    </div>
+                    <h3>{doctor.full_name}</h3>
+                    <div className="staff-badge">{doctor.specialization}</div>
+                    <div className="staff-details">
+                      <p><strong>Hospital:</strong> {doctor.hospital}</p>
+                      <p><strong>Experience:</strong> {doctor.experience} years</p>
+                      <p><strong>Doctor ID:</strong> {doctor.doctor_id}</p>
+                    </div>
+                    <button className="view-profile-btn">View Profile</button>
+                  </div>
+                ))
+              ) : (
+                <div className="no-results">No doctors matching your search criteria</div>
+              )}
             </div>
           </div>
-
-          {/* Nurses Section */}
-          <div className="staff-section">
-            <h2>Nurses</h2>
+          
+          {/* Nurses Tab Content */}
+          <div className={`staff-section ${activeTab === 'nurses' ? 'active' : 'hidden'}`}>
+            <div className="department-stats">
+              <div className="stat-card">
+                <h3>Total Nurses</h3>
+                <p className="stat-value">{nurses.length}</p>
+              </div>
+              <div className="stat-card">
+                <h3>Departments</h3>
+                <p className="stat-value">{new Set(nurses.map(n => n.department)).size}</p>
+              </div>
+              <div className="stat-card">
+                <h3>Average Experience</h3>
+                <p className="stat-value">
+                  {nurses.length > 0 
+                    ? (nurses.reduce((sum, n) => sum + n.experience, 0) / nurses.length).toFixed(1) 
+                    : 0} years
+                </p>
+              </div>
+            </div>
+            
             <div className="staff-grid">
-              {nurses.map(nurse => (
-                <div key={nurse.id} className="staff-card">
-                  <h3>{nurse.full_name}</h3>
-                  <p><strong>Department:</strong> {nurse.department}</p>
-                  <p><strong>Hospital:</strong> {nurse.hospital}</p>
-                  <p><strong>Experience:</strong> {nurse.experience} years</p>
-                  <p><strong>Nurse ID:</strong> {nurse.nurse_id}</p>
-                </div>
-              ))}
+              {isLoading ? (
+                renderSkeletons(6)
+              ) : filteredNurses.length > 0 ? (
+                filteredNurses.map(nurse => (
+                  <div key={nurse.id} className="staff-card">
+                    <div className="staff-avatar">
+                      <User size={32} />
+                    </div>
+                    <h3>{nurse.full_name}</h3>
+                    <div className="staff-badge">{nurse.department}</div>
+                    <div className="staff-details">
+                      <p><strong>Hospital:</strong> {nurse.hospital}</p>
+                      <p><strong>Experience:</strong> {nurse.experience} years</p>
+                      <p><strong>Nurse ID:</strong> {nurse.nurse_id}</p>
+                    </div>
+                    <button className="view-profile-btn">View Profile</button>
+                  </div>
+                ))
+              ) : (
+                <div className="no-results">No nurses matching your search criteria</div>
+              )}
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { User, Mail, Lock, Eye, EyeOff, Phone, Building, Shield } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../../styles/Register.css';
 
 const AdminRegister = () => {
@@ -19,6 +19,8 @@ const AdminRegister = () => {
     adminCode: '',
     role: 'admin'
   });
+
+  const navigate = useNavigate(); // Initialize useNavigate
 
   // Function to generate a random Admin Code
   const generateAdminCode = () => {
@@ -47,14 +49,14 @@ const AdminRegister = () => {
       username: formData.username,
       email: formData.email,
       password: formData.password,
-      full_name: formData.fullName, // Ensure this matches the backend schema
+      full_name: formData.fullName, 
       phone: formData.phone,
       department: formData.department,
-      role: "admin", // Ensure this matches the backend schema
-      admin_code: formData.adminCode, // Ensure this matches the backend schema
+      role: "admin", 
+      admin_code: formData.adminCode, 
     };
   
-    console.log("Payload being sent:", payload); // Debugging
+    console.log("Payload being sent:", payload);
   
     try {
       const response = await axios.post(`http://localhost:8000/adminsignup/`, payload);
@@ -63,6 +65,12 @@ const AdminRegister = () => {
       setFormData((prev) => ({ ...prev, adminCode: generateAdminCode() }));
 
       localStorage.setItem('admin_id', response.data.admin_id);
+      
+      // Add success message
+      alert(`Registration successful! Your Admin ID: ${response.data.admin_id}`);
+      
+      // Redirect to login page after successful registration
+      navigate('/login');
 
     } catch (error) {
       alert(error.response?.data?.detail || "Error signing up");

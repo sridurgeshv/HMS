@@ -1,23 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './Dashboard.css';
-import { 
-  Users, 
-  Briefcase, 
-  BarChart2, 
-  Settings, 
-  Grid, 
-  Bell, 
-  Search, 
-  LogOut, 
-  Menu, 
-  X,
-  ChevronUp,
-  Activity,
-  User,
-  Calendar,
-  Clock
-} from 'lucide-react';
+import { Users, Briefcase, BarChart2, Settings, Grid, Bell, Search, LogOut, Menu, X, ChevronUp, Activity, User, Calendar, Clock } from 'lucide-react';
 import axios from 'axios';
 
 const AdminDashboard = () => {
@@ -320,65 +304,7 @@ const AdminDashboard = () => {
           </section>
           
           {/* Charts and Activity Section */}
-          <div className="dashboard-grid">
-            {/* Analytics Chart */}
-            <section className="chart-section">
-              <div className="section-header">
-                <h2 className="section-title">User Analytics</h2>
-                <div className="section-actions">
-                  <button className="btn-outline">
-                    <ChevronUp size={16} />
-                    Export
-                  </button>
-                </div>
-              </div>
-              
-              <div className="chart-container">
-                {loading ? (
-                  <div className="chart-skeleton"></div>
-                ) : (
-                  <div className="analytics-chart">
-                    <div className="chart-bars">
-                      {analyticsData.labels.map((month, idx) => (
-                        <div key={idx} className="chart-bar-group">
-                          <div className="chart-label">{month}</div>
-                          <div 
-                            className="chart-bar chart-bar-patients" 
-                            style={{height: `${analyticsData.datasets[0].data[idx]/3}px`}}
-                            title={`Patients: ${analyticsData.datasets[0].data[idx]}`}
-                          ></div>
-                          <div 
-                            className="chart-bar chart-bar-doctors" 
-                            style={{height: `${analyticsData.datasets[1].data[idx]}px`}}
-                            title={`Doctors: ${analyticsData.datasets[1].data[idx]}`}
-                          ></div>
-                          <div 
-                            className="chart-bar chart-bar-nurses" 
-                            style={{height: `${analyticsData.datasets[2].data[idx]}px`}}
-                            title={`Nurses: ${analyticsData.datasets[2].data[idx]}`}
-                          ></div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="chart-legend">
-                      <div className="legend-item">
-                        <span className="legend-color legend-patients"></span>
-                        <span>Patients</span>
-                      </div>
-                      <div className="legend-item">
-                        <span className="legend-color legend-doctors"></span>
-                        <span>Doctors</span>
-                      </div>
-                      <div className="legend-item">
-                        <span className="legend-color legend-nurses"></span>
-                        <span>Nurses</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </section>
-            
+          <div className="dashboard-grid">            
             {/* Recent Activity */}
             <section className="activity-section">
               <div className="section-header">
