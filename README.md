@@ -66,7 +66,7 @@ As we are using local storage to fetch details so it is possible that you have t
 
    - Example
     
-    Book a voice appointment in the cardiology department for Thursday at 4 PM to discuss test results.
+    Book a appointment in the cardiology department for Thursday at 4 PM to discuss test results.
 
 ### Medical History:
 
