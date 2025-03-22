@@ -10,12 +10,10 @@ import {
   Menu,
   X,
   User,
-  Filter,
   Pill
 } from 'lucide-react';
 import axios from 'axios';
 import './Dashboard.css';
-
 
 const MedicalRecords = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,6 +24,10 @@ const MedicalRecords = () => {
   const [showMedicationModal, setShowMedicationModal] = useState(false);
   const [selectedMedication, setSelectedMedication] = useState(null);
   const [response, setResponse] = useState("");
+  const [showXRayAnalyzer, setShowXRayAnalyzer] = useState(false); // State for X-Ray Analyzer popup
+  const [selectedImage, setSelectedImage] = useState(null); // State for selected X-Ray image
+  const [analysis, setAnalysis] = useState(""); // State for analysis result
+  const [analyzing, setAnalyzing] = useState(false); // Loading state for analysis
 
   // Fetch patient medications when the component mounts
   useEffect(() => {
@@ -128,6 +130,40 @@ const MedicalRecords = () => {
     }
   };
 
+  // Handle X-Ray image selection
+  const handleImageChange = (event) => {
+    setSelectedImage(event.target.files[0]);
+  };
+
+  // Analyze X-Ray image
+  const analyzeXray = async () => {
+    if (!selectedImage) {
+      setError("Please select an X-ray image.");
+      return;
+    }
+
+    setAnalyzing(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append('xray_image', selectedImage);
+
+    try {
+      const response = await axios.post('http://localhost:8000/analyze-xray/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      setAnalysis(response.data.analysis);
+    } catch (error) {
+      console.error("Error analyzing X-ray:", error);
+      setError("Failed to analyze X-ray. Please try again.");
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -220,9 +256,12 @@ const MedicalRecords = () => {
           <div className="content-header">
             <h1>Patient Previous Medical Records</h1>
             <div className="header-actions">
-              <button className="secondary-button">
-                <Filter size={18} />
-                <span>Filter</span>
+              <button 
+                className="secondary-button"
+                onClick={() => setShowXRayAnalyzer(true)}
+              >
+                <FileText size={18} />
+                <span>X-Ray Analyzer</span>
               </button>
             </div>
           </div>
@@ -314,6 +353,50 @@ const MedicalRecords = () => {
               </button>
               <button className="save-button" onClick={handleSaveResponse}>
                 Save Response
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* X-Ray Analyzer Popup */}
+      {showXRayAnalyzer && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h3>X-Ray Analyzer</h3>
+              <button className="close-modal" onClick={() => setShowXRayAnalyzer(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label>Upload X-Ray Image</label>
+                <input type="file" onChange={handleImageChange} accept="image/*" />
+              </div>
+              {selectedImage && (
+                <div className="image-preview">
+                  <img src={URL.createObjectURL(selectedImage)} alt="Selected X-Ray" />
+                </div>
+              )}
+              {analysis && (
+                <div className="analysis-result">
+                  <h4>Analysis Result:</h4>
+                  <p>{analysis}</p>
+                </div>
+              )}
+              {error && <div className="error-message">{error}</div>}
+            </div>
+            <div className="modal-footer">
+              <button className="cancel-button" onClick={() => setShowXRayAnalyzer(false)}>
+                Cancel
+              </button>
+              <button 
+                className="save-button" 
+                onClick={analyzeXray} 
+                disabled={!selectedImage || analyzing}
+              >
+                {analyzing ? "Analyzing..." : "Analyze"}
               </button>
             </div>
           </div>
