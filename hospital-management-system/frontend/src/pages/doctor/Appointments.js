@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Calendar, 
-  Clock, 
-  Users, 
+import {
+  Calendar,
+  Clock,
+  Users,
   FileText,
   MessageSquare,
-  Bell, 
+  Bell,
   Search,
   Menu,
   X,
@@ -25,6 +25,12 @@ const Appointments = () => {
   const [showFollowUpForm, setShowFollowUpForm] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [followUpNote, setFollowUpNote] = useState('');
+
+  // Chatbot state
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const [patientId, setPatientId] = useState('');
+  const [chatbotResponse, setChatbotResponse] = useState('');
+  const [isChatbotLoading, setIsChatbotLoading] = useState(false);
 
   // Fetch appointments data
   useEffect(() => {
@@ -85,16 +91,16 @@ const Appointments = () => {
 
   const handleFollowUpSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!selectedAppointment || !followUpNote) return;
-  
+
     try {
       const response = await axios.post('http://localhost:8000/follow-up-notes', {
-        appointment_id: selectedAppointment.id,  
-        note: String(followUpNote),                          
+        appointment_id: selectedAppointment.id,
+        note: String(followUpNote),
         doctor_id: localStorage.getItem('doctor_id') || "default_doctor_id",  // Ensure string
       });
-  
+
       if (response.status === 200) {
         alert('Follow-up note saved successfully!');
         setShowFollowUpForm(false);
@@ -105,7 +111,36 @@ const Appointments = () => {
       alert('Failed to save follow-up note. Please try again.');
     }
   };
-  
+
+  // Chatbot functions
+  const openChatbot = () => {
+    setIsChatbotOpen(true);
+  };
+
+  const closeChatbot = () => {
+    setIsChatbotOpen(false);
+    setPatientId('');
+    setChatbotResponse('');
+  };
+
+  const handleChatbotQuery = async () => {
+    if (!patientId) {
+      alert('Please enter a patient ID.');
+      return;
+    }
+
+    setIsChatbotLoading(true);
+    try {
+      const response = await axios.get(`http://localhost:8000/patient-summary/${patientId}`);
+      setChatbotResponse(response.data.summary);
+    } catch (error) {
+      console.error('Error fetching patient summary:', error);
+      setChatbotResponse('Failed to fetch patient details. Please check the patient ID and try again.');
+    } finally {
+      setIsChatbotLoading(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -133,7 +168,7 @@ const Appointments = () => {
             <X size={24} />
           </button>
         </div>
-        
+
         <div className="doctor-profile">
           <div className="profile-image">
             <img src="/download (1).png" alt="Doctor profile" />
@@ -143,7 +178,7 @@ const Appointments = () => {
             <p>{doctor.specialization || "Loading..."}</p>
           </div>
         </div>
-        
+
         <nav className="sidebar-nav">
           <Link to="/doctor/dashboard" className="nav-item">
             <Calendar size={20} />
@@ -167,7 +202,7 @@ const Appointments = () => {
           </Link>
         </nav>
       </aside>
-      
+
       {/* Main Content */}
       <main className="main-content">
         {/* Topbar */}
@@ -175,12 +210,12 @@ const Appointments = () => {
           <button className="menu-toggle" onClick={toggleMenu}>
             <Menu size={24} />
           </button>
-          
+
           <div className="search-bar">
             <Search size={18} />
             <input type="text" placeholder="Search appointments..." />
           </div>
-          
+
           <div className="topbar-right">
             <div className="notification-bell">
               <Bell size={20} />
@@ -188,41 +223,41 @@ const Appointments = () => {
             </div>
           </div>
         </header>
-        
+
         {/* Appointments Content */}
         <div className="dashboard-content">
           <div className="content-header">
             <h1>Appointments</h1>
           </div>
-          
+
           <div className="filter-section">
             <div className="view-toggle">
-              <button 
+              <button
                 className={`toggle-btn ${selectedView === 'all' ? 'active' : ''}`}
                 onClick={() => setSelectedView('all')}
               >
                 All
               </button>
-              <button 
+              <button
                 className={`toggle-btn ${selectedView === 'upcoming' ? 'active' : ''}`}
                 onClick={() => setSelectedView('upcoming')}
               >
                 Upcoming
               </button>
-              <button 
+              <button
                 className={`toggle-btn ${selectedView === 'past' ? 'active' : ''}`}
                 onClick={() => setSelectedView('past')}
               >
                 Past
               </button>
             </div>
-            
+
             <button className="filter-button">
               <Filter size={16} />
               <span>Filter</span>
             </button>
           </div>
-          
+
           <div className="appointments-list">
             {appointments.length === 0 ? (
               <p className="no-appointments-message">No appointments found.</p>
@@ -239,16 +274,16 @@ const Appointments = () => {
                       <span>{appointment.time}</span>
                     </div>
                   </div>
-                  
+
                   <div className="appointment-details">
                     <h3>{appointment.patient}</h3>
                     <p>{appointment.type}</p>
                   </div>
-                  
+
                   <div className={`appointment-status ${appointment.status.toLowerCase()}`}>
                     {appointment.status}
                   </div>
-                  
+
                   <div className="appointment-actions">
                     <button className="action-btn">
                       <MessageSquare size={16} />
@@ -285,6 +320,40 @@ const Appointments = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Chatbot Icon */}
+      <button className="chatbot-icon" onClick={openChatbot}>
+        <MessageSquare size={24} />
+      </button>
+
+      {/* Chatbot Modal */}
+      {isChatbotOpen && (
+        <div className="chatbot-modal-overlay">
+          <div className="chatbot-modal">
+            <h3>Patient Chatbot</h3>
+            <div className="chatbot-input">
+              <input
+                type="text"
+                placeholder="Enter Patient ID"
+                value={patientId}
+                onChange={(e) => setPatientId(e.target.value)}
+              />
+              <button onClick={handleChatbotQuery} disabled={isChatbotLoading}>
+                {isChatbotLoading ? 'Loading...' : 'Query'}
+              </button>
+            </div>
+            {chatbotResponse && (
+              <div className="chatbot-response">
+                <h4>Patient Summary:</h4>
+                <p>{chatbotResponse}</p>
+              </div>
+            )}
+            <button className="close-chatbot" onClick={closeChatbot}>
+              Close
+            </button>
           </div>
         </div>
       )}
