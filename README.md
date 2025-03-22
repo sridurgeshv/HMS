@@ -79,6 +79,13 @@ git clone https://github.com/your-username/hospital-management-system.git
 cd hospital-management-system
 ```
 
+#### Frontend Setup
+```bash
+cd frontend
+npm install
+npm run start
+```
+
 #### Backend Setup
 ```bash
 cd backend
@@ -87,16 +94,11 @@ python -m spacy download en_core_web_sm
 uvicorn app.run:app --reload
 ```
 
+Backend API will be available at `http://localhost:8000`.
+
 #### Initialize Database
 ```bash
 python -c "from app.utils.database import Base, engine; Base.metadata.create_all(bind=engine)"
-```
-
-#### Frontend Setup
-```bash
-cd frontend
-npm install
-npm start
 ```
 
 #### 👥 Contributors
@@ -104,3 +106,10 @@ npm start
 Ritika Srivastava \
 Sri Durgesh
 
+#### Video Demo
+
+For a comprehensive overview of the application's features and functionality, please watch our [video demonstration](). This walkthrough provides detailed guidance on effectively using and navigating NumBuddy.
+
+#### Contributing
+
+Feel free to submit issues and pull requests to improve the project!
