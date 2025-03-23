@@ -12,7 +12,7 @@ This system streamlines the entire hospital workflow from patient registration t
 
 ### Note
 
-As we are using local storage to fetch details so it is possible that you have to login twice to be redirected to patient dashboard.
+Since details are fetched from local storage, you may need to log in twice after a page refresh to access the patient dashboard. If you see a successful login alert but aren’t redirected, manually navigate to /patient/dashboard or the relevant dashboard.
 
 # 👨‍⚕️ Doctor Portal
 
